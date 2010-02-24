@@ -1,0 +1,24 @@
+To build, (copy and paste into terminal)
+
+cd to/directory/with/this/readme
+
+cd Core
+make
+sudo make install
+cd ..
+cd Tests
+make
+
+libAECore.a should appear in /usr/lib/
+Headers for Core and SOIL should appear in /usr/include/AE
+
+To use with gcc, just do -lAECore when you compile.
+To use with Xcode, just add -lAECore to the C flags, or add it in as libAECore.a should appear in the Core/ directory.
+
+To include the headers, do <AE/Core.h>
+SOIL.h is at <AE/SOIL.h>
+
+SOIL was made by Jonathan Dummer, under public domain.
+AE was made by Oliver Daids, under BSD.
+
+Currently only for Macosx (Universal), help for other OSes would be highly appreciated.
