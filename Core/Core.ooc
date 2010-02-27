@@ -1,10 +1,10 @@
 include AE/Core
 
-AeVec2: cover from AEVec2{
+Vec2: cover from AEVec2{
 	x,y: extern Float
 }
 
-AeVec3: cover from AEVec3{
+Vec3: cover from AEVec3{
 	x,y,z: extern Float
 	new: static func(.x,.y,.z)->This{
 		this: This
@@ -20,24 +20,24 @@ AeVec3: cover from AEVec3{
 		new(0)
 	}
 }
-AeVec4: cover from AEVec4{
+Vec4: cover from AEVec4{
 	x,y,z,w: extern Float
 }
 
-AeVec2i: cover from AEVec2{
+Vec2i: cover from AEVec2{
 	x,y: extern Int
 }
 
-AeVec3i: cover from AEVec3{
+Vec3i: cover from AEVec3{
 	x,y,z: extern Int
 }
 
-AeVec4i: cover from AEVec4{
+Vec4i: cover from AEVec4{
 	x,y,z,w: extern Int
 }
 
 
-AeFace: cover from AEFace{
+Face: cover from AEFace{
 	v,n,t: extern UInt[3]
 }
 
@@ -45,48 +45,48 @@ _AEMesh_count_struct_internal: cover{
 	v,f,t,n: extern UInt
 }
 
-AeMesh: cover from AEMesh{
+Mesh: cover from AEMesh{
 	count: extern _AEMesh_count_struct_internal
-	v: extern AeVec3*
-	t: extern AeVec2*
-	n: extern AeVec3*
+	v: extern Vec3*
+	t: extern Vec2*
+	n: extern Vec3*
 	aux: extern Pointer
 
 	load: static extern(AEMeshLoad) func(String)->This*
 	draw: static extern(AEMeshDrawRaw) func(This*)
-	asVBO: static extern(AEMeshAsVBO) func(This*)->AeVBO*
+	asVBO: static extern(AEMeshAsVBO) func(This*)->VBO*
 	delete: static extern(AEMeshDelete) func(This*)
 }
 
-AeVBOVert: cover from AEVBOVert{
-	t: extern AeVec2
-	n,v: extern AeVec3
+VBOVert: cover from AEVBOVert{
+	t: extern Vec2
+	n,v: extern Vec3
 }
 
-AeVBOVertWithoutNormal: cover from AEVBOVertWithoutNormal{
-          t: extern AeVec2
-          v: extern AeVec3
+VBOVertWithoutNormal: cover from AEVBOVertWithoutNormal{
+          t: extern Vec2
+          v: extern Vec3
 }
 
-AeVBO: cover from AEVBO{
+VBO: cover from AEVBO{
 	vbo,ibo,vcount,icount,vallocated,iallocated: extern UInt
 	indices: extern UInt*
 	hasNormals: extern Char
-	verts: extern AeVBOVert*
+	verts: extern VBOVert*
 
 	load: static extern(AEVBOLoad) func(String,Int,Int)->This*
-	add: static extern(AEVBOAdd) func(This*, AeVBOVert*)
+	add: static extern(AEVBOAdd) func(This*, VBOVert*)
 	draw: static extern(AEVBODraw) func(This*)
 	compile: static extern(AEVBOCompile) func(This*,UInt*)
 	delete: static extern(AEVBODelete) func(This*)
 }
 
-AeObject: cover from AEObject extends AeVec3{
-	rotation: extern AeVec3
+Object_: cover from AEObject extends Vec3{
+	rotation: extern Vec3
 	event: extern Func (This*,Int,Pointer)
 	model: extern Pointer
 	texture: extern UInt
-	size,velocity,last: extern AeVec3
+	size,velocity,last: extern Vec3
 	mass: extern  Float
 	isStatic: extern Char
 	aux: extern Pointer
@@ -95,52 +95,66 @@ AeObject: cover from AEObject extends AeVec3{
 	collidesWith: extern(AEObjectsCollide) func(This*,This*)->Int
 	defaultEvent: static extern(AEObjectDefaultEvent) func(This*,Int,Pointer)
 	signalAll: static extern(AEObjectsSignal) func(Int,Pointer)
-	physicsAll: static extern(AEObjectsPhysics) func(Float,AeVec3)
+	physicsAll: static extern(AEObjectsPhysics) func(Float,Vec3)
 	delete: extern(AEObjectDelete) func(This*)
 }
 
-AeObjectEventInit: extern(AEObjectEventInit) Int
-AeObjectEventRender: extern(AEObjectEventRender) Int
-AeObjectEventCollide: extern(AEObjectEventCollide) Int
-AeObjectEventRender: extern(AEObjectEventRender) Int
-AeObjectEventRenderFromCompile: extern(AEObjectEventRenderFromCompile) Int
+ObjectEventInit: extern(AEObjectEventInit) Int
+ObjectEventRender: extern(AEObjectEventRender) Int
+ObjectEventCollide: extern(AEObjectEventCollide) Int
+ObjectEventRender: extern(AEObjectEventRender) Int
+ObjectEventRenderFromCompile: extern(AEObjectEventRenderFromCompile) Int
 
-AeObjectDynamic: extern(AEObjectDynamic) Int
-AeObjectStatic: extern(AEObjectStatic) Int
-AeObjectCompiled: extern(AEObjectCompiled) Int
+ObjectDynamic: extern(AEObjectDynamic) Int
+ObjectStatic: extern(AEObjectStatic) Int
+ObjectCompiled: extern(AEObjectCompiled) Int
 
-AeCameraType: cover from AECameraType extends AeVec3{
-	rotation: extern AeVec3
+CameraType: cover from AECameraType extends Vec3{
+	rotation: extern Vec3
 	fov,near,far: extern Float
 }
 
-AeScreenType: cover from AEScreenType{
+ScreenType: cover from AEScreenType{
 	w,h,r,g,b,a,stencil,depth,inFullscreen: extern Int
 }
 ///////////////////////
-AeCamera: extern(AECamera) AeCameraType
-AeScreen: extern(AEScreen) AeScreenType
-AeMouse: extern(AEMouse) AeVec2i
-AeObjects: extern(AEObjects) AeObject**
-AeObjectCount: extern(AEObjectCount) UInt
-AeBlockKeyInput: extern(AEBlockKeyInput) Int
-AeVBOAddAllocateFreq: extern(AEVBOAddAllocateFreq) UChar
-AeTextureLoadFlags: extern(AETextureLoadFlags) UInt
+Camera: extern(AECamera) CameraType
+Screen: extern(AEScreen) ScreenType
+Mouse: extern(AEMouse) Vec2i
+Objects: extern(AEObjects) Object_**
+ObjectCount: extern(AEObjectCount) UInt
+BlockKeyInput: extern(AEBlockKeyInput) Int
+VBOAddAllocateFreq: extern(AEVBOAddAllocateFreq) UChar
+TextureLoadFlags: extern(AETextureLoadFlags) UInt
 ////////////////////////
-
-Ae: cover{
-	init: static extern(AEInit) func(String,Int,Int)
-	start: static extern(AEStart) func(Func (Float))
-	quit: static extern(AEQuit) func
-	refreshViewport: static extern(AERefreshViewport) func
+/*
+init: static extern(AEInit) func(String,Int,Int)
+start: static extern(AEStart) func(Func (Float))
+quit: static extern(AEQuit) func
+refreshViewport: static extern(AERefreshViewport) func
 	
-	key: static extern(AEKey) func(Int)->Int
-	mouseButton: static extern(AEMouseButton) func(Char)->Int
-	
-	textureLoad: static extern(AETextureLoad) func(String)->UInt
-	textureBind: static extern(AETextureBind) func(UInt)
-	textureDelete: static extern(AETextureDelete) func(UInt)
+key: static extern(AEKey) func(Int)->Int
+mouseButton: static extern(AEMouseButton) func(Char)->Int
 
-	angleTo: static extern(AEAngleTo) func(Float,Float,Float) -> AeVec3
-	moveXZ: static extern(AEMoveXZ) func(Pointer,Float,Float,Float)
-}
+textureLoad: static extern(AETextureLoad) func(String)->UInt
+textureBind: static extern(AETextureBind) func(UInt)
+textureDelete: static extern(AETextureDelete) func(UInt)
+
+angleTo: static extern(AEAngleTo) func(Float,Float,Float) -> Vec3
+moveXZ: static extern(AEMoveXZ) func(Pointer,Float,Float,Float)
+
+*/
+init: extern(AEInit) func(String,Int,Int)
+start: extern(AEStart) func(Func (Float))
+quit: extern(AEQuit) func
+refreshViewport: extern(AERefreshViewport) func
+	
+key: extern(AEKey) func(Int)->Int
+mouseButton: extern(AEMouseButton) func(Char)->Int
+
+textureLoad: extern(AETextureLoad) func(String)->UInt
+textureBind: static extern(AETextureBind) func(UInt)
+textureDelete: static extern(AETextureDelete) func(UInt)
+
+angleTo: extern(AEAngleTo) func(Float,Float,Float) -> Vec3
+moveXZ: extern(AEMoveXZ) func(Pointer,Float,Float,Float)
