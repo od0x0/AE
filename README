@@ -19,6 +19,6 @@ To include the headers, do <AE/Core.h>
 SOIL.h is at <AE/SOIL.h>
 
 SOIL was made by Jonathan Dummer, under public domain.
-AE was made by Oliver Daids, under BSD.
+AE was made by Oliver Daids, under WTFPL.
 
 Currently only for Macosx (Universal), help for other OSes would be highly appreciated.
