@@ -123,6 +123,7 @@ void AEObjectDelete(AEObject* o);
 /////////
 int AEKey(int key);
 int AEMouseButton(char button);
+void AEPollInput(void);
 /////////
 unsigned int AETextureLoad(const char* filename);
 void AETextureBind(unsigned int texture);

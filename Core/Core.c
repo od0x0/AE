@@ -55,7 +55,7 @@ void AETextureDelete(unsigned int texture){
 static unsigned char* AEKeys=NULL;
 static unsigned char AEMouseButtons=0;
 
-static void AEPollInput(void){
+void AEPollInput(void){
 	SDL_PumpEvents();
 	
 	AEKeys=SDL_GetKeyState(NULL);

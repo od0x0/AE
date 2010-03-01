@@ -151,6 +151,7 @@ refreshViewport: extern(AERefreshViewport) func
 	
 key: extern(AEKey) func(Int)->Int
 mouseButton: extern(AEMouseButton) func(Char)->Int
+pollInput: extern(AEPollInput) func
 
 textureLoad: extern(AETextureLoad) func(String)->UInt
 textureBind: static extern(AETextureBind) func(UInt)
