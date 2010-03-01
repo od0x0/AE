@@ -104,7 +104,11 @@ void AEVBOCompile(AEVBO* vbo,unsigned int* usages){
 }
 
 AEVBO* AEVBOLoad(const char* filename,int isStatic,int hasNormals){
-	if(filename==NULL) return AEVBONew();
+	if(filename==NULL){
+		AEVBO* vbo=AEVBONew();
+		vbo->hasNormals=hasNormals;
+		return vbo;
+	}
 	AEMesh* m=AEMeshLoad(filename);
 	AEVBO* vbo=AEMeshAsVBO(m,isStatic,hasNormals);
 	AEMeshDelete(m);
