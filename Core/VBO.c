@@ -89,8 +89,8 @@ void AEVBOCompile(AEVBO* vbo,unsigned int* usages){
 	if(vbo->hasNormals) glBufferData(GL_ARRAY_BUFFER,vbo->vcount*sizeof(AEVBOVert),vbo->verts,usages[0]);
 	else glBufferData(GL_ARRAY_BUFFER,vbo->vcount*sizeof(AEVBOVertWithoutNormal),vbo->verts,usages[0]);
 	
-	free(vbo->verts);
-	vbo->verts=NULL;
+	//free(vbo->verts);
+	//vbo->verts=NULL;
 	//vbo->vallocated=0;
 	
 	//Indices
@@ -98,8 +98,8 @@ void AEVBOCompile(AEVBO* vbo,unsigned int* usages){
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,vbo->ibo);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER,vbo->icount*sizeof(int),vbo->indices,usages[1]);
 	
-	free(vbo->indices);
-	vbo->indices=NULL;
+	//free(vbo->indices);
+	//vbo->indices=NULL;
 	//vbo->vallocated=0;
 }
 
