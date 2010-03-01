@@ -15,7 +15,7 @@ help:
 	echo "To run the tests, just do ./nameoftest"
 
 ooc:
-	ooc Window.ooc +-arch +i386 +-arch +ppc +-std=c99 +-O3 +-lAECore +-framework +SDL +-framework +OpenGL +-framework +Cocoa +-I +/Library/Frameworks/SDL.framework/Headers
+	ooc Window.ooc +-arch +i386 +-arch +ppc +-std=c99 +-O3 +-lAECore +-framework +SDL +-framework +OpenGL +-framework +Cocoa +-I +/Library/Frameworks/SDL.framework/Headers +-I +"/../AE/"
 
 clean:
 	rm -f *.o
