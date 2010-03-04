@@ -31,6 +31,7 @@ install:
 	mkdir -p AE
 	cp libAE.a AE
 	cp Source/*.h AE
+	cp Source/SOIL/SOIL.h AE
 	cp Source/*.ooc AE
 
 sweep:
