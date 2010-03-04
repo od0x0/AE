@@ -1,4 +1,4 @@
-include AE/Core
+include Core
 
 Vec2: cover from AEVec2{
 	x,y: extern Float

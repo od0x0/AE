@@ -10,6 +10,8 @@ An Engine Core.
 extern "C" {
 //#error C++ Warning: STOP!!!!  Foul language is not permitted beyond this point.
 #endif
+#include <SDL/SDL.h>
+#include <SDL/SDL_opengl.h>
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///							Core
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -33,18 +35,18 @@ typedef struct{
 
 typedef struct{//YadaYadaYada Packing
 	AEVec2 t;
-	AEVec3 n;
 	AEVec3 v;
 }AEVBOVert;
 
 typedef struct{//YadaYadaYada Packing
 	AEVec2 t;
-	AEVec3 v;
-}AEVBOVertWithoutNormal;
+	AEVec3 n,v;
+}AEVBOVertWithNormal;
 
 typedef struct{
-	unsigned int vbo,ibo,vcount,icount,vallocated,iallocated,*indices;
+	unsigned int vbo,nbo,ibo,vcount,icount,vallocated,iallocated,*indices;
 	char hasNormals;
+	AEVec3* n;
 	AEVBOVert* verts;
 }AEVBO;
 
@@ -135,7 +137,7 @@ void AETextureDelete(unsigned int texture);
  void AEMeshDelete(AEMesh* m);
 ////////
 AEVBO* AEVBOLoad(const char* filename,int isStatic,int hasNormals);	//Wraps AEMeshes for you
-void AEVBOAdd(AEVBO* vbo,AEVBOVert* v);
+void AEVBOAdd(AEVBO* vbo,AEVBOVertWithNormal* v);
 void AEVBODraw(AEVBO* vbo);
 void AEVBOCompile(AEVBO* vbo,unsigned int* usages);
 void AEVBODelete(AEVBO* vbo);
@@ -150,6 +152,9 @@ typedef struct{
 	AEVec3 rotation;
 	...whatever...
 */
+unsigned int AELinearSearch_internal(void* value,void* array,int length,int size);
+#define AELinearSearch(val,array,len) AELinearSearch_internal(val,array,len,sizeof(*val))
+
 #ifdef __cplusplus
 }//extern "C" 
 #endif

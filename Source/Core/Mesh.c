@@ -4,7 +4,10 @@ I didn't really write the best code for the Mesh and VBO stuff.
 I appologize now.  
 Only handles triangle meshes
 */
-
+#include "../Core.h"
+#include "../SOIL/SOIL.h"
+#include <math.h>
+#include <string.h>
 
  void AEMeshDrawRaw(AEMesh* m){
 	AEVec3* v;AEFace* f;AEVec3* n;AEVec2* t;
@@ -25,12 +28,12 @@ Only handles triangle meshes
 }
 
  AEVBO* AEMeshAsVBO(AEMesh* m,char isStatic,char hasNormals){
-	AEVBO* vbo=AEVBONew();
+	AEVBO* vbo=AEVBOLoad(NULL,0,0);
 	vbo->hasNormals=hasNormals;
 	for(int i=0; i<m->count.f; i++){
 		AEFace* f=&m->f[i];
 		for (char j = 0; j<3; j++) {
-			AEVBOVert v;
+			AEVBOVertWithNormal v;
 			v.t=m->t[f->t[j]];
 			v.n=m->n[f->n[j]];
 			v.v=m->v[f->v[j]];

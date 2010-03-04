@@ -1,5 +1,5 @@
 #include <SDL/SDL.h>
-#include <AE/Core.h>
+#include "../AE/Core.h"
 void perframe(float step){
 	float speed=step*50;
 	if(AEKey('w')) AEMoveXZ(&AECamera,0,-speed);

@@ -1,3 +1,8 @@
+#include "../Core.h"
+#include "../SOIL/SOIL.h"
+#include <math.h>
+#include <string.h>
+
 AEObject** AEObjects=NULL;
 unsigned int AEObjectCount=0;
 

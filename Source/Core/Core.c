@@ -1,18 +1,11 @@
-#include "Core.h"
 #ifdef __cplusplus
 extern "C"{
 #endif
 
-#include <SDL/SDL.h>
-#include <SDL/SDL_opengl.h>
-#include "SOIL/SOIL.h"
+#include "../Core.h"
+#include "../SOIL/SOIL.h"
 #include <math.h>
 #include <string.h>
-
-#include "Utility.c"
-#include "VBO.c"
-#include "Mesh.c"
-#include "Object.c"
 
 AECameraType AECamera;
 

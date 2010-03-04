@@ -1,8 +1,11 @@
+#include "../Core.h"
+#include "../SOIL/SOIL.h"
+#include <math.h>
 #include <string.h>
 
 //C has no template functions, so we have to do this ugly thing
 
-inline unsigned int AELinearSearch_internal(void* value,void* array,int length,int size){
+unsigned int AELinearSearch_internal(void* value,void* array,int length,int size){
 	if(array==NULL || value==NULL) return 0;
 	for(unsigned int i=0;i<length;i++)
 		if(memcmp(((char*)array+(i*size)),value,size)==0) return i+1;

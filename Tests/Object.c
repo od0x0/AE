@@ -1,8 +1,7 @@
 #include <SDL/SDL.h>
-#include <AE/Core.h>
+#include "../AE/Core.h"
 #define true 1
 #define false 0
-#include <unistd.h>
 
 int main(int argc,char** argv){
 	AEInit("Window",256,256);

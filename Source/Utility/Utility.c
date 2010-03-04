@@ -246,7 +246,7 @@ int AEObjectCollidesWithVBO(AEObject* o,AEVBO* vbo,AEVec3 vboPos){
 	for(unsigned int i=0;i<vbo->icount;i+=3){
 		float triverts[3][3];
 		for(char j=0;j<3;j++ ) *((AEVec3*)&triverts[j])=AEVec3Add(vbo->verts[vbo->indices[i+j]].v,vboPos);
-		if(AETriBoxOverlap((float*)o,(float*)&o->size,(float*)triverts)) return 1;
+		if(AETriBoxOverlap((float*)o,(float*)&o->size,triverts)) return 1;
 	}
 	return 0;
 }

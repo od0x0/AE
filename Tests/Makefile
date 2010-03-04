@@ -1,7 +1,7 @@
 
 #Makefile for the demos
 
-FLAGS=-arch i386 -arch ppc -std=c99 -O3 -lAECore -framework SDL -framework OpenGL -framework Cocoa -I /Library/Frameworks/SDL.framework/Headers
+FLAGS=-arch i386 -arch ppc -std=c99 -O3 ../AE/libAE.a -framework SDL -framework OpenGL -framework Cocoa -I /Library/Frameworks/SDL.framework/Headers
 CC=gcc
 
 all: 
@@ -15,7 +15,7 @@ help:
 	echo "To run the tests, just do ./nameoftest"
 
 ooc:
-	ooc Window.ooc +-arch +i386 +-arch +ppc +-std=c99 +-O3 +-lAECore +-framework +SDL +-framework +OpenGL +-framework +Cocoa +-I +/Library/Frameworks/SDL.framework/Headers +-I +"/../AE/"
+	ooc Window.ooc +-arch +i386 +-arch +ppc +-std=c99 +-O3 +"../AE/libAE.a" +-framework +SDL +-framework +OpenGL +-framework +Cocoa +-I +/Library/Frameworks/SDL.framework/Headers
 
 clean:
 	rm -f *.o
