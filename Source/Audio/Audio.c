@@ -1,4 +1,5 @@
- #include <SDL_mixer/SDL_mixer.h>
+#include "../Audio.h"
+#include <SDL_mixer/SDL_mixer.h>
  
 void AEAudioQuit(void){
 	Mix_CloseAudio();
@@ -27,49 +28,49 @@ void AEAudioInit(char numberOfChannels){
 }
 
 
-int AEModeIsMusic=0;//Cleans up an extra parameter
+int AEAudioMusicMode=0;//Cleans up an extra parameter
 
 void* AEAudioLoad(const char* filename){
 	void* sound=NULL;
 	
-	if(AEModeIsMusic)
+	if(AEAudioMusicMode)
 		sound=(void*)Mix_LoadMUS(filename); 
 	else
 		sound=Mix_LoadWAV(filename); //They call it LoadWAV, but apparently, it can load wav, aiff, riff, ogg, and voc as well.... Weird naming.
 	
 	if(!sound) { 
-		printf("AEAudioLoad(\"%s\") (mode:%s): %s\n",filename, (AEModeIsMusic?"Music":"Sample"),Mix_GetError()); 
+		printf("AEAudioLoad(\"%s\") (mode:%s): %s\n",filename, (AEAudioMusicMode?"Music":"Sample"),Mix_GetError()); 
 		exit(1);
 	} 
 	return sound;
 }
 int AEAudioPlay(void* sound,int loop){
 	int channel=-1;
-	if(!AEModeIsMusic) channel=Mix_PlayChannel(-1, (Mix_Chunk*)sound, loop);
+	if(!AEAudioMusicMode) channel=Mix_PlayChannel(-1, (Mix_Chunk*)sound, loop);
 	else channel=Mix_PlayMusic((Mix_Music*)sound, loop);
-	if(channel==-1) printf("AEAudioPlay(%p,%i) (mode:%s): %s\n",sound,loop,(AEModeIsMusic?"Music":"Sample"),Mix_GetError()); 
+	if(channel==-1) printf("AEAudioPlay(%p,%i) (mode:%s): %s\n",sound,loop,(AEAudioMusicMode?"Music":"Sample"),Mix_GetError()); 
 	return channel;
 }
 
 int AEAudioPause(int sound){
-	if(AEModeIsMusic) Mix_PauseMusic();
+	if(AEAudioMusicMode) Mix_PauseMusic();
 	else Mix_Pause(sound);
 	return sound;
 }
 
 int AEAudioResume(int sound){
-	if(AEModeIsMusic) Mix_ResumeMusic();
+	if(AEAudioMusicMode) Mix_ResumeMusic();
 	else Mix_Resume(sound);
 	return sound;
 }
 
 int AEAudioVolume(int sound,float level){
-	if(AEModeIsMusic) Mix_VolumeMusic(MIX_MAX_VOLUME*level);
+	if(AEAudioMusicMode) Mix_VolumeMusic(MIX_MAX_VOLUME*level);
 	else Mix_Volume(sound,MIX_MAX_VOLUME*level);
 	return sound;
 }
 
 void AEAudioDelete(void* sound){
-	if(AEModeIsMusic) Mix_FreeMusic((Mix_Music*)sound);
+	if(AEAudioMusicMode) Mix_FreeMusic((Mix_Music*)sound);
 	else Mix_FreeChunk((Mix_Chunk*)sound);
 }
