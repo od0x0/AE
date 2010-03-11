@@ -1,5 +1,5 @@
 /*
-Under the BSD lisence.  Copyright Oliver Daids, 2009.
+Writen by Oliver Daids, 2009.
 
 An Engine Core.
 */

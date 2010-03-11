@@ -8,6 +8,7 @@ all:
 	gcc Window.c $(FLAGS) -o Window
 	gcc MoveCamera.c $(FLAGS) -o MoveCamera
 	gcc Object.c $(FLAGS) -o Object
+	gcc Nodes.c $(FLAGS) -o Nodes
 	make help
 
 help:
@@ -22,3 +23,4 @@ clean:
 	rm -f MoveCamera
 	rm -f Window
 	rm -f Object
+

@@ -42,6 +42,10 @@ void AEObjectApplyFriction(AEObject* o,float amount){
 	o->velocity.y*=factor;
 	o->velocity.z*=factor;
 }
+void AEObjectApply3DFriction(AEObject* o,AEVec3 amount){
+	AEVec3 factor=AEVec3Sub(AEVec3FromSingle(1),amount);
+	o->velocity=AEVec3Mul(o->velocity,factor);
+}
 
 //#pragma once
 ////
@@ -274,4 +278,8 @@ AEVec3 AEVBOCalculateSize(AEVBO* vbo){
 void AEVBOTranslate(AEVBO* vbo,AEVec3 move){
 	for(unsigned int i=0;i<vbo->vcount;i++)
 		vbo->verts[i].v=AEVec3Sub(vbo->verts[i].v,move);
+}
+
+void AEObjectAimVelocityAt(AEObject* o,AEVec3* point,AEVec3 speed){
+	o->velocity=AEVec3Mul(AEVec3Normalized(AEVec3Sub(*point,*((AEVec3*)o))),speed);
 }
