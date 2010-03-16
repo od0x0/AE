@@ -7,7 +7,7 @@
 
 static char AEOctaIsVisible(AEOcta* octa){
 	AEVec3 center={octa->size/2.0f+octa->x,octa->size/2.0f+octa->y,octa->size/2.0f+octa->z};
-	return AEVFCheck(&center,(octa->size/2)*1.74);
+	return 1;//AEVFCheck(&center,(octa->size/2)*1.74);
 }
 
 void AEOctaDraw(AEOcta* octa){
@@ -30,70 +30,45 @@ void AEOctaRender(AEOcta* octa){
 }
 
 static inline void VBOAppend(AEVBO* vbo,AEVBO* vbo2){
-//	printf("vbo2->indices %p\n",vbo2->indices);
-//	printf("vbo2->verts %p",vbo2->verts);
-	
-	if(!(vbo->hasNormals&&vbo2->hasNormals)) {
-		puts("VBOAppend: Both must have normals!!!");
-		return;
-	}
-	printf("File %s Line %i Reached\n",__FILE__,__LINE__);
-	AEVBOVert* verts=vbo2->verts;
-	unsigned int* indices=vbo2->indices;
-	if(!verts){	
-		printf("File %s Line %i Reached\n",__FILE__,__LINE__);
-		glBindBuffer(GL_ARRAY_BUFFER,vbo2->vbo);
-		printf("File %s Line %i Reached\n",__FILE__,__LINE__);
-		verts=glMapBuffer(GL_ARRAY_BUFFER,GL_READ_ONLY);
-		printf("File %s Line %i Reached\n",__FILE__,__LINE__);
-	}
-	if(!indices){	
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,vbo2->ibo);
-		printf("File %s Line %i Reached\n",__FILE__,__LINE__);
-		indices=glMapBuffer(GL_ELEMENT_ARRAY_BUFFER,GL_READ_ONLY);
-		printf("File %s Line %i Reached\n",__FILE__,__LINE__);
-	}
-	
-	for(unsigned int i=0;i<vbo2->icount;i++)
-		AEVBOAdd(vbo,&verts[indices[i]]);
-		printf("File %s Line %i Reached\n",__FILE__,__LINE__);
+
+	for(unsigned int i=0;i<vbo2->icount;i++){
+		AEVBOVertWithNormal v;
+		AEVBOVert* vert=&(vbo2->verts[vbo2->indices[i]]);
+		v.v=vert->v;
+		v.t=vert->t;
+		if(vbo->hasNormals) v.n=vbo2->n[vbo2->indices[i]];
 		
-	if(!vbo2->verts){	
-		glBindBuffer(GL_ARRAY_BUFFER,vbo2->vbo);
-		printf("File %s Line %i Reached\n",__FILE__,__LINE__);
-		glUnmapBuffer(GL_ARRAY_BUFFER);
-		printf("File %s Line %i Reached\n",__FILE__,__LINE__);
+		AEVBOAdd(vbo,&v);
 	}
-	if(!vbo2->indices){	
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,vbo2->ibo);
-		printf("File %s Line %i Reached\n",__FILE__,__LINE__);
-		glUnmapBuffer(GL_ELEMENT_ARRAY_BUFFER);
-		printf("File %s Line %i Reached\n",__FILE__,__LINE__);
+	AEVBOAdd(vbo,NULL);
+	if(vbo->vbo){
+		glDeleteBuffers(1,(GLuint*)&vbo->vbo);
+		if(vbo->nbo) glDeleteBuffers(1,(GLuint*)&vbo->nbo);
+		glDeleteBuffers(1,(GLuint*)&vbo->ibo);
 	}
-	//AEVBOAdd(vbo,NULL);
-	//if(vbo->vbo){
-		//glDeleteBuffers(1,(GLuint*)&vbo->vbo);
-		//glDeleteBuffers(1,(GLuint*)&vbo->ibo);
-		//AEVBOCompile(vbo,usages);
-	//}
+	//unsigned int vboUsages[]={staticVBO,staticIBO};
+	//if(staticIBO||staticVBO) 
+	AEVBOCompile(vbo,NULL);
 }
 
-void AEOctaCompile(AEOcta* octa,unsigned int* vboUsages){
+void AEOctaCompile(AEOcta* octa,unsigned int staticVBO,unsigned int staticIBO){
 	for(int i=0;i<octa->count;i++){
 		AEVBO* vbo=octa->vbos[i];
 		AEVBOAdd(vbo,NULL);
 		if(vbo->vbo){
 			glDeleteBuffers(1,(GLuint*)&vbo->vbo);
+			if(vbo->nbo) glDeleteBuffers(1,(GLuint*)&vbo->nbo);
 			glDeleteBuffers(1,(GLuint*)&vbo->ibo);
-			AEVBOCompile(vbo,vboUsages);
 		}
+		unsigned int vboUsages[]={staticVBO,staticIBO};
+		if(staticIBO||staticVBO) AEVBOCompile(vbo,vboUsages);
 	}
 }
 
 void AEOctaAddVBO(AEOcta* octa,unsigned int texture,AEVBO* vbo){
 	
 	unsigned int index=0;
-	/*for(int i=0;i<octa->count;i++) if(texture==octa->textures[i]){index=i+1;break;}
+	for(int i=0;i<octa->count;i++) if(texture==octa->textures[i]){index=i+1;break;}
 	
 	if(index){
 		index--;
@@ -101,7 +76,7 @@ void AEOctaAddVBO(AEOcta* octa,unsigned int texture,AEVBO* vbo){
 		VBOAppend(octa->vbos[index],vbo);
 		
 		return;
-	}*/
+	}
 	
 	index=octa->count++;
 	
@@ -111,13 +86,13 @@ void AEOctaAddVBO(AEOcta* octa,unsigned int texture,AEVBO* vbo){
 	
 	octa->vbos=(AEVBO**)realloc(octa->vbos,octa->count*sizeof(AEVBO*));
 	
-	octa->vbos[index]=vbo;//AEVBOLoad(NULL,1,1);
+	octa->vbos[index]=AEVBOLoad(NULL,1,0);
 	
 	
 	/*AEVBO* temp=octa->vbos[index];
 	temp->hasNormals=1;  //AEVBOLoad(NULL,1,1); doesn't set hasNormals!
-	
-	VBOAppend(temp,vbo);*/
+	*/
+	VBOAppend(octa->vbos[index],vbo);
 	
 }
 

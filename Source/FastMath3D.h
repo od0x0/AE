@@ -37,6 +37,8 @@ inline float AEVec3LengthInv(AEVec3 v){return AESqrtInv(AEVec3LengthSQ(v));}
 inline AEVec3 AEVec3Normalized(AEVec3 v){return AEVec3Mul(AEVec3FromSingle(AEVec3LengthInv(v)),v);}
 inline float AEVec3LengthInvAccurate(AEVec3 v){return 1/sqrtf(AEVec3LengthSQ(v));}
 inline AEVec3 AEVec3NormalizedAccurate(AEVec3 v){return AEVec3Mul(AEVec3FromSingle(AEVec3LengthInvAccurate(v)),v);}
+inline AEVec3 AEVec3Max(AEVec3 a,AEVec3 b){return AEVec3FromCoords(AEMax(a.x,b.x),AEMax(a.y,b.y),AEMax(a.z,b.z));}
+inline AEVec3 AEVec3Min(AEVec3 a,AEVec3 b){return AEVec3FromCoords(AEMin(a.x,b.x),AEMin(a.y,b.y),AEMin(a.z,b.z));}
 static char* AEVec3AsString(AEVec3 v){
 	static char buffer[512];
 	sprintf(buffer,"{%f,%f,%f}",v.x,v.y,v.z);

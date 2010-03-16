@@ -16,4 +16,4 @@ void AEOctaAddVBO(AEOcta* octa,unsigned int texture,AEVBO* vbo);
 void AEOctaRender(AEOcta* octa);
 void AEOctaDelete(AEOcta* octa);
 AEOcta* AEOctaGetAt(AEOcta* octa,float x,float y,float z);
-//void AEOctaCompile(AEOcta* octa,unsigned int *vboUsages);
+void AEOctaCompile(AEOcta* octa,unsigned int staticVBO,unsigned int staticIBO);

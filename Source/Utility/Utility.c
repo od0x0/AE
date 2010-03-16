@@ -259,7 +259,7 @@ int AEObjectCollidesWithVBO(AEObject* o,AEVBO* vbo,AEVec3 vboPos){
 	return 0;
 }*/
 
-AEVec3 AEVBOCalculateOffset(AEVBO* vbo){
+/*AEVec3 AEVBOCalculateOffset(AEVBO* vbo){
 	AEVec3 total=AEVec3FromSingle(0);
 	for(unsigned int i=0;i<vbo->icount;i++)
 		total=AEVec3Add(vbo->verts[vbo->indices[i]].v,total);
@@ -274,7 +274,33 @@ AEVec3 AEVBOCalculateSize(AEVBO* vbo){
 		total=AEVec3Add(temp,total);
 	}
 	return AEVec3Div(total,AEVec3FromSingle(2));
+}*/
+
+AEVec3 AEVBOCenter(AEVBO* vbo){
+	AEVec3 max,min;
+	max=min=AEVec3FromSingle(0);	
+
+	for(char i=0;i<vbo->vcount;i++){
+		max=AEVec3Max(max,vbo->verts[i].v);
+		min=AEVec3Min(min,vbo->verts[i].v);
+	}
+
+	return AEVec3Mul(AEVec3Add(max,min),AEVec3FromSingle(0.5));
 }
+
+AEVec3 AEVBOAABB(AEVBO* vbo){
+	AEVec3 max,min;
+	max=min=AEVec3FromSingle(0);	
+
+	for(char i=0;i<vbo->vcount;i++){
+		max=AEVec3Max(max,vbo->verts[i].v);
+		min=AEVec3Min(min,vbo->verts[i].v);
+	}
+
+	return AEVec3Mul(AEVec3Sub(max,min),AEVec3FromSingle(0.5));
+}
+
+
 void AEVBOTranslate(AEVBO* vbo,AEVec3 move){
 	for(unsigned int i=0;i<vbo->vcount;i++)
 		vbo->verts[i].v=AEVec3Sub(vbo->verts[i].v,move);

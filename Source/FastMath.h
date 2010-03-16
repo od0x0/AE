@@ -49,6 +49,16 @@ inline float AECos(float x){
 		return AECosTable[index];
 }
 
+inline float AEMax(float a,float b){
+	if(a>b) return a;
+	else return b;
+}
+
+inline float AEMin(float a,float b){
+	if(a<b) return a;
+	else return b;
+}
+
 //From the dspguru site (forgot the link)
 inline float AEAtan2(float y, float x){
 	float coeff_1 = 3.14159265/4;
