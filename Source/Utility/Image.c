@@ -3,6 +3,8 @@
 AEImage* AEImageNew(int w,int h){
 	AEImage* image=calloc(1,sizeof(AEImage));
 	image->pixels=calloc(w*h,4);
+	image->w=w;
+	image->h=h;
 	return image;
 }
 

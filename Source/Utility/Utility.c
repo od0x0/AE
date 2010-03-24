@@ -278,7 +278,7 @@ AEVec3 AEVBOCalculateSize(AEVBO* vbo){
 
 AEVec3 AEVBOCenter(AEVBO* vbo){
 	AEVec3 max,min;
-	max=min=AEVec3FromSingle(0);	
+	max=min=vbo->verts[0].v;
 
 	for(char i=0;i<vbo->vcount;i++){
 		max=AEVec3Max(max,vbo->verts[i].v);
@@ -290,7 +290,7 @@ AEVec3 AEVBOCenter(AEVBO* vbo){
 
 AEVec3 AEVBOAABB(AEVBO* vbo){
 	AEVec3 max,min;
-	max=min=AEVec3FromSingle(0);	
+	max=min=vbo->verts[0].v;
 
 	for(char i=0;i<vbo->vcount;i++){
 		max=AEVec3Max(max,vbo->verts[i].v);
