@@ -1,20 +1,26 @@
 #include "../AE/Image.h"
 #include "../AE/Core.h"
-#include <SDL/SDL.h>
 
 AEImage* ScreenImage=NULL;
 AEImage* Image=NULL;
 
 void perframe(float step){
-	AEImageBlit(NULL,0,0,Image);
-	//glRasterPos3i(0,0,-1);
-	//glDrawPixels(Image->w,Image->h,GL_RGBA,GL_UNSIGNED_BYTE,Image->pixels);
+	
+	int xcount=ScreenImage->w/Image->w;
+	int ycount=ScreenImage->h/Image->h;
+	
+	for(int x=0;x<xcount;x++)
+		for(int y=0;y<ycount;y++){
+			AEImageBlit(ScreenImage,x*Image->w,y*Image->h,Image);
+		}
+		
+	AEImageBlit(NULL,0,0,ScreenImage);
 }
 
 int main(int argc,char** argv){
-	AEInit("Image Test",128,128);
+	AEInit("Image Test",512,512);
 	Image=AEImageFromFile("Data/Texture.png");
-	//printf()
+	ScreenImage=AEImageNew(512,512);
 	AERefreshViewport(1);
 	AEStart(perframe);
 	return 1;

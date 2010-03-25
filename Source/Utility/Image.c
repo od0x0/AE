@@ -1,7 +1,21 @@
 #include "../Image.h"
 
+#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+    static Uint32 rmask = 0xff000000;
+    static Uint32 gmask = 0x00ff0000;
+    static Uint32 bmask = 0x0000ff00;
+    static Uint32 amask = 0x000000ff;
+#else
+    static Uint32 rmask = 0x000000ff;
+    static Uint32 gmask = 0x0000ff00;
+    static Uint32 bmask = 0x00ff0000;
+    static Uint32 amask = 0xff000000;
+#endif
+
 AEImage* AEImageNew(int w,int h){
 	AEImage* image=calloc(1,sizeof(AEImage));
+	//image->surface=SDL_CreateRGBSurface(SDL_SWSURFACE,w,h,32,rmask, gmask, bmask, amask);
+	//image->pixels=image->surface->pixels;
 	image->pixels=calloc(w*h,4);
 	image->w=w;
 	image->h=h;
@@ -14,13 +28,15 @@ AEImage* AEImageFromFile(char* filename){
 	AEImage* image=calloc(1,sizeof(AEImage));
 	image->w=w;
 	image->h=h;
+	//image->surface=SDL_CreateRGBSurfaceFrom(pixels,w,h,32,w*4,rmask, gmask, bmask, amask);
+	//image->pixels=image->surface->pixels;
 	image->pixels=pixels;
 	return image;
 }
 
 unsigned char* AEImagePixel(AEImage* image,int x,int y){
 	if(x > image->w || y> image->h || y < 0 || x < 0) return NULL;
-	return image->pixels+x*4+y*image->w;
+	return image->pixels+x*4+y*image->h*4;
 }
 
 void AEImageBlit(AEImage* to,int offsetx,int offsety,AEImage* from){
@@ -36,10 +52,14 @@ void AEImageBlit(AEImage* to,int offsetx,int offsety,AEImage* from){
 		memset(to->pixels,255,to->w*to->h*4);
 		return;
 	}
+	//SDL_Rect fromRect={offsetx,offsety,from->w,from->h};
+	//SDL_BlitSurface(from->surface,&fromRect,to->surface,NULL);
+	//SDL_BlitSurface(from->surface,NULL,to->surface,NULL);
 	unsigned char *pixelTo=NULL,*pixelFrom=NULL;
 	for(int x=0;x < from->w;x++)
 		for(int y=0;y < from->h;y++){
-			pixelTo=AEImagePixel(to,x+offsetx,y+offsety);
+			pixelTo=AEImagePixel(to,x+offsetx,y+offsety);//to,x+offsetx,y+offsety);
+			//unsigned char WHITE[4]={255,255,255,255};
 			pixelFrom=AEImagePixel(from,x,y);
 			if(pixelFrom && pixelTo){
 				float srcAlpha=pixelFrom[3]/255.0f;
@@ -52,6 +72,7 @@ void AEImageBlit(AEImage* to,int offsetx,int offsety,AEImage* from){
 }
 
 void AEImageDelete(AEImage* image){
+	//SDL_FreeSurface(image->surface);
 	free(image->pixels);
 	free(image);
 }

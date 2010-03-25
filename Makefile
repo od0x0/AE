@@ -37,3 +37,8 @@ install:
 sweep:
 	rm -f *.o
 	rm -f *.a
+
+clean:
+	make sweep
+	rm -f AE/*
+	rmdir AE
