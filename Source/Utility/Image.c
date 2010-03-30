@@ -77,3 +77,10 @@ void AEImageDelete(AEImage* image){
 	free(image);
 }
 
+unsigned int AEImageToTexture(AEImage* image){
+	GLuint texture=0;
+	glGenTextures(1,&texture);
+	AETextureBind(texture);
+	gluBuild2DMipmaps( GL_TEXTURE_2D, 4, image->w,image->h, GL_RGBA, GL_UNSIGNED_BYTE, image->pixels);
+	return (unsigned int)texture;
+}

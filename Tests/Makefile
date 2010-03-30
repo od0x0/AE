@@ -1,14 +1,13 @@
 
 #Makefile for the demos
 
-FLAGS=-arch i386 -arch ppc -std=c99 -O3 ../AE/libAE.a -framework SDL -framework OpenGL -framework Cocoa -I /Library/Frameworks/SDL.framework/Headers
+FLAGS=-arch i386 -arch ppc -std=c99 -O3 ../AE/libAE.a -framework SDL -framework OpenGL -framework Cocoa -I /Library/Frameworks/SDL.framework/Headers -framework SDL_ttf
 CC=gcc
 
+%:
+	gcc $@.c $(FLAGS) -o $@.binary
+
 all: 
-	gcc Window.c $(FLAGS) -o Window.binary
-	gcc MoveCamera.c $(FLAGS) -o MoveCamera.binary
-	gcc Object.c $(FLAGS) -o Object.binary
-	gcc Nodes.c $(FLAGS) -o Nodes.binary
 	make help
 
 help:
@@ -20,6 +19,3 @@ ooc:
 
 clean:
 	rm -f *.binary
-
-testing:
-	gcc Image.c $(FLAGS) -o Image.binary
