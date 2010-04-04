@@ -28,10 +28,7 @@ AEUIBox* AEUIBoxActive=NULL;
 AEUIBox* AEUIBoxRoot=NULL;
 
 void AEUIBoxSignalChildren(AEUIBox* root,int event,void* data){
-	if(!root){
-		(*AEUIBoxRoot->event)(AEUIBoxRoot,event,data);
-		return;
-	}
+	if(root==NULL) return;
 	for(unsigned int i=0;i<root->subBoxCount;i++){
 		AEUIBox* box=root->subBoxes[i];
 		(*box->event)(box,event,data);
@@ -128,6 +125,7 @@ AEUIBox* AEUIBoxAddChild(AEUIBox* root,
 	box->event=event;
 	box=(*box->event)(box,AEUIBoxEventInit,data);
 	if(root) (*root->event)(root,AEUIBoxEventAddChild,box);
+	if(AEUIBoxRoot==NULL) AEUIBoxRoot=box;
 	return box;
 }
 

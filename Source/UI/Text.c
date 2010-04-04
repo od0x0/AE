@@ -13,7 +13,6 @@ int AEText(char* string,AEFont*  font,int x,int y){
 		//putc(c,stdout);
 		if(c=='\n' || c=='\r') return (int)(string-oldString);//Return the number of chars printed
 	//	if(!glIsTexture(font->glyph[c].img)) puts("Not a texture");//Won't work without it oddly
-		
 		glBindTexture(GL_TEXTURE_RECTANGLE_ARB,font->glyph[c].img);
 		glBegin(GL_QUADS);
 			glTexCoord2d(0, font->glyph[c].h); glVertex3i(x, y+0, 0);

@@ -1,3 +1,4 @@
+#pragma once
 #include "Core.h"
 
 extern SDL_Color AEFontColor;

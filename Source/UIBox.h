@@ -1,10 +1,14 @@
+#pragma once
 #include "Image.h"
 
-typedef struct AEUIBox{
-	int x,y,w,h;
-	void* (*event)(struct AEUIBox* self,int event,void* data);
-	unsigned int subBoxCount;
+#define AEUIBox_inherit \
+	int x,y,w,h;\
+	void* (*event)(struct AEUIBox* self,int event,void* data);\
+	unsigned int subBoxCount;\
 	struct AEUIBox** subBoxes;
+
+typedef struct AEUIBox{
+	AEUIBox_inherit
 }AEUIBox;
 
 #define AEUIBoxEventInit 1
