@@ -16,7 +16,7 @@ int main(int argc,char** argv){
 	
 	Font=AEFontNew("Data/ARIAL.TTF",20);
 	
-	Textbox=AEUIBoxAddChild(NULL,AEUITextboxEvent,NULL,0,0,800,500);
+	AEUIBoxActive=AEUIBoxRoot=Textbox=AEUIBoxAddChild(NULL,AEUITextboxEvent,NULL,0,0,800,500);
 	Textbox->text=strdup("Hello world.-----|");
 	Textbox->max=strlen(Textbox->text);
 	Textbox->caret=Textbox->max-1;
