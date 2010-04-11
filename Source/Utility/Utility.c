@@ -309,3 +309,15 @@ void AEVBOTranslate(AEVBO* vbo,AEVec3 move){
 void AEObjectAimVelocityAt(AEObject* o,AEVec3* point,AEVec3 speed){
 	o->velocity=AEVec3Mul(AEVec3Normalized(AEVec3Sub(*point,*((AEVec3*)o))),speed);
 }
+
+char* AEFileAsString(const char* filename){//Used for loading shaders
+	FILE* file=fopen(filename,"r");
+	if(!file) return NULL;
+	fseek (file,0,SEEK_END);
+	int length=ftell(file);
+	rewind(file);
+	char* string=calloc(length+1,1);
+	fread(string,1,length,file);
+	fclose(file);
+	return string;
+}

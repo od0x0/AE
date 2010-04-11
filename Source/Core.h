@@ -12,6 +12,7 @@ extern "C" {
 #endif
 #include <SDL/SDL.h>
 #include <SDL/SDL_opengl.h>
+#pragma pack(push, 1)
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///							Core
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -45,9 +46,9 @@ typedef struct{//YadaYadaYada Packing
 
 typedef struct{
 	unsigned int vbo,nbo,ibo,vcount,icount,vallocated,iallocated,*indices;
-	char hasNormals;
 	AEVec3* n;
 	AEVBOVert* verts;
+	char hasNormals;
 }AEVBO;
 
 typedef struct AEObject{
@@ -61,9 +62,9 @@ typedef struct AEObject{
 	//Physical Body Data
 	AEVec3 size,velocity,last;
 	float mass;
-	char isStatic;
 	//Auxilary, for when it is easier not to extend this "class"
 	void* aux;
+	char isStatic;
 }AEObject;
 
 #define AEObjectEventInit 1
@@ -154,6 +155,8 @@ typedef struct{
 */
 unsigned int AELinearSearch_internal(void* value,void* array,int length,int size);
 #define AELinearSearch(val,array,len) AELinearSearch_internal(val,array,len,sizeof(*val))
+
+#pragma pack(pop)
 
 #ifdef __cplusplus
 }//extern "C" 

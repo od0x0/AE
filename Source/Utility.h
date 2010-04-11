@@ -15,3 +15,5 @@ void AEObjectApplyFriction(AEObject* o,float amount);
 void AEObjectApply3DFriction(AEObject* o,AEVec3 amount);
 
 void AEObjectAimVelocityAt(AEObject* o,AEVec3* target,AEVec3 speed);
+
+char* AEFileAsString(const char* filename);

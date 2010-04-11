@@ -57,6 +57,7 @@ static unsigned int AEVBOAddVert(AEVBO* vbo,AEVBOVertWithNormal* v){
 }
 
 void AEVBOAdd(AEVBO* vbo,AEVBOVertWithNormal* v){//Pretty much the same concept as above, just for indices, and wraps the above
+	if(vbo==NULL) return;
 	if(v==NULL){
 		vbo->iallocated=0;
 		vbo->indices=(unsigned int*)realloc(vbo->indices,sizeof(int)*vbo->icount);
@@ -76,16 +77,17 @@ void AEVBODraw(AEVBO* vbo){
 	if(!vbo) return;
 	if(vbo->vbo) glBindBuffer(GL_ARRAY_BUFFER,vbo->vbo);
 	
+	const int stride=5*sizeof(float);
+	const unsigned int offset=(unsigned int)(vbo->vbo?NULL:vbo->verts);
+	glVertexPointer(3,GL_FLOAT,stride,(void*)(sizeof(float)*2+offset));
+	glTexCoordPointer(2,GL_FLOAT,stride,(void*)offset);
+	
 	if(vbo->hasNormals){
-		const int stride=5*sizeof(float);
-		const unsigned int offset=(unsigned int)(vbo->vbo?NULL:vbo->verts);
-		glVertexPointer(3,GL_FLOAT,stride,(void*)(sizeof(float)*2+offset));
-		glTexCoordPointer(2,GL_FLOAT,stride,(void*)offset);
 		glEnableClientState(GL_NORMAL_ARRAY);
 		glBindBuffer(GL_ARRAY_BUFFER,vbo->nbo);
 		glNormalPointer(GL_FLOAT,3*sizeof(float),0+(vbo->n?NULL:vbo->n));
 	}
-	else glInterleavedArrays(GL_T2F_V3F,0,vbo->vbo?NULL:vbo->verts);
+	//glInterleavedArrays(GL_T2F_V3F,0,vbo->vbo?NULL:vbo->verts);
 	
 	if(vbo->ibo) glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,vbo->ibo);
 	if(vbo->indices || vbo->ibo) glDrawElements(GL_TRIANGLES, vbo->icount, GL_UNSIGNED_INT, vbo->ibo?NULL:vbo->indices);
@@ -95,6 +97,7 @@ void AEVBODraw(AEVBO* vbo){
 }
 
 void AEVBOCompile(AEVBO* vbo,unsigned int* usages){
+	if(vbo==NULL) return;
 	if(vbo->iallocated||vbo->vallocated) AEVBOAdd(vbo,NULL);//Implicit
 	
 	unsigned int defaultUsages[2]={GL_STATIC_DRAW,GL_STATIC_DRAW};

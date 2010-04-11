@@ -72,14 +72,32 @@ void AEObjectDefaultEvent(AEObject* o,int event,void* data){
 			glPopMatrix();			
 			break;
 			
-		case AEObjectEventCollide:
+		case AEObjectEventCollide:{
 			if(o->isStatic) return;
 			//Redundant check, but oh well.  (It's redundant because it gets checked in AEObjectsPhysics)
 			//However, this might not be called from only that function
-			o->x=o->last.x;
+			/*o->x=o->last.x;
 			o->y=o->last.y;
-			o->z=o->last.z;
-			break;
+			o->z=o->last.z;*/
+			/*
+				Does the formula:
+				axis=smallestAxis((o-o2)-(o size+o2 size)
+				o[axis]=o2[axis]+o2 size[axis]+o size[axis]
+			*/
+			
+			AEObject* o2=data;
+			int axis=0;
+			AEVec3 penetration;
+			penetration.x=(o->x-o2->x)-(o->size.x+o2->size.x);
+			penetration.y=(o->y-o2->y)-(o->size.y+o2->size.y);
+			penetration.z=(o->z-o2->z)-(o->size.z+o2->size.z);
+			if(penetration.y>penetration.x && penetration.y>penetration.z) axis=1;
+			else if(penetration.z>penetration.x && penetration.z>penetration.x) axis=2;
+			//Warning, ugly code, does o[axis]=o2[axis]+o2 size[axis]+o size[axis]
+			((float*)o)[axis]=((float*)o2)[axis]+((float*)&(o2->size))[axis]+((float*)&(o->size))[axis];
+			
+			((float*)&(o->velocity))[axis]*=-1;
+			}break;
 			
 		case AEObjectEventRelease:
 			AETextureDelete(o->texture);
@@ -89,9 +107,9 @@ void AEObjectDefaultEvent(AEObject* o,int event,void* data){
 			break;
 		
 		//For debugging purposes, although may get annoying in certain places
-		default:
+		/*default:
 			printf("AEObjectDefaultEvent(%p,%i,%p):Unknown event sent to Object %i\n",o,event,data,AELinearSearch(o,AEObjects,AEObjectCount)-1);
-			break;
+			break;*/
 	}
 }
 
