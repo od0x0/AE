@@ -152,19 +152,12 @@ void AEObjectsPhysics(float step,AEVec3 globalForce){
 		o->z+=o->velocity.z*step;
 		
 		//Sorry, but we have to check for all, this is only designed for a small amount of dynamic objects anyway
-		int didCollide=0;
 		for (int i = 0;i<AEObjectCount;i++) {
 			AEObject* o2=AEObjects[i];
 			if(o==o2) continue;
 			if(AEObjectsCollide(o,o2)){
 				(*o->event)(o,AEObjectEventCollide,o2);
-				didCollide=1;
 			}
-		}
-		if(!didCollide){
-			o->last.x=o->x;
-			o->last.y=o->y;
-			o->last.z=o->z;
 		}
 	}
 }

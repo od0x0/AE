@@ -99,15 +99,15 @@ Object_: cover from AEObject extends Vec3{
 	delete: extern(AEObjectDelete) func(This*)
 }
 
-ObjectEventInit: extern(AEObjectEventInit) Int
-ObjectEventRender: extern(AEObjectEventRender) Int
-ObjectEventCollide: extern(AEObjectEventCollide) Int
-ObjectEventRender: extern(AEObjectEventRender) Int
-ObjectEventRenderFromCompile: extern(AEObjectEventRenderFromCompile) Int
+objectEventInit: extern(AEObjectEventInit) Int
+objectEventRender: extern(AEObjectEventRender) Int
+objectEventCollide: extern(AEObjectEventCollide) Int
+objectEventRender: extern(AEObjectEventRender) Int
+objectEventRenderFromCompile: extern(AEObjectEventRenderFromCompile) Int
 
-ObjectDynamic: extern(AEObjectDynamic) Int
-ObjectStatic: extern(AEObjectStatic) Int
-ObjectCompiled: extern(AEObjectCompiled) Int
+objectDynamic: extern(AEObjectDynamic) Int
+objectStatic: extern(AEObjectStatic) Int
+objectCompiled: extern(AEObjectCompiled) Int
 
 CameraType: cover from AECameraType extends Vec3{
 	rotation: extern Vec3
@@ -118,14 +118,14 @@ ScreenType: cover from AEScreenType{
 	w,h,r,g,b,a,stencil,depth,inFullscreen: extern Int
 }
 ///////////////////////
-Camera: extern(AECamera) CameraType
-Screen: extern(AEScreen) ScreenType
-Mouse: extern(AEMouse) Vec2i
-Objects: extern(AEObjects) Object_**
-ObjectCount: extern(AEObjectCount) UInt
-BlockKeyInput: extern(AEBlockKeyInput) Int
+camera: extern(AECamera) CameraType
+screen: extern(AEScreen) ScreenType
+mouse: extern(AEMouse) Vec2i
+objects: extern(AEObjects) Object_**
+objectCount: extern(AEObjectCount) UInt
+blockKeyInput: extern(AEBlockKeyInput) Int
 VBOAddAllocateFreq: extern(AEVBOAddAllocateFreq) UChar
-TextureLoadFlags: extern(AETextureLoadFlags) UInt
+textureLoadFlags: extern(AETextureLoadFlags) UInt
 ////////////////////////
 /*
 init: static extern(AEInit) func(String,Int,Int)

@@ -60,7 +60,7 @@ typedef struct AEObject{
 	void* model;
 	unsigned int texture;
 	//Physical Body Data
-	AEVec3 size,velocity,last;
+	AEVec3 size,velocity;
 	float mass;
 	//Auxilary, for when it is easier not to extend this "class"
 	void* aux;
