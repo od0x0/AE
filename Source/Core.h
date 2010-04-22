@@ -165,7 +165,6 @@ unsigned int AELinearSearch_internal(void* value,void* array,int length,int size
 
 /*
 TODO:
--More Flexible/Simple VBO System
 -Speed
 -Simpler
 

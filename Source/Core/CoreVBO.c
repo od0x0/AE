@@ -75,7 +75,7 @@ void AEVBOAdd(AEVBO* vbo,AEVBOVertWithNormal* v){//Pretty much the same concept 
 
 void AEVBODraw(AEVBO* vbo){
 	if(!vbo) return;
-	if(vbo->vbo) glBindBuffer(GL_ARRAY_BUFFER,vbo->vbo);
+	glBindBuffer(GL_ARRAY_BUFFER,vbo->vbo);
 	
 	const int stride=5*sizeof(float);
 	const unsigned int offset=(unsigned int)(vbo->vbo?NULL:vbo->verts);
@@ -89,7 +89,8 @@ void AEVBODraw(AEVBO* vbo){
 	}
 	//glInterleavedArrays(GL_T2F_V3F,0,vbo->vbo?NULL:vbo->verts);
 	
-	if(vbo->ibo) glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,vbo->ibo);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,vbo->ibo);
+	
 	if(vbo->indices || vbo->ibo) glDrawElements(GL_TRIANGLES, vbo->icount, GL_UNSIGNED_INT, vbo->ibo?NULL:vbo->indices);
 	else glDrawArrays(GL_TRIANGLES,vbo->vcount,GL_UNSIGNED_INT);
 	
