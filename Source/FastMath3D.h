@@ -128,7 +128,8 @@ inline void AEQuatRotateZ(AEQuat* q,float angle){
 	*q=AEQuatMul(*q,rotation);
 }
 inline AEQuat AEQuatFrom3dRotation(AEVec3 v){
-	AEQuat x,y,z;
+	AEQuat x,y,z={0,0,0,1};
+	x=y=z;
 	AEQuatRotateX(&x,v.x);
 	AEQuatRotateY(&y,v.y);
 	AEQuatRotateZ(&z,v.z);

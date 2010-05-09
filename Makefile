@@ -1,8 +1,9 @@
 #my second attempt at using makefiles
 
 LIBS= -framework SDL -framework OpenGL
-INTELFLAGS= -arch i386 -std=c99
-PPCFLAGS= -arch ppc -std=c99
+INTELFLAGS= -arch i386 -std=c99 -fno-stack-protector
+PPCFLAGS= -arch ppc -std=c99 -fno-stack-protector
+#Getting errors without -fno-stack-protector on Snow Leopard
 
 INCLUDEPATHS= -I /Library/Frameworks/SDL.framework/Headers\
 	 -I /System/Library/Frameworks/OpenGL.framework/Headers \

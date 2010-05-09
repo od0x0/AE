@@ -3,7 +3,8 @@
 AEGeo* AEGeoActive=NULL;
 
 void AEGeoSegmentDraw(AEGeoSegment seg){
-	glDrawElements(GL_TRIANGLES, seg.indexEnd-seg.indexStart, GL_UNSIGNED_INT, (AEGeoActive->ibo?NULL:AEGeoActive->indices)+seg.indexStart);
+	if(AEGeoActive->indices) glDrawElements(GL_TRIANGLES, seg.indexEnd-seg.indexStart, GL_UNSIGNED_INT, (AEGeoActive->ibo?NULL:AEGeoActive->indices)+seg.indexStart);
+	else glDrawArrays(GL_TRIANGLES,seg.indexStart*3,(seg.indexEnd-seg.indexStart)*3);
 }
 
 void AEGeoBind(AEGeo* geo,AEShader* shader){
@@ -42,7 +43,9 @@ AEGeo* AEGeoLoad(char* path){
 	if(path){
 		glEnableClientState(GL_VERTEX_ARRAY);
 		glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-		return calloc(1,sizeof(AEGeo));
+		AEGeo* geo=calloc(1,sizeof(AEGeo));
+		geo->indices=NULL;
+		return geo;
 	}
 	
 	return NULL;
@@ -65,7 +68,9 @@ static unsigned int AEGeoAddVert_internal(AEGeo* geo,AEGeoVert* vert){
 	}
 	
 	//Check for pre-existing, return it if it is
-	unsigned int index=AELinearSearch(vert,geo->verts,geo->vcount);;
+	unsigned int index=0;
+	
+	if(geo->indices) index=AELinearSearch(vert,geo->verts,geo->vcount);;
 	
 	if(index) return index-1;
 	
@@ -86,10 +91,12 @@ unsigned int AEGeoAddVert(AEGeo* geo,AEGeoVert* vert){
 	if(geo==NULL) return 0;
 	if(vert==NULL){
 		geo->iallocated=0;
-		geo->indices=(unsigned int*)realloc(geo->indices,sizeof(int)*geo->icount);
+		if(geo->indices) geo->indices=(unsigned int*)realloc(geo->indices,sizeof(int)*geo->icount);
 		AEGeoAddVert_internal(geo,NULL);
 		return 0;
 	}
+	
+	if(geo->indices==NULL) return AEGeoAddVert_internal(geo,vert)/3;
 	
 	if(geo->iallocated==0 || geo->iallocated <= (geo->icount+1)){
 		geo->iallocated=geo->icount+AEVBOAddAllocateFreq;
@@ -102,6 +109,21 @@ unsigned int AEGeoAddVert(AEGeo* geo,AEGeoVert* vert){
 void AEGeoCompile(AEGeo* geo,unsigned int isStreamed){
 	if(geo==NULL) return;
 	if(geo->iallocated||geo->vallocated) AEGeoAddVert(geo,NULL);//Implicit
+	
+	geo->indices=malloc(1);
+	AEGeoVert* oldVerts=geo->verts;
+	unsigned int vcount=geo->vcount;
+	geo->vallocated=0;
+	geo->vcount=0;
+	geo->verts=NULL;
+	
+	geo->indices=malloc(1);//Just to avoid a null value so AddVerts knows to generate indices
+	
+	for(unsigned int i=0;i<vcount;i++) AEGeoAddVert(geo,oldVerts+i);
+	
+	AEGeoAddVert(geo,NULL);
+	
+	free(oldVerts);
 	
 	//Vertices
 	if(geo->vbo) glGenBuffers(1,(GLuint*)&geo->vbo);

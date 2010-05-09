@@ -33,7 +33,11 @@ static float AECosTable[360];
 #define AESign(x) (((x)>0)*2-1)
 #define AEAbs(x) (AESign(x)*x)
 
-inline float AESin(float x){
+#define AESin sinf
+#define AECos cosf
+#define AEAtan2 atan2f
+
+inline float AEFastSin(float x){
 	int index=((int)x)%360;
 	if(index<0)
 		return AESinTable[360-index];
@@ -41,7 +45,7 @@ inline float AESin(float x){
 		return AESinTable[index];
 }
 
-inline float AECos(float x){
+inline float AEFastCos(float x){
 	int index=((int)x)%360;
 	if(index<0)
 		return AECosTable[360-index];
@@ -60,7 +64,7 @@ inline float AEMin(float a,float b){
 }
 
 //From the dspguru site (forgot the link)
-inline float AEAtan2(float y, float x){
+inline float AEFastAtan2(float y, float x){
 	float coeff_1 = 3.14159265/4;
 	float coeff_2 = 3*coeff_1;
 	float abs_y = AEAbs(y)+1e-10; // kludge to prevent 0/0 condition
