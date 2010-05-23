@@ -10,6 +10,8 @@ An Engine Core.
 extern "C" {
 //#error C++ Warning: STOP!!!!  Foul language is not permitted beyond this point.
 #endif
+//#include <SDL/SDL.h>
+//#include <SDL/SDL_opengl.h>
 #include <SDL/SDL.h>
 #include <SDL/SDL_opengl.h>
 #pragma pack(push, 1)

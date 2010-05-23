@@ -1,4 +1,5 @@
 #include "../Geo.h"
+#include "../FastMath3D.h"
 
 AEGeo* AEGeoActive=NULL;
 
@@ -134,4 +135,44 @@ void AEGeoCompile(AEGeo* geo,unsigned int isStreamed){
 	if(geo->ibo) glGenBuffers(1,(GLuint*)&geo->ibo);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,geo->ibo);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER,geo->icount*sizeof(unsigned int),geo->indices,GL_STATIC_DRAW);
+}
+
+AEGeoSegment AEGeoAddGeo(AEGeo* geo,AEGeo* geo2){
+	AEGeoSegment seg={0,0};
+	seg.indexStart=geo->indices?geo->icount:geo->vcount/3;
+	if(geo2->indices)
+		for(unsigned int i=0;i<geo2->icount;i++){
+			AEGeoAddVert(geo,geo2->verts+geo2->indices[i]);
+		}
+	else for(unsigned int i=0;i<geo2->vcount;i++){
+		AEGeoAddVert(geo,geo2->verts+i);
+	}
+	seg.indexStart=geo->indices?geo->icount:geo->vcount/3;
+	
+	return seg;
+}
+
+AEGeoSegment AEGeoAddVBO(AEGeo* geo,AEVBO* vbo){
+	AEGeoSegment seg={0,0};
+	seg.indexStart=geo->indices?geo->icount:geo->vcount/3;
+	for(unsigned int i=0;i<vbo->icount;i++){
+		unsigned int index=vbo->indices[i];
+		AEVBOVert* vbovert=vbo->verts+index;
+		AEGeoVert v={0,0,0,{0,0,0},vbovert->t,{0,0}};
+		if(vbo->n) v.n=vbo->n[index];
+		v.x=vbovert->v.x;
+		v.y=vbovert->v.y;
+		v.z=vbovert->v.z;
+		AEGeoAddVert(geo,&v);
+	}
+	seg.indexStart=geo->indices?geo->icount:geo->vcount/3;
+	
+	return seg;
+}
+
+void AEGeoDeform(AEGeo* geo,AEVec3 center,float strength,float radius,int axis){
+	for(unsigned int i=0;i<geo->vcount;i++){
+		AEVec3 v=*((AEVec3*)geo->verts+i);
+		float distance=1/AEVec3LengthInv(AEVec3Sub(v,center));
+	}
 }

@@ -33,7 +33,7 @@ void AEGeoCompile(AEGeo* geo,unsigned int isStreamed);
 void AEGeoUncompile(AEGeo* geo);
 AEGeoSegment AEGeoAddGeo(AEGeo* geo,AEGeo* geo2);
 AEGeoSegment AEGeoAddVBO(AEGeo* geo,AEVBO* vbo);
-void AEGeoDeform(AEGeo* geo,AEVec3 offsetCenter,float strength,float radius,int axis);
+void AEGeoDeform(AEGeo* geo,AEVec3 center,float strength,float radius,int axis);
 
 
 
