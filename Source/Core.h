@@ -131,7 +131,7 @@ int AEMouseButton(char button);
 void AEPollInput(void);
 /////////
 unsigned int AETextureLoad(const char* filename);
-void AETextureBind(unsigned int texture);
+inline void AETextureBind(unsigned int texture){glBindTexture(GL_TEXTURE_2D,(GLuint)texture);}
 void AETextureDelete(unsigned int texture);
 /////////		I would rather you not use AEMeshes for rendering, mainly for loading .objs
  AEMesh* AEMeshLoad(const char* filename);

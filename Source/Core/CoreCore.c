@@ -33,13 +33,13 @@ unsigned int AETextureLoad(const char* filename){
 	return texid;
 }
 
-void AETextureBind(unsigned int texture){	
+/*void AETextureBind(unsigned int texture){	
 	//From what I heard on idevgames.com/forum , OpenGL doesn't take this optimization
 	//Just checks to see if the current texture is the same as the last, doesn't bother binding it if it is
 	static GLuint current=0;
 	//if(current!=texture) 
 	glBindTexture(GL_TEXTURE_2D,current=texture);
-}
+}*/
 
 void AETextureDelete(unsigned int texture){
 	glDeleteTextures(1,(GLuint*)&texture);

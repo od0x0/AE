@@ -137,6 +137,21 @@ void AEGeoCompile(AEGeo* geo,unsigned int isStreamed){
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER,geo->icount*sizeof(unsigned int),geo->indices,GL_STATIC_DRAW);
 }
 
+void AEGeoUncompile(AEGeo* geo){
+	if(geo==NULL) return;
+	
+	AEGeoVert* oldVerts=geo->verts;
+	unsigned int* indices=geo->indices;
+	unsigned int icount=geo->icount;
+	geo->icount=geo->iallocated=geo->vcount=geo->vallocated=0;
+	geo->verts=NULL;
+	geo->indices=NULL;
+	
+	for(unsigned int i=0;i<icount;i++) AEGeoAddVert(geo,oldVerts+indices[i]);
+	
+	free(oldVerts);
+}
+
 AEGeoSegment AEGeoAddGeo(AEGeo* geo,AEGeo* geo2){
 	AEGeoSegment seg={0,0};
 	seg.indexStart=geo->indices?geo->icount:geo->vcount/3;

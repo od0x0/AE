@@ -24,7 +24,7 @@ AEObject* AEObjectNew(void (*event)(AEObject* o,int event,void* data),void* data
 }
 
 int AEObjectsCollide(AEObject* o,AEObject* o2){
-	//Really fast AABB collision detection (as compared to the system I used in Toxic, the rather quickly coded physics engine)
+	//Really fast AABB collision detection (as compared to the system I used in Toxic, which used a rather quickly coded physics engine)
 	
 	if((o->size.x+o->size.y+o->size.z)==0) return 0;
 	else if((o2->size.x+o2->size.y+o2->size.z)==0) return 0;

@@ -64,12 +64,17 @@ AEShader* AEShaderLoad(char* filename){
 	return shader;
 }
 
+unsigned int AEShaderTextureUnitCount=0;
+
+unsigned int AEShaderFixedFunction=0;
+
 void AEShaderBind(AEShader* shader,unsigned char textureUnitCount,unsigned int* textures){
 	if(shader==NULL){
-		for(unsigned char i=textureUnitCount;i--;){
+		if(AEShaderFixedFunction) for(unsigned char i=AEShaderTextureUnitCount;i--;){
 			glActiveTexture(GL_TEXTURE0+i);
 			AETextureBind(0);
 		}
+		AEShaderTextureUnitCount=0;
 		glUseProgram(0);
 		return;
 	}
@@ -80,6 +85,8 @@ void AEShaderBind(AEShader* shader,unsigned char textureUnitCount,unsigned int* 
 		AETextureBind(textures[i]);
 		if(shader->textureUniforms[i]) glUniform1i(shader->textureUniforms[i],i);
 	}
+	
+	AEShaderTextureUnitCount=textureUnitCount;
 }
 
 void AEShaderDelete(AEShader* shader){

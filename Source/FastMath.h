@@ -23,12 +23,17 @@ static inline float AESqrtInv(float x){
 static inline float AESqrtInv(float x){
     return __frsqrte(x);
 }
+
 #else
-#error Unknown arch for fast invsqrt
+
+static inline AESqrtInv(float x){
+	return 1/sqrtf(x);
+}
+
 #endif
 
-static float AESinTable[360];
-static float AECosTable[360];
+/*static float AESinTable[360];
+static float AECosTable[360];*/
 #define AEPiOver180 (3.14159265/180)
 #define AESign(x) (((x)>0)*2-1)
 #define AEAbs(x) (AESign(x)*x)
@@ -37,7 +42,7 @@ static float AECosTable[360];
 #define AECos cosf
 #define AEAtan2 atan2f
 
-inline float AEFastSin(float x){
+/*inline float AEFastSin(float x){
 	int index=((int)x)%360;
 	if(index<0)
 		return AESinTable[360-index];
@@ -51,7 +56,7 @@ inline float AEFastCos(float x){
 		return AECosTable[360-index];
 	else 
 		return AECosTable[index];
-}
+}*/
 
 inline float AEMax(float a,float b){
 	if(a>b) return a;
@@ -83,9 +88,9 @@ inline float AEFastAtan2(float y, float x){
 		return(angle);
 }
 
-static void AEMathSetup(void){
-	for(int i=0;i<360;i++){
+static inline void AEMathSetup(void){
+	/*for(int i=0;i<360;i++){
 		AESinTable[i]=sinf(AEPiOver180*i);
 		AECosTable[i]=cosf(AEPiOver180*i);
-	}
+	}*/
 }
