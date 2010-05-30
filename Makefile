@@ -21,13 +21,13 @@ all:
 
 buildOSXUni: 	
 	
-	g++ -c $(shell find Source/ODE/src/ -name "*.cpp") -I Source/ODE/ -I Source/ODE/src/ -arch ppc -Os
+	g++ -c $(shell find Source/ODE/src/ -name "*.cpp") -I Source/ODE/ -I Source/ODE/src/ -arch ppc -O3
 	$(CC) -c SDLMain.m $(FLAGS) -arch ppc -Os -I /Library/Frameworks/SDL.framework/Headers
 	$(CC) -c $(shell find Source -name "*.c") $(FLAGS) -arch ppc -O3 $(INCLUDEPATHS) 
 	ar cr libAEppc.a *.o
 	rm -f *.o
 
-	g++ -c $(shell find Source/ODE/src/ -name "*.cpp") -I Source/ODE/ -I Source/ODE/src/  -arch i386 -Os
+	g++ -c $(shell find Source/ODE/src/ -name "*.cpp") -I Source/ODE/ -I Source/ODE/src/  -arch i386 -O3
 	$(CC) -c SDLMain.m $(FLAGS) -arch i386 -Os -I /Library/Frameworks/SDL.framework/Headers
 	$(CC) -c $(shell find Source -name "*.c") $(FLAGS) -arch i386 -O3 $(INCLUDEPATHS) 
 	ar cr libAEintel.a *.o
@@ -40,7 +40,7 @@ install:
 	cp libAE.a AE
 	cp Source/*.h AE
 	cp Source/SOIL/SOIL.h AE
-	cp Source/*.ooc AE
+	#cp Source/*.ooc AE
 
 sweep:
 	rm -f *.o

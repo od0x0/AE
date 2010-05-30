@@ -23,12 +23,12 @@
 #ifndef _ODE_COLLISION_H_
 #define _ODE_COLLISION_H_
 
-#include <ode/common.h>
-#include <ode/collision_space.h>
-#include <ode/contact.h>
+#include "common.h"
+#include "collision_space.h"
+#include "contact.h"
 // Include odeinit.h for backward compatibility as some of initialization APIs 
 // were initally declared in current header.
-#include <ode/odeinit.h>
+#include "odeinit.h"
 
 #ifdef __cplusplus
 extern "C" {

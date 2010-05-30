@@ -5,7 +5,6 @@
 typedef struct{
 	int w,h;
 	unsigned char* pixels;
-	SDL_Surface* surface;
 }AEImage;
 
 AEImage* AEImageNew(int w,int h);
