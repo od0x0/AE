@@ -21,11 +21,23 @@ all:
 
 buildOSXUni: 	
 	
+	#g++ -c $(shell find Source/ODE/src/ -name "*.cpp") -I Source/ODE/ -I Source/ODE/src/ -arch ppc -O3
+	#ar cr libODEppc.a *.o
+	#rm -f *.o
+
+	#g++ -c $(shell find Source/ODE/src/ -name "*.cpp") -I Source/ODE/ -I Source/ODE/src/ -arch i386 -O3
+	#ar cr libODEintel.a *.o
+	#rm -f *.o
+
+	#lipo -create libODEintel.a libODEppc.a -output libODE.a
+
+	g++ -c $(shell find Source/ODE/src/ -name "*.cpp") -I Source/ODE/ -I Source/ODE/src/ -arch ppc -O3
 	$(CC) -c SDLMain.m $(FLAGS) -arch ppc -Os -I /Library/Frameworks/SDL.framework/Headers
 	$(CC) -c $(shell find Source -name "*.c") $(FLAGS) -arch ppc -O3 $(INCLUDEPATHS) 
 	ar cr libAEppc.a *.o
 	rm -f *.o
 
+	g++ -c $(shell find Source/ODE/src/ -name "*.cpp") -I Source/ODE/ -I Source/ODE/src/ -arch i386 -O3
 	$(CC) -c SDLMain.m $(FLAGS) -arch i386 -Os -I /Library/Frameworks/SDL.framework/Headers
 	$(CC) -c $(shell find Source -name "*.c") $(FLAGS) -arch i386 -O3 $(INCLUDEPATHS) 
 	ar cr libAEintel.a *.o
