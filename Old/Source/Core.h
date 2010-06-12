@@ -119,6 +119,13 @@ void AEStart(void (*func)(float));
 void AEQuit(void);
 void AERefreshViewport(char in2d);
 /////////
+AEObject* AEObjectNew(void (*event)(AEObject* o,int event,void* data),void* data);
+int AEObjectsCollide(AEObject* o,AEObject* o2);
+void AEObjectDefaultEvent(AEObject* o,int event,void* data);
+void AEObjectsSignal(int event,void* data);
+void AEObjectsPhysics(float step,AEVec3 globalForce);
+void AEObjectDelete(AEObject* o);
+/////////
 int AEKey(int key);
 int AEMouseButton(char button);
 void AEPollInput(void);
@@ -126,8 +133,43 @@ void AEPollInput(void);
 unsigned int AETextureLoad(const char* filename);
 inline void AETextureBind(unsigned int texture){glBindTexture(GL_TEXTURE_2D,(GLuint)texture);}
 void AETextureDelete(unsigned int texture);
+/////////		I would rather you not use AEMeshes for rendering, mainly for loading .objs
+ AEMesh* AEMeshLoad(const char* filename);
+ void AEMeshDrawRaw(AEMesh* m);//Slow!!!!  Immediate mode, mainly for prototyping without much fuss
+ AEVBO* AEMeshAsVBO(AEMesh* m,char isStatic,char hasNormals);
+ void AEMeshDelete(AEMesh* m);
+////////
+AEVBO* AEVBOLoad(const char* filename,int isStatic,int hasNormals);	//Wraps AEMeshes for you
+void AEVBOAdd(AEVBO* vbo,AEVBOVertWithNormal* v);
+void AEVBODraw(AEVBO* vbo);
+void AEVBOCompile(AEVBO* vbo,unsigned int* usages);
+void AEVBODelete(AEVBO* vbo);
+/////////
+/////////
+AEVec3 AEAngleTo(float x,float y,float z);  //Angle from origin (Simply masks a few atanf's)
+void AEMoveXZ(void* object,float x,float z);
+/* object's type must begin like
 
+typedef struct{
+	float x,y,z;
+	AEVec3 rotation;
+	...whatever...
+*/
 unsigned int AELinearSearch_internal(void* value,void* array,int length,int size);
 #define AELinearSearch(val,array,len) AELinearSearch_internal(val,array,len,sizeof(*val))
 
-#include "HeaderEnd.h"
+#pragma pack(pop)
+
+#ifdef __cplusplus
+}//extern "C" 
+#endif
+#endif
+
+/*
+TODO:
+-Speed
+-Simpler
+
+I removed a lot of features that could be added separately later on, 
+AEObjectEventRenderFromCompile, and the object states are remnants of that.
+*/

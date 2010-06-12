@@ -1,3 +1,7 @@
+#ifdef __cplusplus
+extern "C"{
+#endif
+
 #include "../Core.h"
 #include "../SOIL/SOIL.h"
 #include <math.h>
@@ -186,3 +190,7 @@ void AEStart(void (*perframe)(float)){
 void AEQuit(void){
 	SDL_Quit();
 }
+
+#ifdef __cplusplus
+} //extern "C"
+#endif
