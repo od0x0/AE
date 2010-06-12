@@ -3,15 +3,14 @@
 #include <math.h>
 #include <string.h>
 
-AECameraType AECamera;
-
-AEScreenType AEScreen;
-
-AEVec2i AEMouse={0,0};
-
-int AEBlockKeyInput=0;
-
-unsigned int AETextureLoadFlags=SOIL_FLAG_COMPRESS_TO_DXT|SOIL_FLAG_INVERT_Y|SOIL_FLAG_MIPMAPS;
+struct{
+	unsigned int w,h,r,g,b,a,stencil,depth,inFullscreen;
+	unsigned int blockKeyInput,textureLoadFlags;
+	unsigned char* keys;
+	unsigned char mouseButtons;
+	float fov,near,far;
+	AEVec2i mouse;
+}AEInternal;
 
 ///////////////////////////////////////////////////			Texture Stuff
 unsigned int AETextureLoad(const char* filename){
@@ -22,7 +21,7 @@ unsigned int AETextureLoad(const char* filename){
 			filename,
 			SOIL_LOAD_AUTO,
 			SOIL_CREATE_NEW_ID,
-			AETextureLoadFlags
+			AEInternal.textureLoadFlags
 		);
 		if(texid==0) printf("AETextureLoad: Texture loading of %s failed because %s\n",filename,SOIL_last_result());
 	AETextureBind(texid);
@@ -52,40 +51,22 @@ unsigned int AELinearSearch_internal(void* value,void* array,int length,int size
 }
 
 #define AELinearSearch(val,array,len) AELinearSearch_internal(val,array,len,sizeof(*val))
-
-void AEMoveXZ(void* object,float x,float z){
-	AECameraType* o=(AECameraType*)object;//As long as we don't use the fov/near/far, we should be fine
-	const float piover180=M_PI/180;
-	o->x += sinf(o->rotation.y*piover180) * z;
-	o->z += cosf(o->rotation.y*piover180) * z;
-	o->x += sinf((o->rotation.y+90)*piover180) * x;
-	o->z += cosf((o->rotation.y+90)*piover180) * x;
-}
-
-AEVec3 AEAngleTo(float x,float y,float z){
-	const float piunder180=180/M_PI;
-	AEVec3 angle= {atanf(y/z)*piunder180,atanf(z/x)*piunder180,atanf(y/x)*piunder180};
-	return angle;
-}
 ////////////////////////////////////////////////////			SDL Interaction
-
-static unsigned char* AEKeys=NULL;
-static unsigned char AEMouseButtons=0;
 
 void AEPollInput(void){
 	SDL_PumpEvents();
 	
-	AEKeys=SDL_GetKeyState(NULL);
+	AEInternal.keys=SDL_GetKeyState(NULL);
 	if((AEKey(SDLK_LMETA)||AEKey(SDLK_LSUPER))&&AEKey(SDLK_q)) exit(0);
 		//SDLK_LSUPER for Windoze and SDLK_LMETA for OS X
 	static unsigned char blankKeys[256];
-	if(AEBlockKeyInput) AEKeys=blankKeys;
+	if(AEBlockKeyInput) AEInternal.keys=blankKeys;
 	
-	AEMouseButtons=SDL_GetMouseState(&AEMouse.x,&AEMouse.y);
+	AEInternal.mouseButtons=SDL_GetMouseState(&AEInternal.mouse.x,&AEInternal.mouse.y);
 }
 
-int AEKey(int key){return AEKeys[key];}
-int AEMouseButton(char button){return (SDL_BUTTON(button)&AEMouseButtons);}
+int AEKey(int key){return AEInternal.keys[key];}
+int AEMouseButton(char button){return (SDL_BUTTON(button)&AEInternal.mouseButtons);}
 
 static int AEEventFilter(const SDL_Event* event){
 	//So it closes when the user says close
@@ -94,15 +75,6 @@ static int AEEventFilter(const SDL_Event* event){
 } 
 
 ////////////////////////////////////////////////////			View Stuff
-
-void AERefreshViewport(char in2d){
-	glViewport(0,0,AEScreen.w,AEScreen.h);
-	glMatrixMode(GL_PROJECTION);
-		glLoadIdentity();
-		if(in2d) glOrtho(0,AEScreen.w,0,AEScreen.h,AECamera.near,AECamera.far);
-		else gluPerspective (AECamera.fov, (float)AEScreen.w/(float)AEScreen.h, AECamera.near, AECamera.far);
-	glMatrixMode(GL_MODELVIEW);
-}
 
 void AEInit(char* title,int w,int h){
 	//atexit(AEQuit);
@@ -113,29 +85,33 @@ void AEInit(char* title,int w,int h){
 		exit(1);
 	}
 	
-	if(AECamera.fov==0) AECamera.fov=60;
-	if(AECamera.far==0) AECamera.far=3000;
-	if(AECamera.near==0) AECamera.near=1;
-	if(AEScreen.r==0) AEScreen.r=8;
-	if(AEScreen.g==0) AEScreen.g=8;
-	if(AEScreen.b==0) AEScreen.b=8;
-	if(AEScreen.a==0) AEScreen.a=8;
-	if(AEScreen.depth==0) AEScreen.depth=8;
+	if(AEInternal.fov==0) AEInternal.fov=60;
+	if(AEInternal.far==0) AEInternal.far=3000;
+	if(AEInternal.near==0) AEInternal.near=1;
+	if(AEInternal.r==0) AEInternal.r=8;
+	if(AEInternal.g==0) AEInternal.g=8;
+	if(AEInternal.b==0) AEInternal.b=8;
+	if(AEInternal.a==0) AEInternal.a=8;
+	if(AEInternal.depth==0) AEInternal.depth=8;
 	
-	SDL_GL_SetAttribute(SDL_GL_RED_SIZE, AEScreen.r);
-	SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, AEScreen.g);
-	SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, AEScreen.b);
-	SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE,AEScreen.a );
-	SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, AEScreen.stencil);
-	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, AEScreen.depth);
+	SDL_GL_SetAttribute(SDL_GL_RED_SIZE, AEInternal.r);
+	SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, AEInternal.g);
+	SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, AEInternal.b);
+	SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE,AEInternal.a );
+	SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, AEInternal.stencil);
+	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, AEInternal.depth);
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 	
-	SDL_SetVideoMode(w, h, 0, AEScreen.inFullscreen?(SDL_OPENGL | SDL_FULLSCREEN):SDL_OPENGL);
-	AEScreen.w=w;AEScreen.h=h;
+	SDL_SetVideoMode(w, h, 0, AEInternal.inFullscreen?(SDL_OPENGL | SDL_FULLSCREEN):SDL_OPENGL);
+	AEInternal.w=w;AEInternal.h=h;
 	
 	SDL_WM_SetCaption(title,NULL);
 	
-	AERefreshViewport(0);
+	glViewport(0,0,AEInternal.w,AEInternal.h);
+	glMatrixMode(GL_PROJECTION);
+		glLoadIdentity();
+		gluPerspective (AEInternal.fov, (float)AEInternal.w/(float)AEInternal.h, AEInternal.near, AEInternal.far);
+	glMatrixMode(GL_MODELVIEW);
 	
 	glClearColor(0,0,0,1);
 	glEnable( GL_BLEND );
@@ -145,15 +121,12 @@ void AEInit(char* title,int w,int h){
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
 	
-	SDL_SetEventFilter(AEEventFilter);
+	AEInternal.textureLoadFlags=SOIL_FLAG_COMPRESS_TO_DXT|SOIL_FLAG_INVERT_Y|SOIL_FLAG_MIPMAPS;
 	
-	/*glEnableClientState(GL_VERTEX_ARRAY);
-	glEnableClientState(GL_TEXTURE_COORD_ARRAY);*/
+	SDL_SetEventFilter(AEEventFilter);
 }
 
-static void AEDefaultPerframeFunc(float step){
-	AEObjectsSignal(AEObjectEventRender,NULL);
-}
+static void AEDefaultPerframeFunc(float step){}
 
 void AEStart(void (*perframe)(float)){
 	//0 is a magical number, simply acts as the default
@@ -165,12 +138,6 @@ void AEStart(void (*perframe)(float)){
 	while(1){
 		glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 		
-		glPushMatrix();
-		glRotatef(-AECamera.rotation.x,	1,0,0);
-		glRotatef(-AECamera.rotation.y,	0,1,0);
-		glRotatef(-AECamera.rotation.z,	0,0,1);
-		glTranslatef(-AECamera.x,-AECamera.y,-AECamera.z);
-		
 		AEPollInput();
 		
 		now=SDL_GetTicks()*0.001;
@@ -178,7 +145,6 @@ void AEStart(void (*perframe)(float)){
 		then=now;
 		//Sounds....  Poetic
 		
-		glPopMatrix();
 		SDL_GL_SwapBuffers();
 	}
 }

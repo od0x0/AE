@@ -21,7 +21,7 @@ typedef struct{
 
 extern unsigned char AEVBOAddAllocateFreq;
 
-AEVBO* AEVBOLoad(const char* filename,int isStatic,int hasNormals);	//Wraps AEMeshes for you
+AEVBO* AEVBOLoad(const char* filename,int isStatic,int hasNormals);
 void AEVBOAdd(AEVBO* vbo,AEVBOVertWithNormal* v);
 void AEVBODraw(AEVBO* vbo);
 void AEVBOCompile(AEVBO* vbo,unsigned int* usages);
