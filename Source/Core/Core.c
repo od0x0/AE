@@ -2,15 +2,17 @@
 #include "../SOIL/SOIL.h"
 #include <math.h>
 #include <string.h>
+#include "../Ent.h"
+#include "../Camera.h"
 
-struct{
-	unsigned int w,h,r,g,b,a,stencil,depth,inFullscreen;
-	unsigned int blockKeyInput,textureLoadFlags;
-	unsigned char* keys;
-	unsigned char mouseButtons;
-	float fov,near,far;
-	AEVec2i mouse;
-}AEInternal;
+AEState AEActiveState={
+	800,500,8,8,8,8,8,8,0,
+	0,SOIL_FLAG_COMPRESS_TO_DXT|SOIL_FLAG_INVERT_Y|SOIL_FLAG_MIPMAPS,
+	NULL,
+	0,
+	60,1,3000,
+	{400,250}
+};
 
 ///////////////////////////////////////////////////			Texture Stuff
 unsigned int AETextureLoad(const char* filename){
@@ -21,7 +23,7 @@ unsigned int AETextureLoad(const char* filename){
 			filename,
 			SOIL_LOAD_AUTO,
 			SOIL_CREATE_NEW_ID,
-			AEInternal.textureLoadFlags
+			AEActiveState.textureLoadFlags
 		);
 		if(texid==0) printf("AETextureLoad: Texture loading of %s failed because %s\n",filename,SOIL_last_result());
 	AETextureBind(texid);
@@ -56,17 +58,17 @@ unsigned int AELinearSearch_internal(void* value,void* array,int length,int size
 void AEPollInput(void){
 	SDL_PumpEvents();
 	
-	AEInternal.keys=SDL_GetKeyState(NULL);
+	AEActiveState.keys=SDL_GetKeyState(NULL);
 	if((AEKey(SDLK_LMETA)||AEKey(SDLK_LSUPER))&&AEKey(SDLK_q)) exit(0);
 		//SDLK_LSUPER for Windoze and SDLK_LMETA for OS X
 	static unsigned char blankKeys[256];
-	if(AEBlockKeyInput) AEInternal.keys=blankKeys;
+	if(AEActiveState.blockKeyInput) AEActiveState.keys=blankKeys;
 	
-	AEInternal.mouseButtons=SDL_GetMouseState(&AEInternal.mouse.x,&AEInternal.mouse.y);
+	AEActiveState.mouseButtons=SDL_GetMouseState(&AEActiveState.mouse.x,&AEActiveState.mouse.y);
 }
 
-int AEKey(int key){return AEInternal.keys[key];}
-int AEMouseButton(char button){return (SDL_BUTTON(button)&AEInternal.mouseButtons);}
+int AEKey(int key){return AEActiveState.keys[key];}
+int AEMouseButton(char button){return (SDL_BUTTON(button)&AEActiveState.mouseButtons);}
 
 static int AEEventFilter(const SDL_Event* event){
 	//So it closes when the user says close
@@ -84,33 +86,39 @@ void AEInit(char* title,int w,int h){
 		puts("SDL failed to start");
 		exit(1);
 	}
+	printf("%s() Line %i\n",__func__,__LINE__);
 	
-	if(AEInternal.fov==0) AEInternal.fov=60;
-	if(AEInternal.far==0) AEInternal.far=3000;
-	if(AEInternal.near==0) AEInternal.near=1;
-	if(AEInternal.r==0) AEInternal.r=8;
-	if(AEInternal.g==0) AEInternal.g=8;
-	if(AEInternal.b==0) AEInternal.b=8;
-	if(AEInternal.a==0) AEInternal.a=8;
-	if(AEInternal.depth==0) AEInternal.depth=8;
+	/*if(AEActiveState.fov==0) AEActiveState.fov=60;
+	if(AEActiveState.far==0) AEActiveState.far=3000;
+	if(AEActiveState.near==0) AEActiveState.near=1;
+	if(AEActiveState.r==0) AEActiveState.r=8;
+	if(AEActiveState.g==0) AEActiveState.g=8;
+	if(AEActiveState.b==0) AEActiveState.b=8;
+	if(AEActiveState.a==0) AEActiveState.a=8;
+	if(AEActiveState.depth==0) AEActiveState.depth=8;*/
 	
-	SDL_GL_SetAttribute(SDL_GL_RED_SIZE, AEInternal.r);
-	SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, AEInternal.g);
-	SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, AEInternal.b);
-	SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE,AEInternal.a );
-	SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, AEInternal.stencil);
-	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, AEInternal.depth);
+	SDL_GL_SetAttribute(SDL_GL_RED_SIZE, AEActiveState.r);
+	SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, AEActiveState.g);
+	SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, AEActiveState.b);
+	SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE,AEActiveState.a );
+	SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, AEActiveState.stencil);
+	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, AEActiveState.depth);
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 	
-	SDL_SetVideoMode(w, h, 0, AEInternal.inFullscreen?(SDL_OPENGL | SDL_FULLSCREEN):SDL_OPENGL);
-	AEInternal.w=w;AEInternal.h=h;
+	if(w==0) w=AEActiveState.w;
+	if(h==0) h=AEActiveState.h;
+	
+	SDL_SetVideoMode(w, h, 0, AEActiveState.inFullscreen?(SDL_OPENGL | SDL_FULLSCREEN):SDL_OPENGL);
+	AEActiveState.w=w;AEActiveState.h=h;
 	
 	SDL_WM_SetCaption(title,NULL);
 	
-	glViewport(0,0,AEInternal.w,AEInternal.h);
+	printf("%s() Line %i\n",__func__,__LINE__);
+	
+	glViewport(0,0,AEActiveState.w,AEActiveState.h);
 	glMatrixMode(GL_PROJECTION);
 		glLoadIdentity();
-		gluPerspective (AEInternal.fov, (float)AEInternal.w/(float)AEInternal.h, AEInternal.near, AEInternal.far);
+		gluPerspective (AEActiveState.fov, (float)AEActiveState.w/(float)AEActiveState.h, AEActiveState.near, AEActiveState.far);
 	glMatrixMode(GL_MODELVIEW);
 	
 	glClearColor(0,0,0,1);
@@ -121,9 +129,17 @@ void AEInit(char* title,int w,int h){
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
 	
-	AEInternal.textureLoadFlags=SOIL_FLAG_COMPRESS_TO_DXT|SOIL_FLAG_INVERT_Y|SOIL_FLAG_MIPMAPS;
+	printf("%s() Line %i\n",__func__,__LINE__);
+	
+	//AEActiveState.textureLoadFlags=SOIL_FLAG_COMPRESS_TO_DXT|SOIL_FLAG_INVERT_Y|SOIL_FLAG_MIPMAPS;
 	
 	SDL_SetEventFilter(AEEventFilter);
+	
+	
+	printf("%s() Line %i\n",__func__,__LINE__);
+	
+	AEEntEventsGetOrAdd("init");
+	AEEntEventsGetOrAdd("release");
 }
 
 static void AEDefaultPerframeFunc(float step){}
@@ -140,6 +156,16 @@ void AEStart(void (*perframe)(float)){
 		
 		AEPollInput();
 		
+		AECamera* cam=AECameraActiveGet();
+		
+		glLoadIdentity();
+		glRotatef(-cam->rotation.x,	1,0,0);
+		glRotatef(-cam->rotation.y,	0,1,0);
+		glRotatef(-cam->rotation.z,	0,0,1);
+		glTranslatef(-cam->x,-cam->y,-cam->z);
+	
+		//AECameraVFCalculate(cam);
+		
 		now=SDL_GetTicks()*0.001;
 		(*perframe)((now-then));
 		then=now;
@@ -150,5 +176,6 @@ void AEStart(void (*perframe)(float)){
 }
 
 void AEQuit(void){
+	AEEntEventsDelete();
 	SDL_Quit();
 }

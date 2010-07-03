@@ -1,8 +1,9 @@
 #my second attempt at using makefiles
 
 LIBS= -framework SDL -framework OpenGL
-FLAGS= -std=c99 -fno-stack-protector
+FLAGS= -std=c99 -fno-stack-protector -Os
 #Getting errors without -fno-stack-protector on Snow Leopard
+OBJCFLAGS= -fobjc-direct-dispatch -Os
 ARCHS= i386 ppc
 INCLUDEPATHS= -I /Library/Frameworks/SDL.framework/Headers\
 	 -I /System/Library/Frameworks/OpenGL.framework/Headers \
@@ -22,12 +23,14 @@ all:
 buildOSXUni: 	
 	
 	$(CC) -c SDLMain.m $(FLAGS) -arch ppc -Os -I /Library/Frameworks/SDL.framework/Headers
-	$(CC) -c $(shell find Source -name "*.c") $(FLAGS) -arch ppc -O3 $(INCLUDEPATHS) 
+	$(CC) -c $(shell find Source -name "*.c") $(FLAGS) -arch ppc $(INCLUDEPATHS) 
+	$(CC) -c $(shell find Source -name "*.m") $(FLAGS) -arch ppc $(INCLUDEPATHS) $(OBJCFLAGS)
 	ar cr libAEppc.a *.o
 	rm -f *.o
 
 	$(CC) -c SDLMain.m $(FLAGS) -arch i386 -Os -I /Library/Frameworks/SDL.framework/Headers
-	$(CC) -c $(shell find Source -name "*.c") $(FLAGS) -arch i386 -O3 $(INCLUDEPATHS) 
+	$(CC) -c $(shell find Source -name "*.c") $(FLAGS) -arch i386 $(INCLUDEPATHS) 
+	$(CC) -c $(shell find Source -name "*.m") $(FLAGS) -arch i386 $(INCLUDEPATHS) $(OBJCFLAGS)
 	ar cr libAEintel.a *.o
 	rm -f *.o
 
@@ -48,3 +51,7 @@ clean:
 	make sweep
 	rm -f AE/*
 	rmdir AE
+
+vbotest:
+	make
+	cd Tests && make Object && ./Object.binary

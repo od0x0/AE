@@ -1,0 +1,29 @@
+#include "../Audio.h"
+ 
+void AEAudioQuit(void){}
+
+void AEAudioInit(char numberOfChannels){}
+
+int AEAudioMusicMode=0;//Cleans up an extra parameter
+
+void* AEAudioLoad(const char* filename){
+	return NULL;
+}
+
+int AEAudioPlay(void* buffer,int loop){
+	return -1;
+}
+
+int AEAudioPause(int channel){
+	return -1;
+}
+
+int AEAudioResume(int channel){
+	return -1;
+}
+
+int AEAudioVolume(int channel,float level){
+	return -1;
+}
+
+void AEAudioDelete(void* buffer){}

@@ -1,30 +1,29 @@
 #pragma once
 #include "Core.h"
 #include "HeaderBegin.h"
+#include "VA.h"
+#include "List.h"
+#include "RawMesh.h"
 
-typedef struct{//YadaYadaYada Packing
-	AEVec2 t;
-	AEVec3 v;
-}AEVBOVert;
-
-typedef struct{//YadaYadaYada Packing
-	AEVec2 t;
-	AEVec3 n,v;
-}AEVBOVertWithNormal;
+#include <stdlib.h>
 
 typedef struct{
-	unsigned int vbo,nbo,ibo,vcount,icount,vallocated,iallocated,*indices;
-	AEVec3* n;
-	AEVBOVert* verts;
+	AEVA va;
+	AEVA indices;
 	char hasNormals;
+	char texUnitCount;
+	char elementSize;
+	char usesIndices;
 }AEVBO;
 
-extern unsigned char AEVBOAddAllocateFreq;
+//extern unsigned char AEVBOAddAllocateFreq;
 
-AEVBO* AEVBOLoad(const char* filename,int isStatic,int hasNormals);
-void AEVBOAdd(AEVBO* vbo,AEVBOVertWithNormal* v);
+AEVBO* AEVBONew(char hasNormals,char tcount,char usesIndices,char* type);
+size_t AEVBOVertexTypeSize(AEVBO* vbo);
+void AEVBOCompileVertexList(AEVBO* vbo,AEList* list);
+void AEVBOBind(AEVBO* vbo);
 void AEVBODraw(AEVBO* vbo);
-void AEVBOCompile(AEVBO* vbo,unsigned int* usages);
 void AEVBODelete(AEVBO* vbo);
+AEVBO* AEVBOLoad(char* filename,char hasNormals,char tcount,char usesIndices,char* type);
 
 #include "HeaderEnd.h"

@@ -1,152 +1,128 @@
 #include "../VBO.h"
 #include "../SOIL/SOIL.h"
+#include "../RawMesh.h"
 #include <math.h>
 #include <string.h>
 
-// This code could have been cleaner, particularly with an array "class"
+// This code could have been cleaner, it's like this mainly because I'm simply trying to get it to work
 
-static AEVBO* AEVBONew(void){
+AEVBO* AEVBONew(char hasNormals,char tcount,char usesIndices,char* type){
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-	return (AEVBO*)calloc(1,sizeof(AEVBO));
+	
+	AEVBO* vbo=(AEVBO*)calloc(1,sizeof(AEVBO));
+	
+	vbo->indices.vbotype=AEVAVBOTypeStatic;
+		//vbo->indices.vbotype=0;
+	
+	if(strstr(type,"static")!=NULL) vbo->va.vbotype=AEVAVBOTypeStatic;
+	else if(strstr(type,"dynamic")!=NULL) vbo->va.vbotype=AEVAVBOTypeDynamic;
+	else if(strstr(type,"stream")!=NULL) vbo->va.vbotype=AEVAVBOTypeStream;
+	else vbo->va.vbotype=0;
+	
+	vbo->usesIndices=usesIndices;
+	vbo->elementSize=1*3+tcount*2+hasNormals*3;
+	vbo->hasNormals=hasNormals;
+	vbo->texUnitCount=tcount;
+	
+	printf("VBO 1 verts, %i normals, %i texcoords, %i indices, type %i\n",hasNormals,tcount,usesIndices,(int)vbo->va.vbotype);
+	
+	return vbo;
 }
 
 unsigned char AEVBOAddAllocateFreq=100;
 
-////  Really ugly code, this is the part where I say, "It works"
-static unsigned int AEVBOAddVert(AEVBO* vbo,AEVBOVertWithNormal* v){
-	if(v==NULL){//  Resize the array to fit
-		vbo->vallocated=0;
-		if(vbo->hasNormals) vbo->n=realloc(vbo->n,sizeof(AEVec3)*vbo->vcount);
-		vbo->verts=(AEVBOVert*)realloc(vbo->verts,sizeof(AEVBOVert)*vbo->vcount);
-		return 0xbaadf00d;//Junk return, you shouldn't do anything with this anyway
-	}
-	
-	//Check for pre-existing, return it if it is
-	unsigned int index=0;
-	AEVBOVert vert={v->t,v->v};
-	/*index=AELinearSearch(&vert,vbo->verts,vbo->vcount);
-	if(vbo->hasNormals){
-		index=AELinearSearch(&(v->n),vbo->v,vbo->vcount);
-	}*/
-	for(unsigned int i=0;i<vbo->vcount;i++){
-		if(memcmp(vbo->verts+i,&vert,sizeof(AEVBOVert))==0){
-			
-			if((!vbo->hasNormals)||memcmp(vbo->n+i,&(v->n),sizeof(AEVec3))==0){
-				index=i+1;
-				break;
-			}
-		}
-	}
-	
-	
-	if(index) return index-1;
-	//Add if it doesn't exist
-	//Resize array
-	index=vbo->vcount++;
-	if(vbo->vallocated==0 || vbo->vallocated <= (vbo->vcount+1)){//Allocates more than needed to avoid expensive realloc calls
-		vbo->vallocated=vbo->vcount+AEVBOAddAllocateFreq;
-		if(vbo->hasNormals) vbo->n=realloc(vbo->n,sizeof(AEVec3)*vbo->vallocated);
-		vbo->verts=(AEVBOVert*)realloc(vbo->verts,sizeof(AEVBOVert)*vbo->vallocated);
-	}
-	//Make assignment
-	if(vbo->hasNormals) vbo->n[index]=v->n;
-	vbo->verts[index]=vert;
-	
-	return index;
-}
 
-void AEVBOAdd(AEVBO* vbo,AEVBOVertWithNormal* v){//Pretty much the same concept as above, just for indices, and wraps the above
-	if(vbo==NULL) return;
-	if(v==NULL){
-		vbo->iallocated=0;
-		vbo->indices=(unsigned int*)realloc(vbo->indices,sizeof(int)*vbo->icount);
-		AEVBOAddVert(vbo,v);
-		return;
+void AEVBOBind(AEVBO* vbo){
+	if(vbo==NULL){
+		AEVABindIndices(NULL);
 	}
-	
-	if(vbo->iallocated==0 || vbo->iallocated <= (vbo->icount+1)){
-		vbo->iallocated=vbo->icount+AEVBOAddAllocateFreq;
-		vbo->indices=(unsigned int*)realloc(vbo->indices,sizeof(int)*vbo->iallocated);
-	}
-	
-	vbo->indices[vbo->icount++]=AEVBOAddVert(vbo,v);
+	if(vbo->hasNormals) AEVABindInterleavedTNV(&(vbo->va));
+	else AEVABindInterleavedTV(&(vbo->va));
+	void* indices=NULL;
+	if(vbo->usesIndices) indices=&(vbo->indices);
+	AEVABindIndices(indices);
 }
 
 void AEVBODraw(AEVBO* vbo){
-	if(!vbo) return;
-	glBindBuffer(GL_ARRAY_BUFFER,vbo->vbo);
-	
-	const int stride=5*sizeof(float);
-	const unsigned int offset=(unsigned int)(vbo->vbo?NULL:vbo->verts);
-	glVertexPointer(3,GL_FLOAT,stride,(void*)(sizeof(float)*2+offset));
-	glTexCoordPointer(2,GL_FLOAT,stride,(void*)offset);
-	
-	if(vbo->hasNormals){
-		glEnableClientState(GL_NORMAL_ARRAY);
-		glBindBuffer(GL_ARRAY_BUFFER,vbo->nbo);
-		glNormalPointer(GL_FLOAT,3*sizeof(float),0+(vbo->n?NULL:vbo->n));
-	}
-	//glInterleavedArrays(GL_T2F_V3F,0,vbo->vbo?NULL:vbo->verts);
-	
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,vbo->ibo);
-	
-	if(vbo->indices || vbo->ibo) glDrawElements(GL_TRIANGLES, vbo->icount, GL_UNSIGNED_INT, vbo->ibo?NULL:vbo->indices);
-	else glDrawArrays(GL_TRIANGLES,vbo->vcount,GL_UNSIGNED_INT);
-	
-	if(vbo->hasNormals) glDisableClientState(GL_NORMAL_ARRAY);
+	unsigned int range=vbo->va.length/vbo->elementSize;
+	if(vbo->usesIndices) range=vbo->indices.length;
+	AEVADraw(0,range);
 }
 
-void AEVBOCompile(AEVBO* vbo,unsigned int* usages){
+size_t AEVBOVertexTypeSize(AEVBO* vbo){
+	return vbo->elementSize*sizeof(float);
+}
+
+void AEVBOCompileVertexList(AEVBO* vbo,AEList* list){
 	if(vbo==NULL) return;
-	if(vbo->iallocated||vbo->vallocated) AEVBOAdd(vbo,NULL);//Implicit
 	
-	unsigned int defaultUsages[2]={GL_STATIC_DRAW,GL_STATIC_DRAW};
-	if(usages==NULL) usages=defaultUsages;
+	//vbo->indices.length=AEListLength(list)/3;
 	
-	//Vertices
-	glGenBuffers(1,(GLuint*)&vbo->vbo);
-	glBindBuffer(GL_ARRAY_BUFFER,vbo->vbo);
-	glBufferData(GL_ARRAY_BUFFER,vbo->vcount*sizeof(AEVBOVert),vbo->verts,usages[0]);
-	
-	//free(vbo->verts);
-	//vbo->verts=NULL;
-	//vbo->vallocated=0;
-	
-	if(vbo->hasNormals){
-		glGenBuffers(1,(GLuint*)&vbo->nbo);
-		glBindBuffer(GL_ARRAY_BUFFER,vbo->nbo);
-		glBufferData(GL_ARRAY_BUFFER,vbo->vcount*sizeof(AEVec3),vbo->n,usages[0]);
-	}
-	
-	//Indices
-	glGenBuffers(1,(GLuint*)&vbo->ibo);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,vbo->ibo);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER,vbo->icount*sizeof(int),vbo->indices,usages[1]);
-	
-	//free(vbo->indices);
-	//vbo->indices=NULL;
-	//vbo->vallocated=0;
-}
+	if(vbo->usesIndices){
+		AEList* indicesList=AEListNew(size_t);
+		AEListRemoveDuplicates(list,indicesList);
+		vbo->indices.isAnIndexArray=1;
+		volatile unsigned int* data=AEVAMap(&(vbo->indices),AEListLength(indicesList),GL_WRITE_ONLY);
+		size_t* indices=AEListAsArray(indicesList,size_t);
+		for(size_t i=0;i<AEListLength(indicesList);i++)
+			data[i]=indices[i];
+		
+		AEVAUnmap(&(vbo->indices));
+		AEListDelete(indicesList);
+	}//else vbo->indices.length=AEListLength(list)/3;
 
-AEVBO* AEVBOLoad(const char* filename,int isStatic,int hasNormals){
-	if(filename==NULL){
-		AEVBO* vbo=AEVBONew();
-		vbo->hasNormals=hasNormals;
-		return vbo;
-	}
-	puts(".obj loading not yet implemented");
-	return NULL;
-	return vbo;
+	float* data=AEVAMap(&(vbo->va),AEListLengthInSizeofType(list,float),GL_READ_WRITE);
+	memcpy(data,AEListAsArray(list,void),AEListLengthInSizeofType(list,char));
+	/*float* vdata=AEListAsArray(list,float);
+	for(size_t i=0;i<AEListLength(list);i++)
+			data[i]=vdata[i];*/
+	AEVAUnmap(&(vbo->va));
+	
+	AEListDelete(list);
 }
 
 void AEVBODelete(AEVBO* vbo){
 	if(vbo==NULL) return;
-	glDeleteBuffers(1,(GLuint*)&vbo->vbo);
-	glDeleteBuffers(1,(GLuint*)&vbo->nbo);
-	glDeleteBuffers(1,(GLuint*)&vbo->ibo);
-	free(vbo->verts);
-	free(vbo->indices);
-	free(vbo->n);
+	AEVAClear(&(vbo->va));
+	AEVAClear(&(vbo->indices));
 	free(vbo);
+}
+
+AEVBO* AEVBOLoad(char* filename,char hasNormals,char tcount,char usesIndices,char* type){
+	AEVBO* vbo=AEVBONew(hasNormals, tcount, usesIndices, type);
+	
+	AEList* vlist=AEListNewWithTypeSize(AEVBOVertexTypeSize(vbo));
+	
+	AERawMesh* m=AERawMeshLoad(filename);
+	for(unsigned int i=0;i < m->count.f;i++){
+		AERawMeshFace* face=m->f+i;
+		for(int j=0;j<3;j++){
+			float* v=alloca(AEVBOVertexTypeSize(vbo));
+			int size=0;
+			for(int k=0;k<(vbo->texUnitCount*2);k+=2){
+				v[size++]=m->t[face->t[j]].x;
+				v[size++]=m->t[face->t[j]].y;
+			}
+			if(vbo->hasNormals){
+				v[size++]=m->n[face->n[j]].x;
+				v[size++]=m->n[face->n[j]].y;
+				v[size++]=m->n[face->n[j]].z;
+			}
+			v[size++]=m->v[face->v[j]].x;
+			v[size++]=m->v[face->v[j]].y;
+			v[size++]=m->v[face->v[j]].z;
+			AEListAddBytes(vlist,v);
+			
+			/*printf("Face(%i) %i Size(%i):  ",i,j,size);
+			for(int k=0;k<size;k++){
+				printf("%f ",v[k]);
+			}
+			puts("");*/
+		}
+	}
+	AERawMeshDelete(m);
+
+	AEVBOCompileVertexList(vbo,vlist);
+	return vbo;
 }

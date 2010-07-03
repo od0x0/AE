@@ -5,7 +5,8 @@ Ambition Engine Core.
 */
 
 #pragma once
-#include "HeaderStart.h"
+#include "HeaderBegin.h"
+//Might not always use SDL, but just to avoid extra work
 #include <SDL/SDL.h>
 #include <SDL/SDL_opengl.h>
 
@@ -17,14 +18,23 @@ typedef struct{int x,y;}AEVec2i;
 typedef struct{int x,y,z;}AEVec3i;
 typedef struct{int x,y,z,w;}AEVec4i;
 
+typedef struct{float r,g,b;}AERGB;
+typedef struct{float r,g,b,a;}AERGBA;
 
+typedef struct AEState{
+	unsigned int w,h,r,g,b,a,stencil,depth,inFullscreen;
+	unsigned int blockKeyInput,textureLoadFlags;
+	unsigned char* keys;
+	unsigned char mouseButtons;
+	float fov,near,far;
+	AEVec2i mouse;
+}AEState;
+
+extern AEState AEActiveState;
 
 void AEInit(char* title,int w,int h);
 void AEStart(void (*func)(float));
 void AEQuit(void);
-
-void AEGet(int option,void* pointerToValue);
-void AESet(int option,void* pointerToValue);
 
 int AEKey(int key);
 int AEMouseButton(char button);
