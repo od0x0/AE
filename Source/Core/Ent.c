@@ -66,13 +66,10 @@ typedef struct{char* key;int value;} AEEntEventTag;
 int AEEntEventsGetOrAdd(char* name){
 	if(AEEntEvents==NULL){
 		//AEEntEvents=kh_init(AEEntEventsType);
-		puts("Allocating AEEntEvents");
-		printf("%s() Line %i\n",__func__,__LINE__);
 		AEEntEvents=AEListNew(AEEntEventTag);
-		printf("%p\n",AEEntEvents);
 	}
 	if(name==NULL){
-		printf("AEEntEventsGet(%s): Passed a null value\n",name);
+		printf("AEEntEventsGet(%s): Was passed a null value\n",name);
 		exit(1);
 	}
 	unsigned int length=AEListLength(AEEntEvents);

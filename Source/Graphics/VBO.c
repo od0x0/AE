@@ -5,8 +5,9 @@
 #include <string.h>
 
 // This code could have been cleaner, it's like this mainly because I'm simply trying to get it to work
-
-AEVBO* AEVBONew(char hasNormals,char tcount,char usesIndices,char* type){
+//Format: "ttnvi"
+//char hasNormals,char tcount,char usesIndices
+AEVBO* AEVBONew(char* format,char* type){
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 	
@@ -20,12 +21,29 @@ AEVBO* AEVBONew(char hasNormals,char tcount,char usesIndices,char* type){
 	else if(strstr(type,"stream")!=NULL) vbo->va.vbotype=AEVAVBOTypeStream;
 	else vbo->va.vbotype=0;
 	
-	vbo->usesIndices=usesIndices;
-	vbo->elementSize=1*3+tcount*2+hasNormals*3;
+	/*vbo->usesIndices=usesIndices;
+	vbo->floatsPerVertex=1*3+tcount*2+hasNormals*3;
 	vbo->hasNormals=hasNormals;
-	vbo->texUnitCount=tcount;
+	vbo->texUnitCount=tcount;*/
+	vbo->texUnitCount=vbo->hasNormals=vbo->usesIndices=0;
+	size_t length=strlen(format);
+	for(size_t i=0;i<length;i++){
+		switch(format[i]){
+			case 't':
+				vbo->texUnitCount++;
+				break;
+			case 'n':
+				vbo->hasNormals=1;
+				break;
+			case 'i':
+				vbo->usesIndices=1;
+				break;
+		}
+	}
 	
-	printf("VBO 1 verts, %i normals, %i texcoords, %i indices, type %i\n",hasNormals,tcount,usesIndices,(int)vbo->va.vbotype);
+	vbo->floatsPerVertex=1*3+vbo->texUnitCount*2+vbo->hasNormals*3;
+	
+	//printf("VBO 1 verts, %i normals, %i texcoords, %i indices, type %i\n",vbo->hasNormals,vbo->texUnitCount,vbo->usesIndices,(int)vbo->va.vbotype);
 	
 	return vbo;
 }
@@ -45,13 +63,13 @@ void AEVBOBind(AEVBO* vbo){
 }
 
 void AEVBODraw(AEVBO* vbo){
-	unsigned int range=vbo->va.length/vbo->elementSize;
+	unsigned int range=vbo->va.length/vbo->floatsPerVertex;
 	if(vbo->usesIndices) range=vbo->indices.length;
 	AEVADraw(0,range);
 }
 
 size_t AEVBOVertexTypeSize(AEVBO* vbo){
-	return vbo->elementSize*sizeof(float);
+	return vbo->floatsPerVertex*sizeof(float);
 }
 
 void AEVBOCompileVertexList(AEVBO* vbo,AEList* list){
@@ -89,8 +107,8 @@ void AEVBODelete(AEVBO* vbo){
 	free(vbo);
 }
 
-AEVBO* AEVBOLoad(char* filename,char hasNormals,char tcount,char usesIndices,char* type){
-	AEVBO* vbo=AEVBONew(hasNormals, tcount, usesIndices, type);
+AEVBO* AEVBOLoad(char* filename,char* format,char* type){
+	AEVBO* vbo=AEVBONew(format, type);
 	
 	AEList* vlist=AEListNewWithTypeSize(AEVBOVertexTypeSize(vbo));
 	

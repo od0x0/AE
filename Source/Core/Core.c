@@ -86,7 +86,6 @@ void AEInit(char* title,int w,int h){
 		puts("SDL failed to start");
 		exit(1);
 	}
-	printf("%s() Line %i\n",__func__,__LINE__);
 	
 	/*if(AEActiveState.fov==0) AEActiveState.fov=60;
 	if(AEActiveState.far==0) AEActiveState.far=3000;
@@ -113,8 +112,6 @@ void AEInit(char* title,int w,int h){
 	
 	SDL_WM_SetCaption(title,NULL);
 	
-	printf("%s() Line %i\n",__func__,__LINE__);
-	
 	glViewport(0,0,AEActiveState.w,AEActiveState.h);
 	glMatrixMode(GL_PROJECTION);
 		glLoadIdentity();
@@ -129,17 +126,9 @@ void AEInit(char* title,int w,int h){
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
 	
-	printf("%s() Line %i\n",__func__,__LINE__);
-	
 	//AEActiveState.textureLoadFlags=SOIL_FLAG_COMPRESS_TO_DXT|SOIL_FLAG_INVERT_Y|SOIL_FLAG_MIPMAPS;
 	
 	SDL_SetEventFilter(AEEventFilter);
-	
-	
-	printf("%s() Line %i\n",__func__,__LINE__);
-	
-	AEEntEventsGetOrAdd("init");
-	AEEntEventsGetOrAdd("release");
 }
 
 static void AEDefaultPerframeFunc(float step){}
