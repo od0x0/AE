@@ -4,7 +4,7 @@ AETextBuffer* AETextBufferNew(void){
 	return calloc(1,sizeof(AETextBuffer));
 }
 
-//Sorta ripped this from Enough, worked better that what I had, so it's probably under FreeBSD (he doesn't leave any license info in his code)
+//Sorta ripped this from Enough, worked better that what I had, so it's probably under Open/FreeBSD (he doesn't leave any license info in his code)
 void AETextBufferInsert(AETextBuffer *buffer,size_t offset,char *text){
 	size_t	length;
 

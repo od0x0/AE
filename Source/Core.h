@@ -32,6 +32,9 @@ typedef struct AEState{
 
 extern AEState AEActiveState;
 
+inline void AEStateActiveSet(AEState* state){AEActiveState=*state;}
+inline AEState* AEStateActiveGet(void){return &AEActiveState;}
+
 void AEInit(char* title,int w,int h);
 void AEStart(void (*func)(float));
 void AEQuit(void);

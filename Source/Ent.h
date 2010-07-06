@@ -2,6 +2,7 @@
 #include "HeaderBegin.h"
 #include "Core.h"
 #include "List.h"
+#include "VBO.h"
 
 struct AEEnt;
 typedef struct AEEnt AEEnt;
@@ -11,6 +12,8 @@ typedef void* (*AEEntEventFunc)(AEEnt* ent,int event,void* data);
 struct AEEnt{
 	float x,y,z;
 	AEVec3 rotation;
+	AEVBO* vbo;
+	unsigned int texture;
 	void* data;
 	AEList* subents;
 	AEEntEventFunc event;//Could also be used to figure out type
@@ -20,6 +23,12 @@ struct AEEnt{
 
 #define AEEntEventInit 0
 #define AEEntEventRelease 1
+#define AEEntEventRender 2
+
+static inline AEVec3 AEEntPositionGet(AEEnt* ent){return *((AEVec3*)ent);}
+inline void AEEntPositionSet(AEEnt* ent,AEVec3 position){*((AEVec3*)ent)=position;}
+inline AEVec3 AEEntRotationGet(AEEnt* ent){return ent->rotation;}
+inline void AEEntRotationSet(AEEnt* ent,AEVec3 rotation){ent->rotation=rotation;}
 
 inline void* AEEntSignal(AEEnt* ent,int event,void* data){return (*ent->event)(ent,event,data);}
 inline void AEEntSignalChildren(AEEnt* ent,int event,void* data){

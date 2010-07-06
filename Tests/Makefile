@@ -1,7 +1,7 @@
 
 #Makefile for the demos
 
-FLAGS=  -arch i386 -arch ppc -std=c99 ../AE/libAE.a -framework SDL -framework OpenGL -framework Cocoa -I /Library/Frameworks/SDL.framework/Headers -O3
+FLAGS=  -arch i386 -arch ppc -std=c99 ../AE/libAE.a -framework SDL -framework OpenGL -framework Cocoa -framework SDL_ttf -framework SDL_mixer -I /Library/Frameworks/SDL.framework/Headers -O3
 CC=gcc
 
 %:

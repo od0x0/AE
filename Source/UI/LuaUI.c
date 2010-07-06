@@ -1,2 +1,0 @@
-#include "../lua/lua.h"
-

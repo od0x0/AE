@@ -4,10 +4,25 @@
 
 void* AEEntEventDefault(AEEnt* ent,int event,void* data){
 	AEEntSignalChildren(ent,event,data);
-
-	if(event==AEEntEventInit);
+	
+	if(event==AEEntEventRender){
+		if(ent->vbo==NULL || ent->texture==0) return NULL;
+		glPushMatrix();
+			glTranslatef(ent->x,ent->y,ent->z);
+			glRotatef(ent->rotation.x,	1,0,0);
+			glRotatef(ent->rotation.y,	0,1,0);
+			glRotatef(ent->rotation.z,	0,0,1);
+			
+			AETextureBind(ent->texture);
+			AEVBOBind(ent->vbo);
+			AEVBODraw(ent->vbo);
+		glPopMatrix();
+	}
+	else if(event==AEEntEventInit);
 	else if(event==AEEntEventRelease){
 		if(ent->subents) AEListDelete(ent->subents);
+		if(ent->texture) AETextureDelete(ent->texture);
+		if(ent->vbo) AEVBODelete(ent->vbo);
 	}
 	
 	return NULL;
@@ -76,7 +91,6 @@ int AEEntEventsGetOrAdd(char* name){
 	puts(name);
 	for(unsigned int i=0;i<length;i++){
 		char* key=AEListAsArray(AEEntEvents,AEEntEventTag)[i].key;
-		printf("%p %p\n",name,key);
 		if(strcmp(name,key)==0) return AEListAsArray(AEEntEvents,AEEntEventTag)[i].value;
 	}
 	AEEntEventTag tag={strdup(name),AEEntEventsCurrentMax++};

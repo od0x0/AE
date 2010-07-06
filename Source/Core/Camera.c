@@ -17,7 +17,7 @@ void AECameraActiveSet(AECamera* cam){
 	glRotatef(-cam->rotation.x,	1,0,0);
 	glRotatef(-cam->rotation.y,	0,1,0);
 	glRotatef(-cam->rotation.z,	0,0,1);
-	glTranslatef(-cam->x,-cam->y,-cam->z);
+	glTranslatef(-cam->position.x,-cam->position.y,-cam->position.z);
 	
 	AECameraVFCalculate(cam);
 }

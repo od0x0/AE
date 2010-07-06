@@ -128,6 +128,10 @@ void AEInit(char* title,int w,int h){
 	
 	//AEActiveState.textureLoadFlags=SOIL_FLAG_COMPRESS_TO_DXT|SOIL_FLAG_INVERT_Y|SOIL_FLAG_MIPMAPS;
 	
+	AEEntEventsGetOrAdd("init");
+	AEEntEventsGetOrAdd("release");
+	AEEntEventsGetOrAdd("render");
+	
 	SDL_SetEventFilter(AEEventFilter);
 }
 
@@ -151,7 +155,7 @@ void AEStart(void (*perframe)(float)){
 		glRotatef(-cam->rotation.x,	1,0,0);
 		glRotatef(-cam->rotation.y,	0,1,0);
 		glRotatef(-cam->rotation.z,	0,0,1);
-		glTranslatef(-cam->x,-cam->y,-cam->z);
+		glTranslatef(-cam->position.x,-cam->position.y,-cam->position.z);
 	
 		//AECameraVFCalculate(cam);
 		
