@@ -59,8 +59,6 @@ inline static void AEListAddBytes(AEList* list,void* bytes){
 	memcpy(pointer,bytes,list->typeSize);
 }
 
-
-//Private
 static inline size_t AEList_private_LinearSearch(void* value,void* array,size_t length,size_t size){
 	if(array==NULL || value==NULL) return 0;
 	for(size_t i=0;i<length;i++)
@@ -91,6 +89,19 @@ inline static size_t AEListAddBytesUnique(AEList* list,void* data){
 	index=AEListLength(list);
 	
 	return index-1;
+}
+
+inline size_t AEListFindIndexOfBytes(AEList* list,void* bytes){
+	size_t length=AEListLength(list);
+	char* listdata=AEListAsArray(list,char);
+	
+	size_t index=0;//AEList_private_LinearSearch(data,listdata,length,AEListTypeSize(list));
+	
+	for(size_t i=0;i<length;i++){
+		if(memcmp(listdata+i*AEListTypeSize(list),bytes,AEListTypeSize(list))==0) return i+1;
+	}
+	
+	return 0;
 }
 
 inline static void AEListRemoveDuplicates(AEList* list,AEList* indices){
