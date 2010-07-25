@@ -22,7 +22,7 @@ AEWM* AEWMOpen(char* title,int w,int h){
 	printf("Reached %s Line %i\n",__func__,__LINE__);
 	
 	window  = [window initWithContentRect:frame
-                                        styleMask:NSBorderlessWindowMask
+                                        styleMask:NSTitledWindowMask | NSClosableWindowMask | NSTexturedBackgroundWindowMask
                                         backing:NSBackingStoreBuffered
                                         defer:NO];
 										
@@ -34,6 +34,13 @@ AEWM* AEWMOpen(char* title,int w,int h){
 	printf("Reached %s Line %i\n",__func__,__LINE__);
 	[window setReleasedWhenClosed:YES];
 	printf("Reached %s Line %i\n",__func__,__LINE__);
+	
+	[window center];
+	[window setLevel:NSFloatingWindowLevel];
+	
+	NSString* string=[[NSString  alloc] initWithCString:title encoding:NSASCIIStringEncoding];
+	[window setTitle:string];
+	[string release];
 	
 	wm->data=calloc(1,sizeof(AEWMCocoa));
 	AEWMCocoa* cocoawm=wm->data;

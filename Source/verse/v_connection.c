@@ -275,7 +275,8 @@ boolean v_con_callback_update(void)
 {
 	static unsigned int seconds;
 	boolean	output = FALSE;
-	unsigned int	size, connection, s;
+	unsigned int	connection, s;
+	size_t size;
 	VNetInPacked	*p;
 
 	v_n_get_current_time(&s, NULL);
@@ -289,7 +290,7 @@ boolean v_con_callback_update(void)
 		return FALSE;
 	if(VConData.con[VConData.current_connection].connect_stage == V_CS_CONNECTED)
 	{
-		while((p = (VNetInPacked*)v_niq_get(&VConData.con[VConData.current_connection].in_queue, &size)) != NULL)
+		while((p = v_niq_get(&VConData.con[VConData.current_connection].in_queue, &size)) != NULL)
 		{
 			VConData.pending_packets--;
 			v_fs_unpack(p->data, size);

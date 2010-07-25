@@ -73,7 +73,7 @@ AEFont* AEFontNew(char* fontname,int size){
 	return uifont;
 }
 
-void AEFontRelease(AEFont* font){
+void AEFontDelete(AEFont* font){
 	for(unsigned char c=32;c<128;c++) glDeleteTextures(1, (GLuint*)&(font->glyph[c].img));
 	free(font);
 }

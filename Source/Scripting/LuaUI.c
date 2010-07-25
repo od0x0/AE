@@ -17,14 +17,14 @@ static int AELuaUI_FontNew(lua_State *L){
 
 static int AELuaUI_FontRelease(lua_State *L){
 	void* font=lua_touserdata(L,-1);
-	AEFontRelease(font);
+	AEFontDelete(font);
 	return 0;
 }
 
 static const struct luaL_reg AELuaUILibFont [] = {
 	{"AEFontInit",AELuaUI_FontInit},
 	{"AEFontNew",AELuaUI_FontNew},
-	{"AEFontRelease",AELuaUI_FontRelease},
+	{"AEFontDelete",AELuaUI_FontRelease},
 	{NULL, NULL}
 };
 
@@ -88,7 +88,7 @@ static int AELuaUI_TextBufferDelete(lua_State *L){
 static int AELuaUI_TextBufferInsert(lua_State *L){
 	void* textbuffer=lua_touserdata(L,-3);
 	size_t offset=lua_tointeger(L,-2);
-	char* text=lua_tostring(L,-1);
+	char* text=(char*)lua_tostring(L,-1);
 	AETextBufferInsert(textbuffer,offset,text);
 	return 0;
 }
@@ -141,27 +141,30 @@ static int AELuaUI_ImageFromFile(lua_State *L){
 	return 1;
 }
 
-static int AELuaUI_ImagePixel(lua_State *L){
+/*static int AELuaUI_ImagePixel(lua_State *L){
 	int x=lua_tointeger(L,-3);
 	int y=lua_tointeger(L,-2);
 	AEImage* image=lua_touserdata(L,-1);
 	unsigned char* pixel=AEImagePixel(image,x,y);
 	lua_pushlightuserdata(L,pixel);
 	return 1;
-}
+}*/
 
-static int AELuaUI_ImagePixelComponentSet(lua_State *L){
-	float value=lua_tonumber(L,-1);
-	int component=lua_tointeger(L,-2);
-	unsigned char* pixel=lua_touserdata(L,-3);
-	pixel[component]=value*255;
+static int AELuaUI_ImagePixelSet(lua_State *L){
+/*	int x=lua_tointeger(L,-3);
+	int y=lua_tointeger(L,-2);
+	AEImage* image=lua_touserdata(L,-1);
+	unsigned char pixel[4];
+	for(int i=0;i<AEImageChannelCountGet(image);i++) pixel[i]=lua_tointeger(L,-4 - i);
+	AEImagePixelSet(image,x,y,pixel);
+	lua_pushlightuserdata(L,pixel);*/
 	return 0;
 }
 
-static int AELuaUI_ImagePixelComponentGet(lua_State *L){
-	int component=lua_tointeger(L,-1);
+static int AELuaUI_ImagePixelGet(lua_State *L){
+	/*int component=lua_tointeger(L,-1);
 	unsigned char* pixel=lua_touserdata(L,-2);
-	lua_pushnumber(L,pixel[component]/255.0f);
+	lua_pushnumber(L,pixel[component]/255.0f);*/
 	return 1;
 }
 
@@ -190,9 +193,9 @@ static int AELuaUI_ImageDelete(lua_State *L){
 static const struct luaL_reg AELuaUILibImage [] = {
 	{"AEImageNew",AELuaUI_ImageNew},
 	{"AEImageFromFile",AELuaUI_ImageFromFile},
-	{"AEImagePixel",AELuaUI_ImagePixel},
-	{"AEImagePixelComponentSet",AELuaUI_ImagePixelComponentSet},
-	{"AEImagePixelComponentGet",AELuaUI_ImagePixelComponentGet},
+	//{"AEImagePixel",AELuaUI_ImagePixel},
+	{"AEImagePixelSet",AELuaUI_ImagePixelSet},
+	{"AEImagePixelGet",AELuaUI_ImagePixelGet},
 	{"AEImageBlit",AELuaUI_ImageBlit},
 	{"AEImageToTexture",AELuaUI_ImageToTexture},
 	{"AEImageDelete",AELuaUI_ImageDelete},

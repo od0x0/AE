@@ -11,6 +11,7 @@ void AEUIRenderMode(int on){
 	if(on){
 		glMatrixMode(GL_PROJECTION);
 			glPushMatrix();
+			glLoadIdentity();
 			glOrtho(0,AEActiveState.w,0,AEActiveState.h,0,1000);
 		glMatrixMode(GL_MODELVIEW);
 		glDisable(GL_CULL_FACE);

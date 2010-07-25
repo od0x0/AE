@@ -88,7 +88,7 @@ int AEEntEventsGetOrAdd(char* name){
 		exit(1);
 	}
 	unsigned int length=AEListLength(AEEntEvents);
-	puts(name);
+	//puts(name);
 	for(unsigned int i=0;i<length;i++){
 		char* key=AEListAsArray(AEEntEvents,AEEntEventTag)[i].key;
 		if(strcmp(name,key)==0) return AEListAsArray(AEEntEvents,AEEntEventTag)[i].value;

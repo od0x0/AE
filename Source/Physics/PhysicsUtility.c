@@ -1,4 +1,4 @@
-#include "../ODE/ode/ode.h"
+#include "../ode/ode.h"
 #include "../FastMath3D.h"
 
 void dAEBodyGiveMass(void* body,float x,float y,float z,AEVec3 size,float amount){

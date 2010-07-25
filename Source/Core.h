@@ -10,7 +10,6 @@ Ambition Engine Core.
 #include <SDL/SDL.h>
 #include <SDL/SDL_opengl.h>
 
-
 typedef struct{float x,y;}AEVec2;
 typedef struct{float x,y,z;}AEVec3;
 typedef struct{float x,y,z,w;}AEVec4;
@@ -49,5 +48,11 @@ void AETextureDelete(unsigned int texture);
 
 unsigned int AELinearSearch_internal(void* value,void* array,int length,int size);
 #define AELinearSearch(val,array,len) AELinearSearch_internal(val,array,len,sizeof(*val))
+
+static inline void AEError_internal(char* message, char* function){
+	printf("ERROR in %s():\n\t%s\n",function,message);
+	abort();
+}
+#define AEError(msg) AEError_internal(msg,__func__)
 
 #include "HeaderEnd.h"

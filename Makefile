@@ -8,8 +8,10 @@ ARCHS= i386 ppc
 INCLUDEPATHS= -I /Library/Frameworks/SDL.framework/Headers\
 	 -I /System/Library/Frameworks/OpenGL.framework/Headers \
 	-I /System/Library/Frameworks/Cocoa.framework/Headers
-CC=gcc
-CCXX=g++
+CC=gcc-4.0 -mmacosx-version-min=10.4 -Wno-pointer-sign
+CCXX=g++-4.0 -mmacosx-version-min=10.4
+
+#-4.0 -mmacosx-version-min=10.4
 
 UNAME:=$(shell uname)
 
@@ -23,15 +25,15 @@ all:
 
 buildOSXUni: 	
 	
-
-	$(CCXX) -c $(shell find Source/ODE/src/ -name "*.cpp") -I Source/ODE/ -I Source/ODE/src/ -arch ppc -Os
+	#-I Source/ODE/ -I Source/ODE/src/
+	$(CCXX) -c $(shell find Source -name "*.cpp") -arch ppc -Os
 	$(CC) -c SDLMain.m $(FLAGS) -arch ppc -Os -I /Library/Frameworks/SDL.framework/Headers
 	$(CC) -c $(shell find Source -name "*.c") $(FLAGS) -arch ppc $(INCLUDEPATHS) 
 	$(CC) -c $(shell find Source -name "*.m") $(FLAGS) -arch ppc $(INCLUDEPATHS) $(OBJCFLAGS)
 	ar cr libAEppc.a *.o
 	rm -f *.o
 	
-	$(CCXX) -c $(shell find Source/ODE/src/ -name "*.cpp") -I Source/ODE/ -I Source/ODE/src/ -arch i386 -Os
+	$(CCXX) -c $(shell find Source -name "*.cpp") -arch i386 -Os
 	$(CC) -c SDLMain.m $(FLAGS) -arch i386 -Os -I /Library/Frameworks/SDL.framework/Headers
 	$(CC) -c $(shell find Source -name "*.c") $(FLAGS) -arch i386 $(INCLUDEPATHS) 
 	$(CC) -c $(shell find Source -name "*.m") $(FLAGS) -arch i386 $(INCLUDEPATHS) $(OBJCFLAGS)
@@ -47,7 +49,7 @@ install:
 	cp libAE.a AE
 	cp Source/*.h AE
 	cp Source/SOIL/SOIL.h AE
-	cp Source/ODE/ode/*.h AE/ode
+	cp Source/ode/*.h AE/ode
 	cp Source/lua/*.h AE/lua
 	#cp Source/*.ooc AE
 
@@ -57,9 +59,12 @@ sweep:
 
 clean:
 	make sweep
-	rm -rf AE/*
-	rmdir AE
+	cd Tests && make clean
+	rm -rf AE
 
-vbotest:
+nodetest:
 	make
-	cd Tests && make Object && ./Object.binary
+	cd Tests && make Node && ./Node.binary
+
+%:
+	cd Tests && make $@

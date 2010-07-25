@@ -7,6 +7,7 @@
 int main(int argc,char** argv){
 	lua_State* L=AELuaNew(1);
 	AELuaCoreSetup(L);
+	AELuaUISetup(L);
 	AELuaRun(L,"Lua.lua");
 	//AEStart(NULL);
 	return 1;

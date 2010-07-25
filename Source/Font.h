@@ -8,4 +8,4 @@ typedef struct{
 
 void AEFontInit(void);
 AEFont* AEFontNew(char* fontname,int size);
-void AEFontRelease(AEFont* font);
+void AEFontDelete(AEFont* font);

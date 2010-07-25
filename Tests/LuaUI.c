@@ -10,8 +10,8 @@ AEFont* Font=NULL;
 
 void perframe(float step){
 	//
-	//glTranslatef(0,0,1);
-	//AEText("Hello from C",Font,400,250);
+	glTranslatef(0,0,1);
+	AEText("Hello from C",Font,400,250);
 	//AEUIRenderMode(0);
 }
 
@@ -20,12 +20,12 @@ int main(int argc,char** argv){
 	AEInit("Window",800,500);
 	glClearColor(1,1,1,1);
 	//Code here
-	//AEFontInit();
-	//Font=AEFontNew("Data/ARIAL.TTF",100);
-	//AEUIRenderMode(1);
+	AEFontInit();
+	Font=AEFontNew("Data/ARIAL.TTF",100);
+	AEUIRenderMode(1);
 	glTranslatef(0,0,1);
-	AELuaUIRun("LuaUI.lua");
+	//AELuaRun("LuaUI.lua");
 	//AEUIRenderMode(0);
-	//AEStart(perframe);
+	AEStart(perframe);
 	return 1;
 }

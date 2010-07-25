@@ -197,7 +197,7 @@ inline void AEQuatToMatrix4x4(AEQuat q,float* m4x4){
 	m4x4[9]  =         (2.0f * ((q.y * q.z) - (q.x * q.w)));
 	m4x4[10] = (1.0f - (2.0f * ((q.x * q.x) + (q.y * q.y))));
 	m4x4[11] = 0.0f;
-	m4x412] = 0.0f;
+	m4x4[12] = 0.0f;
 	m4x4[13] = 0.0f;
 	m4x4[14] = 0.0f;
 	m4x4[15] = 1.0f;

@@ -1,6 +1,8 @@
 #include "../LuaBinding.h"
 #include "../Core.h"
 #include "../Camera.h"
+#include "LuaGL/luagl.h"
+#include "LuaGL/luaglu.h"
 
 static int AELuaCore_TextureBind(lua_State* L){
 	unsigned int texture=lua_tointeger(L,-1);
@@ -22,16 +24,22 @@ static int AELuaCore_TextureLoad(lua_State* L){
 }
 
 static int AELuaCore_Key(lua_State* L){
-	unsigned int button=lua_tointeger(L,-1);
+	unsigned int button=0;
+	if(lua_isstring(L,-1)){
+		button=lua_tostring(L,-1)[0];
+	}
+	else button=lua_tointeger(L,-1);
 	int state=AEKey(button);
-	lua_pushinteger(L,state);
+//	printf("AEKey: %i\n",state);
+//	exit(0);
+	lua_pushboolean(L,state);
 	return 1;
 }
 
 static int AELuaCore_MouseButton(lua_State* L){
 	unsigned int button=lua_tointeger(L,-1);
 	int state=AEMouseButton(button);
-	lua_pushinteger(L,state);
+	lua_pushboolean(L,state);
 	return 1;
 }
 
@@ -321,6 +329,10 @@ static const struct luaL_reg AELuaCoreLibCamera [] = {
 void AELuaCoreSetup(lua_State* L){
 	AELuaAddLibrary(L,"",AELuaCoreLibCore);
 	AELuaAddLibrary(L,"",AELuaCoreLibCamera);
+	lua_pushlightuserdata(L,NULL);
+	lua_setglobal(L,"AENULL");
+	luaopen_luagl(L);
+	luaopen_luaglu(L);
 }
 
 ///////////
