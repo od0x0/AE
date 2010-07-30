@@ -1,7 +1,10 @@
 #include "../TextBuffer.h"
 
 AETextBuffer* AETextBufferNew(void){
-	return calloc(1,sizeof(AETextBuffer));
+	AETextBuffer* buffer=calloc(1,sizeof(AETextBuffer));
+	buffer->text=malloc(1);
+	buffer->text[0]=0;
+	return buffer;
 }
 
 //Sorta ripped this from Enough, worked better that what I had, so it's probably under Open/FreeBSD (he doesn't leave any license info in his code)

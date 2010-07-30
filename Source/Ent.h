@@ -25,13 +25,15 @@ struct AEEnt{
 #define AEEntEventRelease 1
 #define AEEntEventRender 2
 
-static inline AEVec3 AEEntPositionGet(AEEnt* ent){return *((AEVec3*)ent);}
-inline void AEEntPositionSet(AEEnt* ent,AEVec3 position){*((AEVec3*)ent)=position;}
-inline AEVec3 AEEntRotationGet(AEEnt* ent){return ent->rotation;}
-inline void AEEntRotationSet(AEEnt* ent,AEVec3 rotation){ent->rotation=rotation;}
+void AEEntsInit(void);
 
-inline void* AEEntSignal(AEEnt* ent,int event,void* data){return (*ent->event)(ent,event,data);}
-inline void AEEntSignalChildren(AEEnt* ent,int event,void* data){
+static inline AEVec3 AEEntPositionGet(AEEnt* ent){return *((AEVec3*)ent);}
+static inline void AEEntPositionSet(AEEnt* ent,AEVec3 position){*((AEVec3*)ent)=position;}
+static inline AEVec3 AEEntRotationGet(AEEnt* ent){return ent->rotation;}
+static inline void AEEntRotationSet(AEEnt* ent,AEVec3 rotation){ent->rotation=rotation;}
+
+static inline void* AEEntSignal(AEEnt* ent,int event,void* data){return (*ent->event)(ent,event,data);}
+static inline void AEEntSignalChildren(AEEnt* ent,int event,void* data){
 	if(ent->subents==NULL) return;
 	unsigned int length=AEListLength(ent->subents);
 	AEEnt* subents=AEListAsArray(ent->subents,AEEnt);
@@ -40,7 +42,7 @@ inline void AEEntSignalChildren(AEEnt* ent,int event,void* data){
 	}
 }
 void* AEEntEventDefault(AEEnt* ent,int event,void* data);
-AEEnt AEEntNew(AEEntEventFunc eventFunc,void* data);
+void AEEntInit(AEEnt* ent,AEEntEventFunc eventFunc,void* data);
 void AEEntAdd(AEEnt* ent,AEEnt subent);
 void AEEntRemove(AEEnt* ent,AEEnt subent);
 

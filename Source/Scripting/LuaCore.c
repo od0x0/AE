@@ -235,19 +235,19 @@ static int AELuaCore_CameraPositionGet(lua_State* L){
 static int AELuaCore_CameraPositionSet(lua_State* L){
 	AEVec3 v;
 	//We skip the first argument, it's unused for now
-	lua_getfield(L,-1,"x");
-	v.x=lua_tonumber(L,-1);
-	lua_pop(L,1);
+//	lua_getfield(L,-1,"x");
+	v.x=lua_tonumber(L,-3);
+//	lua_pop(L,1);
 		
-	lua_getfield(L,-1,"y");
-	v.y=lua_tonumber(L,-1);
-	lua_pop(L,1);
+//	lua_getfield(L,-1,"y");
+	v.y=lua_tonumber(L,-2);
+//	lua_pop(L,1);
 	
-	lua_getfield(L,-1,"z");
+	//lua_getfield(L,-1,"z");
 	v.z=lua_tonumber(L,-1);
-	lua_pop(L,1);
+//	lua_pop(L,1);
 	
-	AECameraPositionSet(AECameraActiveGet(),v);
+	AECameraPositionSet(AECameraActiveGet(),v.x,v.y,v.z);
 	
 	return 0;
 }

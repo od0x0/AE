@@ -17,6 +17,3 @@ help:
 
 clean:
 	rm -f *.binary
-
-luatest:
-	$(CC) Lua.m $(FLAGS) -o Lua

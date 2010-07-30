@@ -18,12 +18,12 @@ UNAME:=$(shell uname)
 
 
 all:
-	make buildOSXUni
+	make core
 	
 	make install
 	make sweep
 
-buildOSXUni: 	
+core: 	
 	
 	#-I Source/ODE/ -I Source/ODE/src/
 	$(CCXX) -c $(shell find Source -name "*.cpp") -arch ppc -Os
@@ -61,10 +61,6 @@ clean:
 	make sweep
 	cd Tests && make clean
 	rm -rf AE
-
-nodetest:
-	make
-	cd Tests && make Node && ./Node.binary
 
 %:
 	cd Tests && make $@

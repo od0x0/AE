@@ -2,7 +2,6 @@
 #include "../SOIL/SOIL.h"
 #include <math.h>
 #include <string.h>
-#include "../Ent.h"
 #include "../Camera.h"
 
 AEState AEActiveState={
@@ -128,10 +127,6 @@ void AEInit(char* title,int w,int h){
 	
 	//AEActiveState.textureLoadFlags=SOIL_FLAG_COMPRESS_TO_DXT|SOIL_FLAG_INVERT_Y|SOIL_FLAG_MIPMAPS;
 	
-	AEEntEventsGetOrAdd("init");
-	AEEntEventsGetOrAdd("release");
-	AEEntEventsGetOrAdd("render");
-	
 	SDL_SetEventFilter(AEEventFilter);
 }
 
@@ -169,6 +164,5 @@ void AEStart(void (*perframe)(float)){
 }
 
 void AEQuit(void){
-	AEEntEventsDelete();
 	SDL_Quit();
 }

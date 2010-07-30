@@ -30,6 +30,7 @@ AEVBO* AEVBOLoad(char* filename,char* format,char* type);
 
 
 //Helper functions
+
 //result is compounded on the input
 static inline void AEVBOCalculateAABB(AEVBO* vbo,AEVec3* min,AEVec3* max){
 	int skip=AEVBOVertexTypeSize(vbo);

@@ -8,9 +8,13 @@ static int AELuaUI_FontInit(lua_State *L){
 }
 
 static int AELuaUI_FontNew(lua_State *L){
-	char* path=(char*)lua_tostring(L,-2);
-	int size=(int)lua_tointeger(L,-1);
-	void* font=AEFontNew(path,size);
+	char* path=(char*)lua_tostring(L,-6);
+	int size=(int)lua_tointeger(L,-5);
+	float r=lua_tonumber(L, -4);
+	float g=lua_tonumber(L, -3);
+	float b=lua_tonumber(L, -2);
+	float a=lua_tonumber(L, -1);
+	void* font=AEFontNew(path,size,r,g,b,a);
 	lua_pushlightuserdata(L,font);
 	return 1;
 }

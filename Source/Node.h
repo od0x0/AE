@@ -99,6 +99,7 @@ void AENodeEntRadiusSet(AENode* node,float radius);
 void AENodeEntBodySet(AENode* node,AEPBody* body);
 AEPBody* AENodeEntBodyGet(AENode* node);
 
+void AENodeEntAddChild(AENode* node,AENode* node2);
 //Mesh Specific
 void AENodeMeshVBOSet(AENode* node,AEVBO* vbo);
 AEVBO* AENodeMeshVBOGet(AENode* node);

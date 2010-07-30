@@ -71,18 +71,18 @@ inline float AEFastCos(float x){
 		return AECosTable[index];
 }*/
 
-inline float AEMax(float a,float b){
+static inline float AEMax(float a,float b){
 	if(a>b) return a;
 	else return b;
 }
 
-inline float AEMin(float a,float b){
+static inline float AEMin(float a,float b){
 	if(a<b) return a;
 	else return b;
 }
 
 //From the dspguru site (forgot the link)
-inline float AEFastAtan2(float y, float x){
+static inline float AEFastAtan2(float y, float x){
 	float coeff_1 = 3.14159265/4;
 	float coeff_2 = 3*coeff_1;
 	float abs_y = AEAbs(y)+1e-10; // kludge to prevent 0/0 condition

@@ -58,7 +58,7 @@ void AEWMClose(AEWM* wm){
 
 void AEWMPoll(AEWM* wm);
 
-unsigned char* AEWMGetKeys(void){}
+unsigned char* AEWMGetKeys(void){return NULL;}
 
 int* AEWMMouse(int* newPosition);//Returns static array of 2 ints (x,y), sets mouse pos if arg is not null
 
