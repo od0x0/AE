@@ -29,14 +29,14 @@ core:
 	$(CCXX) -c $(shell find Source -name "*.cpp") -arch ppc -Os
 	$(CC) -c SDLMain.m $(FLAGS) -arch ppc -Os -I /Library/Frameworks/SDL.framework/Headers
 	$(CC) -c $(shell find Source -name "*.c") $(FLAGS) -arch ppc $(INCLUDEPATHS) 
-	$(CC) -c $(shell find Source -name "*.m") $(FLAGS) -arch ppc $(INCLUDEPATHS) $(OBJCFLAGS)
+	#$(CC) -c $(shell find Source -name "*.m") $(FLAGS) -arch ppc $(INCLUDEPATHS) $(OBJCFLAGS)
 	ar cr libAEppc.a *.o
 	rm -f *.o
 	
 	$(CCXX) -c $(shell find Source -name "*.cpp") -arch i386 -Os
 	$(CC) -c SDLMain.m $(FLAGS) -arch i386 -Os -I /Library/Frameworks/SDL.framework/Headers
 	$(CC) -c $(shell find Source -name "*.c") $(FLAGS) -arch i386 $(INCLUDEPATHS) 
-	$(CC) -c $(shell find Source -name "*.m") $(FLAGS) -arch i386 $(INCLUDEPATHS) $(OBJCFLAGS)
+	#$(CC) -c $(shell find Source -name "*.m") $(FLAGS) -arch i386 $(INCLUDEPATHS) $(OBJCFLAGS)
 	ar cr libAEintel.a *.o
 	rm -f *.o
 
@@ -50,7 +50,7 @@ install:
 	cp Source/*.h AE
 	cp Source/SOIL/SOIL.h AE
 	cp Source/ode/*.h AE/ode
-	cp Source/lua/*.h AE/lua
+	#cp Source/lua/*.h AE/lua
 	#cp Source/*.ooc AE
 
 sweep:

@@ -144,3 +144,37 @@ AEVBO* AEVBOLoad(char* filename,char* format,char* type){
 	AEVBOCompileVertexList(vbo,vlist);
 	return vbo;
 }
+
+void AEVBOCalculateAABB(AEVBO* vbo,AEVec3* min,AEVec3* max){
+	int skip=AEVBOVertexTypeSize(vbo);
+	unsigned int vcount=vbo->va.length/vbo->floatsPerVertex;
+	int offset=vbo->texUnitCount*2+vbo->hasNormals*3;
+	void* data=AEVAMap(&(vbo->va),vbo->va.length/vbo->floatsPerVertex,GL_READ_ONLY);
+	for(unsigned int i=0;i<vcount;i++){
+		AEVec3* v=data+offset*sizeof(float)+skip*i;
+		*min=AEVec3Min(*min,*v);
+		*max=AEVec3Max(*max,*v);
+	}
+	AEVAUnmap(&(vbo->va));
+}
+
+AEVec3 AEAABBCalculateSize(AEVec3 min,AEVec3 max){
+	AEVec3 size=AEVec3Sub(max,min);//size is the difference of the two
+	return AEVec3Sub(size,AEVec3Mul(AEVec3FromSingle(0.5),size));//Center it
+}
+
+AEVec3 AEAABBCalculateCenter(AEVec3 min,AEVec3 max){
+	return AEVec3Mul(AEVec3Add(max,min),AEVec3FromSingle(0.5));//The average
+}
+
+void AEVBOTranslate(AEVBO* vbo,AEVec3 move){
+	int skip=AEVBOVertexTypeSize(vbo);
+	unsigned int vcount=vbo->va.length/vbo->floatsPerVertex;
+	int offset=vbo->texUnitCount*2+vbo->hasNormals*3;
+	void* data=AEVAMap(&(vbo->va),vbo->va.length/vbo->floatsPerVertex,GL_READ_ONLY);
+	for(unsigned int i=0;i<vcount;i++){
+		AEVec3* v=data+offset*sizeof(float)+skip*i;
+		*v=AEVec3Add(*v,move);
+	}
+	AEVAUnmap(&(vbo->va));
+}

@@ -1,14 +1,10 @@
-#include "../AE/Core.h"
-//#include <SDL/SDL.h>
-#include "SDL.h"
+#include "AESDL.h"
 
 typedef struct{
 	AEWM super;
-	unsigned char* keys;
-	unsigned int mouseButtons;
 }AESDL;
 
-static int AESDLEventFilter(const SDL_Event* event){
+int AESDLEventFilter(const SDL_Event* event){
 	//So it closes when the user says close
 	if(event->type==SDL_QUIT) exit(0);
 	return 1;
@@ -16,7 +12,7 @@ static int AESDLEventFilter(const SDL_Event* event){
 
 //AESDL* AESDLActive=NULL;
 
-static AEWM* AESDLNew(char* title,AEState* state){
+AEWM* AESDLNew(char* title,AEState* state){
 	AEWM* wm=calloc(1,sizeof(AESDL));
 	wm->size=sizeof(AESDL);
 	
@@ -44,22 +40,22 @@ static AEWM* AESDLNew(char* title,AEState* state){
 	return wm;
 }
 
-static AEState* AESDLStateGet(AEWM* wm){
+AEState* AESDLStateGet(AEWM* wm){
 	return &(wm->state);
 }
 
-static void AESDLStateSet(AEWM* wm,AEState* state){
+void AESDLStateSet(AEWM* wm,AEState* state){
 	wm->state=*state;
 }
 
-static void AESDLSwapBuffers(AEWM* wm){
+void AESDLSwapBuffers(AEWM* wm){
 	SDL_GL_SwapBuffers();
 }
 
-int AEKey(int key){return SDL_GetKeyState(NULL)[key];}
-int AEMouseButton(char button){return (SDL_BUTTON(button)&SDL_GetMouseState(NULL,NULL));}
+int AESDLKey(int key){return SDL_GetKeyState(NULL)[key];}
+int AESDLMouseButton(char button){return (SDL_BUTTON(button)&SDL_GetMouseState(NULL,NULL));}
 
-static int AESDLPollInput(AEWM* wm){
+int AESDLPollInput(AEWM* wm){
 	//if(wm->state.blockKeyInput==0) 
 	SDL_PumpEvents();
 	AESDL* sdl=(AESDL*)wm;
@@ -68,7 +64,7 @@ static int AESDLPollInput(AEWM* wm){
 	
 	//sdl->keys=SDL_GetKeyState(NULL);
 	SDL_PumpEvents();
-	if((AEKey(SDLK_LMETA)||AEKey(SDLK_LSUPER))&&AEKey(SDLK_q)) exit(0);
+	if((AESDLKey(SDLK_LMETA)||AESDLKey(SDLK_LSUPER))&&AESDLKey(SDLK_q)) exit(0);
 		//SDLK_LSUPER for Windoze and SDLK_LMETA for OS X
 	//static unsigned char blankKeys[SDLK_LAST];
 	//if(wm->state.blockKeyInput) sdl->keys=blankKeys;
@@ -79,39 +75,22 @@ static int AESDLPollInput(AEWM* wm){
 	return 1;
 }
 
-static void AESDLDelete(AEWM* wm){
+void AESDLDelete(AEWM* wm){
 	if(wm==NULL) return;
 	free(wm);
 	SDL_Quit();
 }
 
-static double AESDLSecondsGet(AEWM* wm){
+double AESDLSecondsGet(AEWM* wm){
 	return SDL_GetTicks()*0.001;
 }
 
-static void AESDLInit(void){
+void AESDLInit(void){
 	AEWMNew=AESDLNew;
-	
 	AEWMStateGet=AESDLStateGet;
 	AEWMStateSet=AESDLStateSet;
 	AEWMPollInput=AESDLPollInput;
 	AEWMSwapBuffers=AESDLSwapBuffers;
 	AEWMDelete=AESDLDelete;
 	AEWMSecondsGet=AESDLSecondsGet;
-}
-
-int main(int argc,char** argv){
-	AESDLInit();
-	AEInit("Window",800,500);
-	/*
-	extern AEWM* (*AEWMNew)(char* title, AEState* state);
-extern AEState* (*AEWMStateGet)(AEWM* wm);
-extern void (*AEWMStateSet)(AEWM* wm,AEState* state);
-extern int (*AEWMPollInput)(AEWM* wm);
-extern void (*AEWMSwapBuffers)(AEWM* wm);
-extern void (*AEWMDelete)(AEWM* wm);
-extern double (*AEWMSecondsGet)(AEWM* wm);
-	*/
-	//Code here
-	AEStart(NULL);
 }

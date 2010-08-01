@@ -3,6 +3,7 @@
 #include "UIArray.h"
 #include "Image.h"
 #include "Text.h"
+#include "AESDL.h"
 #include "Font.h"
 #include "UIPrim.h"
 
@@ -90,6 +91,7 @@ static inline AEUIViewEvent AEUIViewEventFromSDLEvent(SDL_Event* sdlevent){
 -(AEImage*)background;
 -(AEUIArray*)subviews;
 -(void)event:(AEUIViewEvent*)event;
+-(void)moveX:(int)x Y:(int)y;
 -(void)focus;
 -(void)loseFocus;
 -(BOOL)hasFocus;

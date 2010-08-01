@@ -1,7 +1,7 @@
 
 #Makefile for the demos
 
-FLAGS=  -arch i386 -arch ppc -std=c99 ../AE/libAE.a -framework SDL -framework OpenGL -framework Cocoa -framework SDL_ttf -framework SDL_mixer -I /Library/Frameworks/SDL.framework/Headers -I /Library/Frameworks/Cocoa.framework/Headers -O3 -lstdc++
+FLAGS=  -arch i386 -arch ppc -std=c99 ../AE/libAE.a -framework SDL -framework OpenGL -framework Cocoa -framework SDL_ttf -framework SDL_mixer -I /Library/Frameworks/SDL.framework/Headers -I /Library/Frameworks/Cocoa.framework/Headers -I /Library/Frameworks/OpenGL.framework/Headers -O3 -lstdc++
 CC=gcc-4.0 -mmacosx-version-min=10.4 -Wno-pointer-sign
 
 %:

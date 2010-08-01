@@ -1,6 +1,5 @@
-#include "../Audio.h"
+#include "Audio.h"
 #include <SDL_mixer/SDL_mixer.h>
-#include "../FastMath3D.h"
  
 void AEAudioQuit(void){
 	Mix_CloseAudio();

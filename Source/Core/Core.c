@@ -4,13 +4,34 @@
 #include <string.h>
 #include "../Camera.h"
 
+static AEWM* AEContext=NULL;
+
+AEWM* (*AEWMNew)(char* title, AEState* state)=NULL;
+AEState* (*AEWMStateGet)(AEWM* wm)=NULL;
+void (*AEWMStateSet)(AEWM* wm,AEState* state)=NULL;
+int (*AEWMPollInput)(AEWM* wm)=NULL;
+void (*AEWMSwapBuffers)(AEWM* wm)=NULL;
+void (*AEWMDelete)(AEWM* wm)=NULL;
+double (*AEWMSecondsGet)(AEWM* wm)=NULL;
+
 AEState AEActiveState={
-	800,500,8,8,8,8,8,8,0,
-	0,SOIL_FLAG_COMPRESS_TO_DXT|SOIL_FLAG_INVERT_Y|SOIL_FLAG_MIPMAPS,
-	NULL,
-	0,
-	60,1,3000,
-	{400,250}
+	.w=800,.h=500,
+	.r=8,
+	.g=8,
+	.b=8,
+	.a=8,
+	.stencil=8,
+	.depth=8,
+	.inFullscreen=0,
+	.blockKeyInput=0,
+	.textureLoadFlags=SOIL_FLAG_COMPRESS_TO_DXT|SOIL_FLAG_INVERT_Y|SOIL_FLAG_MIPMAPS,
+/*	.keys=NULL,
+	.mouseButtons=0,
+	*/
+	.fov=60,
+	.near=1,
+	.far=3000,
+	.mouse={400,250}
 };
 
 ///////////////////////////////////////////////////			Texture Stuff
@@ -54,7 +75,9 @@ unsigned int AELinearSearch_internal(void* value,void* array,int length,int size
 #define AELinearSearch(val,array,len) AELinearSearch_internal(val,array,len,sizeof(*val))
 ////////////////////////////////////////////////////			SDL Interaction
 
-void AEPollInput(void){
+/*void AEPollInput(void){
+	
+	
 	SDL_PumpEvents();
 	
 	AEActiveState.keys=SDL_GetKeyState(NULL);
@@ -64,52 +87,58 @@ void AEPollInput(void){
 	if(AEActiveState.blockKeyInput) AEActiveState.keys=blankKeys;
 	
 	AEActiveState.mouseButtons=SDL_GetMouseState(&AEActiveState.mouse.x,&AEActiveState.mouse.y);
-}
-
+	
+}*/
+/*
 int AEKey(int key){return AEActiveState.keys[key];}
 int AEMouseButton(char button){return (SDL_BUTTON(button)&AEActiveState.mouseButtons);}
-
+*/
+/*
 static int AEEventFilter(const SDL_Event* event){
 	//So it closes when the user says close
 	if(event->type==SDL_QUIT) exit(0);
 	return 1;
-} 
+} */
 
 ////////////////////////////////////////////////////			View Stuff
 
 void AEInit(char* title,int w,int h){
+	if(AEWMNew==NULL || AEWMStateGet==NULL || AEWMStateSet==NULL || AEWMPollInput==NULL || AEWMSwapBuffers==NULL || AEWMDelete==NULL || AEWMSecondsGet==NULL) AEError("AEWM function pointers need to all be filled before you can use the engine.");
 	//atexit(AEQuit);
-	int error;
+	/*int error;
 	error = SDL_Init(SDL_INIT_EVERYTHING);
 	if(error){
 		puts("SDL failed to start");
 		exit(1);
-	}
+	}*/
 	
-	/*if(AEActiveState.fov==0) AEActiveState.fov=60;
+	if(AEActiveState.fov==0) AEActiveState.fov=60;
 	if(AEActiveState.far==0) AEActiveState.far=3000;
 	if(AEActiveState.near==0) AEActiveState.near=1;
 	if(AEActiveState.r==0) AEActiveState.r=8;
 	if(AEActiveState.g==0) AEActiveState.g=8;
 	if(AEActiveState.b==0) AEActiveState.b=8;
 	if(AEActiveState.a==0) AEActiveState.a=8;
-	if(AEActiveState.depth==0) AEActiveState.depth=8;*/
+	if(AEActiveState.depth==0) AEActiveState.depth=8;
 	
-	SDL_GL_SetAttribute(SDL_GL_RED_SIZE, AEActiveState.r);
+	/*SDL_GL_SetAttribute(SDL_GL_RED_SIZE, AEActiveState.r);
 	SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, AEActiveState.g);
 	SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, AEActiveState.b);
 	SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE,AEActiveState.a );
 	SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, AEActiveState.stencil);
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, AEActiveState.depth);
-	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);*/
 	
 	if(w==0) w=AEActiveState.w;
 	if(h==0) h=AEActiveState.h;
 	
-	SDL_SetVideoMode(w, h, 0, AEActiveState.inFullscreen?(SDL_OPENGL | SDL_FULLSCREEN):SDL_OPENGL);
+	if(AEContext) AEWMDelete(AEContext);
+	AEContext=NULL;
+	AEContext=AEWMNew(title,&AEActiveState);
+	//SDL_SetVideoMode(w, h, 0, AEActiveState.inFullscreen?(SDL_OPENGL | SDL_FULLSCREEN):SDL_OPENGL);
 	AEActiveState.w=w;AEActiveState.h=h;
 	
-	SDL_WM_SetCaption(title,NULL);
+	//SDL_WM_SetCaption(title,NULL);
 	
 	glViewport(0,0,AEActiveState.w,AEActiveState.h);
 	glMatrixMode(GL_PROJECTION);
@@ -127,7 +156,7 @@ void AEInit(char* title,int w,int h){
 	
 	//AEActiveState.textureLoadFlags=SOIL_FLAG_COMPRESS_TO_DXT|SOIL_FLAG_INVERT_Y|SOIL_FLAG_MIPMAPS;
 	
-	SDL_SetEventFilter(AEEventFilter);
+	//SDL_SetEventFilter(AEEventFilter);
 }
 
 static void AEDefaultPerframeFunc(float step){}
@@ -137,12 +166,10 @@ void AEStart(void (*perframe)(float)){
 	if(perframe==NULL) perframe=AEDefaultPerframeFunc;
 
 	
-	float now=SDL_GetTicks()*0.001;
+	float now=AEWMSecondsGet(AEContext);
 	float then=now;
-	while(1){
+	while(AEWMPollInput(AEContext)){
 		glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
-		
-		AEPollInput();
 		
 		AECamera* cam=AECameraActiveGet();
 		
@@ -154,15 +181,15 @@ void AEStart(void (*perframe)(float)){
 	
 		//AECameraVFCalculate(cam);
 		
-		now=SDL_GetTicks()*0.001;
+		now=AEWMSecondsGet(AEContext);
 		(*perframe)((now-then));
 		then=now;
 		//Sounds....  Poetic
 		
-		SDL_GL_SwapBuffers();
+		AEWMSwapBuffers(AEContext);
 	}
 }
 
 void AEQuit(void){
-	SDL_Quit();
+	AEWMDelete(AEContext);
 }

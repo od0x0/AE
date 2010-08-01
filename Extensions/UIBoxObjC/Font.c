@@ -1,8 +1,8 @@
 #include <SDL_ttf/SDL_ttf.h>
 #include <stdio.h>
-#include "../Font.h"
+#include "Font.h"
 #include "osc simpletext/simple-text.h"
-#include "../SOIL.h"
+#include "SOIL.h"
 
 SDL_Color AEFontColor = {255,255,255,255};
 SDL_Color AEFontBackgoundColor = {0,0,0,0};

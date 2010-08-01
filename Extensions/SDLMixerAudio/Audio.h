@@ -1,5 +1,6 @@
 #pragma once
 #include "Core.h"
+#include "FastMath3D.h"
 
 void AEAudioQuit(void);
 void AEAudioInit(char numberOfChannels);

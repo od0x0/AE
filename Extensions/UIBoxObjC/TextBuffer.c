@@ -1,4 +1,4 @@
-#include "../TextBuffer.h"
+#include "TextBuffer.h"
 
 AETextBuffer* AETextBufferNew(void){
 	AETextBuffer* buffer=calloc(1,sizeof(AETextBuffer));

@@ -104,29 +104,25 @@
 		conditions+= bounds.y < mouseY;
 		conditions+= (bounds.x+bounds.w) > AEStateActiveGet()->mouse.x;
 		conditions+= (bounds.y+bounds.h) > mouseY;*/
-		char conditions=4*mouseIsHovering;
-		if(conditions==4){
+		if(mouseIsHovering){
 			[self click];
 		}
 		else [self loseFocus];
 	}
-	else if(event->type==AEUIViewEventTypeMove){
-		bounds.x+=event->data.move.x;
-		bounds.y+=event->data.move.y;
-	}
 	//Drag handling
-	else if(mouseIsHovering && event->type==AEUIViewEventTypeMouseMove && AEMouseButton(1)){
-		AEUIViewEvent moveevent;
-		moveevent.type=AEUIViewEventTypeMove;
-		moveevent.data.move.x=event->data.mousemove.x;
-		moveevent.data.move.y=event->data.mousemove.y;
-		[self event:&moveevent];
+	else if(mouseIsHovering && event->type==AEUIViewEventTypeMouseMove && AESDLMouseButton(1)){
+		[self moveX: event->data.mousemove.x Y:event->data.mousemove.y];
 		return;//Skip children handling it
 	}
 	
 	size_t length=[subviews length];
 	for(size_t i=0;i<length;i++)
 		[[subviews at:i] event:event];
+}
+
+-(void)moveX:(int)x Y:(int)y{
+	bounds.x+=x;
+	bounds.y+=y;
 }
 
 -(void)focus{

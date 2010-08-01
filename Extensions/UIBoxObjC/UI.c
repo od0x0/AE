@@ -1,5 +1,5 @@
-#include "../UI.h"
-#include "../Core.h"
+#include "UI.h"
+#include "Core.h"
 
 void AEUIRenderMode(int on){
 	static int lastState=0;

@@ -72,6 +72,7 @@ typedef struct{
 }AENodeEnt;
 
 unsigned char AENodeTypeGet(AENode* node);
+static inline char* AENodeNameGet(AENode* node){return node->name;}
 AENode* AENodeRetain(AENode* node);
 AENode* AENodeNew(unsigned char type,char* name);
 void AENodeDelete(AENode* node);

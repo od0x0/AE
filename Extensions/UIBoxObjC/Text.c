@@ -1,4 +1,4 @@
-#include "../Text.h"
+#include "Text.h"
 #include <string.h>
 
 float AETextLineSpaceFactor=1.0f;
