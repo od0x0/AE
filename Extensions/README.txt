@@ -1,1 +1,0 @@
-Note that in order to use these, they have to 'believe' as if they were included in the same directory as the core.

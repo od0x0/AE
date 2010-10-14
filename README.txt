@@ -3,6 +3,7 @@ Multiple game engines built around a single core.
 
 SOIL was made by Jonathan Dummer, under public domain.
 AE was made by Oliver Daids, under BSD.
+Other licenses are found in Licenses/
 
 
 
