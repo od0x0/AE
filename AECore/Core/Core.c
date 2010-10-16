@@ -190,10 +190,10 @@ AEContext* AEContextActiveGet(void){
 void AEContextInit(AEContext* context,char* title,int w,int h){
 	if(not context) context=AEContextActiveGet();
 	
-	if(context->init==NULL || context->refresh==NULL || context->pollinput==NULL || context->swapbuffers==NULL || context->deinit==NULL || context->seconds==NULL) AEError("AEContext function pointers need to all be filled before you can use the engine.");
+	if(context->init==NULL || context->refresh==NULL || context->pollinput==NULL || context->swapbuffers==NULL || context->deinit==NULL || context->secondsget==NULL) AEError("AEContext function pointers need to all be filled before you can use the engine.");
 	
 	context->w=w;context->h=h;
-	context->init(context,title);
+	context->init(context,title, context->initarg);
 	
 	AECamera* cam=AECameraActiveGet();
 	AECameraViewportSet(cam,context->w,context->h);
@@ -212,32 +212,106 @@ void AEContextInit(AEContext* context,char* title,int w,int h){
 	glCullFace(GL_BACK);
 }
 
-static void AEDefaultPerframeFunc(float step){}
+static void AEDefaultPerframeFunc(AEContext* context, double step, void* arg){}
 
-void AEContextStart(AEContext* context,void (*perframe)(float)){
-	//0 is a magical number, simply acts as the default
-	if(perframe==NULL) perframe=AEDefaultPerframeFunc;
-	
+void AEContextRun(AEContext* context){
 	if(not context) context=AEContextActiveGet();
+	//0 is a magical number, simply acts as the default
+	if(context->frameupdate==NULL) context->frameupdate=AEDefaultPerframeFunc;
 	
-	float now=context->seconds(context);
-	float then=now;
-	while(context->pollinput(context)){
+	double now=context->secondsget(context, context->secondsgetarg);
+	double then=now;
+	while(context->pollinput(context, context->pollinputarg)){
 		glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT); //This is default
 		//glClear(GL_DEPTH_BUFFER_BIT); // Use this if you always use a skybox
 		AECameraBind(AECameraActiveGet());
 		
-		now=context->seconds(context);
-		perframe((now-then));
+		now=context->secondsget(context, context->secondsgetarg);
+		context->frameupdate(context, (now-then),context->frameupdatearg);
 		then=now;
 		//Sounds....  Poetic
 		
-		context->swapbuffers(context);
+		context->swapbuffers(context, context->swapbuffersarg);
 	}
-	context->deinit(context);
+	AEContextDeinit(context);
 }
 
-void AEContextQuit(AEContext* context){
+void AEContextDeinit(AEContext* context){
 	if(not context) context=AEContextActiveGet();
-	context->deinit(context);
+	if(context->deinit) context->deinit(context, context->deinitarg);
+}
+
+void AEContextCallbackSet(AEContext* context, int funcname, void* func, void* arg){
+	if(not context) context=AEContextActiveGet();
+	switch (funcname) {
+		case AEContextCallbackInit:
+			context->init=func;
+			context->initarg=arg;
+			break;
+		case AEContextCallbackRefresh:
+			context->refresh=func;
+			context->refresharg=arg;
+			break;
+		case AEContextCallbackPollInput:
+			context->pollinput=func;
+			context->pollinputarg=arg;
+			break;
+		case AEContextCallbackSwapBuffers:
+			context->swapbuffers=func;
+			context->swapbuffersarg=arg;
+			break;
+		case AEContextCallbackDeinit:
+			context->deinit=func;
+			context->deinitarg=arg;
+			break;
+		case AEContextCallbackSecondsGet:
+			context->secondsget=func;
+			context->secondsgetarg=arg;
+			break;
+		case AEContextCallbackFixedUpdate:
+			context->fixedupdate=func;
+			context->fixedupdatearg=arg;
+			break;
+		case AEContextCallbackFrameUpdate:
+			context->frameupdate=func;
+			context->frameupdatearg=arg;
+			break;
+		default:
+			AEError("Unknown callback set.");
+			break;
+	}
+}
+
+void* AEContextCallbackGet(AEContext* context, int funcname,void** arg){
+	if(not context) context=AEContextActiveGet();
+	switch (funcname) {
+		case AEContextCallbackInit:
+			if(arg) *arg=context->initarg;
+			return context->init;
+		case AEContextCallbackRefresh:
+			if(arg) *arg=context->refresharg;
+			return context->refresh;
+		case AEContextCallbackPollInput:
+			if(arg) *arg=context->pollinputarg;
+			return context->pollinput;
+		case AEContextCallbackSwapBuffers:
+			if(arg) *arg=context->swapbuffersarg;
+			return context->swapbuffers;
+		case AEContextCallbackDeinit:
+			if(arg) *arg=context->deinitarg;
+			return context->deinit;
+		case AEContextCallbackSecondsGet:
+			if(arg) *arg=context->secondsgetarg;
+			return context->secondsget;
+		case AEContextCallbackFixedUpdate:
+			if(arg) *arg=context->fixedupdatearg;
+			return context->fixedupdate;
+		case AEContextCallbackFrameUpdate:
+			if(arg) *arg=context->frameupdatearg;
+			return context->frameupdate;
+		default:
+			AEError("Unknown callback set.");
+			break;
+	}
+	return NULL;
 }

@@ -12,20 +12,43 @@ typedef struct AEContext{
 	unsigned int w,h,r,g,b,a,stencil,depth,inFullscreen;
 	void* aux;
 	
-	void (*init)(struct AEContext* self,char* title);
-	void (*refresh)(struct AEContext* self);
-	int (*pollinput)(struct AEContext* self);
-	void (*swapbuffers)(struct AEContext* self);
-	void (*deinit)(struct AEContext* self);
-	double (*seconds)(struct AEContext* self);
+	void (*init)(struct AEContext* self,char* title, void* arg);
+	void* initarg;
+	void (*refresh)(struct AEContext* self, void* arg);
+	void* refresharg;
+	int (*pollinput)(struct AEContext* self, void* arg);
+	void* pollinputarg;
+	void (*swapbuffers)(struct AEContext* self, void* arg);
+	void* swapbuffersarg;
+	void (*deinit)(struct AEContext* self, void* arg);
+	void* deinitarg;
+	double (*secondsget)(struct AEContext* self, void* arg);
+	void* secondsgetarg;
+	
+	void (*fixedupdate)(struct AEContext* self, double secondsSinceLastCall, void* arg);
+	void* fixedupdatearg;
+	void (*frameupdate)(struct AEContext* self, double secondsSinceLastCall, void* arg);
+	void* frameupdatearg;
 }AEContext;
 
 void AEContextActiveSet(AEContext* context);
 AEContext* AEContextActiveGet(void);
 
 void AEContextInit(AEContext* context,char* title,int w,int h);
-void AEContextStart(AEContext* context,void (*func)(float));
-void AEContextQuit(AEContext* context);
+void AEContextRun(AEContext* context);
+void AEContextDeinit(AEContext* context);
+
+#define AEContextCallbackInit 1
+#define AEContextCallbackRefresh 2
+#define AEContextCallbackPollInput 3
+#define AEContextCallbackSwapBuffers 4
+#define AEContextCallbackDeinit 5
+#define AEContextCallbackSecondsGet 6
+#define AEContextCallbackFixedUpdate 7
+#define AEContextCallbackFrameUpdate 8
+
+void AEContextCallbackSet(AEContext* context, int funcname, void* func, void* arg);
+void* AEContextCallbackGet(AEContext* context, int funcname, void** arg);
 
 ///////////////////////////////////////////
 //////////Utility stuff
