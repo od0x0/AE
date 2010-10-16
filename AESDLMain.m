@@ -441,10 +441,10 @@ double AESDLSecondsGet(AEContext* context,void* arg){
 
 void AESDLBridge(void){
 	AEContext* context=AEContextActiveGet();
-	context->init=AESDLInit;
-	context->pollinput=AESDLPollInput;
-	context->swapbuffers=AESDLSwapBuffers;
-	context->deinit=AESDLDeInit;
-	context->secondsget=AESDLSecondsGet;
-	context->refresh=AESDLRefresh;
+	AEContextCallbackSet(context, AEContextCallbackInit, AESDLInit, NULL);
+	AEContextCallbackSet(context, AEContextCallbackPollInput, AESDLPollInput, NULL);
+	AEContextCallbackSet(context, AEContextCallbackSwapBuffers, AESDLSwapBuffers, NULL);
+	AEContextCallbackSet(context, AEContextCallbackDeinit, AESDLDeInit, NULL);
+	AEContextCallbackSet(context, AEContextCallbackSecondsGet, AESDLSecondsGet, NULL);
+	AEContextCallbackSet(context, AEContextCallbackRefresh, AESDLRefresh, NULL);
 }
