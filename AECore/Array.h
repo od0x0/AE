@@ -1,7 +1,7 @@
 #pragma once
 #include <stdlib.h>
 #include <string.h>
-
+#warning AEArray is incomplete, do not use it just yet.
 //Work in progress replacement for AEList, allows more typechecking
 
 //Do not access directly

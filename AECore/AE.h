@@ -32,8 +32,6 @@ typedef struct{int x,y;}AEVec2i;
 typedef struct{int x,y,z;}AEVec3i;
 typedef struct{int x,y,z,w;}AEVec4i;
 
-typedef struct{int min, max;}AERange2i;
-
 typedef struct{float r,g,b;}AERGB;
 typedef struct{float r,g,b,a;}AERGBA;
 typedef struct{unsigned char r,g,b;}AERGBub;

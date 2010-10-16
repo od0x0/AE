@@ -90,6 +90,23 @@ void AEUInt32To4Bytes(uint32_t integer,uint8_t* bytes,bool bigendian){
 	}
 }
 
+uint64_t AEHostU64FromNet(uint64_t netu64){
+	return AEUInt64From8Bytes((uint8_t*)&netu64, true);
+}
+
+uint64_t AENetU64FromHost(uint64_t hostu64){
+	AEUInt64To8Bytes(hostu64, (uint8_t*)&hostu64, true);
+	return hostu64;
+}
+
+uint32_t AEHostU32FromNet(uint32_t netu32){
+	return AEUInt32From4Bytes((uint8_t*)&netu32, true);
+}
+
+uint32_t AENetU32FromHost(uint32_t hostu32){
+	AEUInt32To4Bytes(hostu32, (uint8_t*)&hostu32, true);
+	return hostu32;
+}
 
 void AEError_internal(char* message,const char* function){
 	printf("ERROR in %s():\n\t%s\n",function,message);
@@ -98,106 +115,17 @@ void AEError_internal(char* message,const char* function){
 }
 ////////////////////////////////////////////////////
 //File Stuff
-/*
-void AEFileInit(AEFile* self){
-	memset(self, 0, sizeof(AEFile));
+
+
+void AEMBufferInit(AEMBuffer* self){
+	memset(self, 0, sizeof(AEMBuffer));
 }
 
-void AEFileDeinit(AEFile* self){
-	self->close(self);
-	memset(self, 0, sizeof(AEFile));
+void AEMBufferDeinit(AEMBuffer* self){
+	if (not self) return;
+	free(self->bytes);
+	memset(self, 0, sizeof(AEMBuffer));
 }
-
-void AEFileRead(AEFile* self, void* to, size_t size){
-	self->read(self, to, size);
-}
-
-void AEFileWrite(AEFile* self, void* from, size_t size){
-	self->write(self, from, size);
-}
-
-void AEFilePositionSet(AEFile* self, uint64_t position){
-	self->positionSet(self, position);
-}
-
-uint64_t AEFilePositionGet(AEFile* self){
-	return self->positionGet(self);
-}
-
-uint64_t AEFileLengthGet(AEFile* self){
-	return self->lengthGet(self);
-}
-
-bool AEFileIsAtEnd(AEFile* self){
-	return self->eof(self);
-}
-
-typedef struct{
-	uint64_t size;
-	uint64_t position;
-	void* memory;
-}AEFile_Data_Memory;
-
-void AEFile_MemoryRead(AEFile* self, void* to, size_t size){
-	AEFile_Data_Memory* data=self->data;
-	if((data->position+size) > data->size){
-		data->position=data->size;
-		return;
-	}
-	memcpy(to, data->memory+data->position, size);
-}
-
-void AEFile_MemoryWrite(AEFile* self, void* from, size_t size){
-	AEFile_Data_Memory* data=self->data;
-	if((data->position+size) > data->size){
-		data->position=data->size;
-		return;
-	}
-	memcpy(data->memory+data->position, from, size);
-}
-
-void AEFile_MemoryClose(AEFile* self){
-	AEFile_Data_Memory* data=self->data;
-	free(data);
-	self->data=NULL;
-}
-
-void AEFile_MemoryPositionSet(AEFile* self, uint64_t position){
-	AEFile_Data_Memory* data=self->data;
-	data->position=position;
-}
-
-uint64_t AEFile_MemoryPositionGet(AEFile* self){
-	AEFile_Data_Memory* data=self->data;
-	return data->position;
-}
-
-uint64_t AEFile_MemoryLengthGet(AEFile* self){
-	AEFile_Data_Memory* data=self->data;
-	return data->size;
-}
-
-bool AEFile_MemoryEof(AEFile* self){
-	AEFile_Data_Memory* data=self->data;
-	return data->position==data->size;
-}
-
-void AEFileInitWithMemory(AEFile* self, void* memory, size_t size){
-	AEFileInit(self);
-	AEFile_Data_Memory* data=calloc(1,sizeof(AEFile_Data_Memory));
-	data->memory=memory;
-	data->size=size;
-	self->data=data;
-	
-	self->read=AEFile_MemoryRead;
-	self->write=AEFile_MemoryWrite;
-	self->close=AEFile_MemoryClose;
-	self->positionGet=AEFile_MemoryPositionGet;
-	self->positionSet=AEFile_MemoryPositionSet;
-	self->lengthGet=AEFile_MemoryLengthGet;
-	self->eof=AEFile_MemoryEof;
-}*/
-
 void* AEMBufferBytesGet(AEMBuffer* self, size_t size){
 	self->position+=size;
 	if(self->position > self->length){
@@ -209,7 +137,7 @@ void* AEMBufferBytesGet(AEMBuffer* self, size_t size){
 
 void AEMBufferRead(AEMBuffer* self, void* data, size_t size){
 	void* from=AEMBufferBytesGet(self, size);
-	if(data) memcpy(data, from, size);
+	if(data and from) memcpy(data, from, size);
 }
 
 void AEMBufferWrite(AEMBuffer* self, void* data, size_t size){
@@ -220,6 +148,7 @@ void AEMBufferWrite(AEMBuffer* self, void* data, size_t size){
 		self->length += size;
 		self->allocated = self->length * 1.2;
 		self->bytes=realloc(self->bytes, self->allocated);
+		to=AEMBufferBytesGet(self, size);
 	}
 	if(data and to) memcpy(to, data, size);
 }
@@ -258,7 +187,7 @@ AEContext* AEContextActiveGet(void){
 	return &AEContextActive;
 }
 
-void AEInit(AEContext* context,char* title,int w,int h){
+void AEContextInit(AEContext* context,char* title,int w,int h){
 	if(not context) context=AEContextActiveGet();
 	
 	if(context->init==NULL || context->refresh==NULL || context->pollinput==NULL || context->swapbuffers==NULL || context->deinit==NULL || context->seconds==NULL) AEError("AEContext function pointers need to all be filled before you can use the engine.");
@@ -285,7 +214,7 @@ void AEInit(AEContext* context,char* title,int w,int h){
 
 static void AEDefaultPerframeFunc(float step){}
 
-void AEStart(AEContext* context,void (*perframe)(float)){
+void AEContextStart(AEContext* context,void (*perframe)(float)){
 	//0 is a magical number, simply acts as the default
 	if(perframe==NULL) perframe=AEDefaultPerframeFunc;
 	
@@ -299,7 +228,7 @@ void AEStart(AEContext* context,void (*perframe)(float)){
 		AECameraBind(AECameraActiveGet());
 		
 		now=context->seconds(context);
-		(*perframe)((now-then));
+		perframe((now-then));
 		then=now;
 		//Sounds....  Poetic
 		
@@ -308,7 +237,7 @@ void AEStart(AEContext* context,void (*perframe)(float)){
 	context->deinit(context);
 }
 
-void AEQuit(AEContext* context){
+void AEContextQuit(AEContext* context){
 	if(not context) context=AEContextActiveGet();
 	context->deinit(context);
 }

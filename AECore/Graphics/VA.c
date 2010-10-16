@@ -272,21 +272,21 @@ void AEVADraw(unsigned long start, unsigned long end){
 }
 
 void AEVASerializeToFILE(AEVA* va,FILE* file){
-	uint8_t buffer[16];
 	
 	uint64_t version=1;
-	AEUInt64To8Bytes(version, buffer, true);
-	fwrite(buffer, 1, sizeof(uint64_t), file);
+	version=AENetU64FromHost(version);
+	fwrite(&version, 1, sizeof(uint64_t), file);
 	
 	uint64_t length=va->length;
-	AEUInt64To8Bytes(length, buffer, true);
-	fwrite(buffer, 1, sizeof(uint64_t), file);
+	length=AENetU64FromHost(length);
+	fwrite(&length, 1, sizeof(uint64_t), file);
 	
-	buffer[0]=va->isAnIndexArray;
-	buffer[1]=va->vbotype;
-	buffer[2]=va->tunit;
-	buffer[3]=va->dataformat;
-	fwrite(buffer, 1, 4, file);
+	uint8_t bytes[4];
+	bytes[0]=va->isAnIndexArray;
+	bytes[1]=va->vbotype;
+	bytes[2]=va->tunit;
+	bytes[3]=va->dataformat;
+	fwrite(bytes, 1, 4, file);
 	
 	void* memory=AEVAMap(va, va->length, GL_READ_ONLY);
 	
@@ -295,8 +295,8 @@ void AEVASerializeToFILE(AEVA* va,FILE* file){
 	else{
 		uint32_t* ints=memory;
 		for (size_t i=0; i<va->length; i++) {
-			AEUInt32To4Bytes(ints[i], buffer, true);
-			fwrite(buffer, sizeof(uint32_t), 1, file);
+			ints[i]=AENetU32FromHost(ints[i]);
+			fwrite(ints+i, sizeof(uint32_t), 1, file);
 		}
 	}
 	
@@ -306,21 +306,24 @@ void AEVASerializeToFILE(AEVA* va,FILE* file){
 void AEVAUnserializeFromFILE(AEVA* va,FILE* file){
 	uint8_t buffer[16];
 	
-	fread(buffer, 1, sizeof(uint64_t), file);
-	uint64_t version=AEUInt64From8Bytes(buffer, true);
+	uint64_t version;
+	fread(&version, 1, sizeof(uint64_t), file);
+	version=AEHostU64FromNet(version);
 	if(version not_eq 1)
 		AEError("Invalid version, only 1 is accepted.");
 	AEVADeinit(va);
 	memset(va, 0, sizeof(AEVA));
 	
-	fread(buffer, 1, sizeof(uint64_t), file);
-	uint64_t length=AEUInt64From8Bytes(buffer, true);
+	uint64_t length;
+	fread(&length, 1, sizeof(uint64_t), file);
+	length=AEHostU64FromNet(length);
 	
-	fread(buffer, 1, 4, file);
-	va->isAnIndexArray=buffer[0];
-	va->vbotype=buffer[1];
-	va->tunit=buffer[2];
-	va->dataformat=buffer[3];
+	uint8_t bytes[4];
+	fread(bytes, 1, 4, file);
+	va->isAnIndexArray=bytes[0];
+	va->vbotype=bytes[1];
+	va->tunit=bytes[2];
+	va->dataformat=bytes[3];
 	
 	
 	void* memory=AEVAMap(va, length, GL_WRITE_ONLY);
@@ -330,8 +333,88 @@ void AEVAUnserializeFromFILE(AEVA* va,FILE* file){
 	else{
 		uint32_t* ints=memory;
 		for (size_t i=0; i<va->length; i++) {
-			fread(buffer, sizeof(uint32_t), 1, file);
-			ints[i]=AEUInt32From4Bytes(buffer, true);
+			fread(ints+i, sizeof(uint32_t), 1, file);
+			ints[i]=AEHostU32FromNet(ints[i]);
+		}
+	}
+	
+	AEVAUnmap(va);
+}
+
+void AEVASerializeToMBuffer(AEVA* va,AEMBuffer* mbuffer){
+	
+	uint64_t version=1;
+	version=AENetU64FromHost(version);
+	//fwrite(&version, 1, sizeof(uint64_t), file);
+	AEMBufferWrite(mbuffer, &version, sizeof(uint64_t));
+	
+	uint64_t length=va->length;
+	length=AENetU64FromHost(length);
+	//fwrite(&length, 1, sizeof(uint64_t), file);
+	AEMBufferWrite(mbuffer, &length, sizeof(uint64_t));
+	
+	uint8_t bytes[4];
+	bytes[0]=va->isAnIndexArray;
+	bytes[1]=va->vbotype;
+	bytes[2]=va->tunit;
+	bytes[3]=va->dataformat;
+	//fwrite(bytes, 1, 4, file);
+	AEMBufferWrite(mbuffer, bytes, 4);
+	
+	void* memory=AEVAMap(va, va->length, GL_READ_ONLY);
+	
+	if(not va->isAnIndexArray)
+		//fwrite(memory, sizeof(float), va->length, file);
+		AEMBufferWrite(mbuffer, memory, va->length*sizeof(float));
+	else{
+		uint32_t* ints=memory;
+		for (size_t i=0; i<va->length; i++) {
+			ints[i]=AENetU32FromHost(ints[i]);
+			//fwrite(ints+i, sizeof(uint32_t), 1, file);
+			AEMBufferWrite(mbuffer, ints+i, sizeof(uint32_t));
+		}
+	}
+	
+	AEVAUnmap(va);
+}
+
+void AEVAUnserializeFromMBuffer(AEVA* va,AEMBuffer* mbuffer){
+	uint8_t buffer[16];
+	
+	uint64_t version;
+	//fread(&version, 1, sizeof(uint64_t), file);
+	AEMBufferRead(mbuffer, &version, sizeof(uint64_t));
+	version=AEHostU64FromNet(version);
+	if(version not_eq 1)
+		AEError("Invalid version, only 1 is accepted.");
+	AEVADeinit(va);
+	memset(va, 0, sizeof(AEVA));
+	
+	uint64_t length;
+	//fread(&length, 1, sizeof(uint64_t), file);
+	AEMBufferRead(mbuffer, &length, sizeof(uint64_t));
+	length=AEHostU64FromNet(length);
+	
+	uint8_t bytes[4];
+	AEMBufferRead(mbuffer, bytes, 4);
+	//fread(bytes, 1, 4, file);
+	va->isAnIndexArray=bytes[0];
+	va->vbotype=bytes[1];
+	va->tunit=bytes[2];
+	va->dataformat=bytes[3];
+	
+	
+	void* memory=AEVAMap(va, length, GL_WRITE_ONLY);
+	
+	if(not va->isAnIndexArray)
+		//fread(memory, sizeof(float), va->length, file);
+		AEMBufferRead(mbuffer, memory, va->length*sizeof(float));
+	else{
+		uint32_t* ints=memory;
+		for (size_t i=0; i<va->length; i++) {
+			//fread(ints+i, sizeof(uint32_t), 1, file);
+			AEMBufferRead(mbuffer, ints+i, sizeof(uint32_t));
+			ints[i]=AEHostU32FromNet(ints[i]);
 		}
 	}
 	

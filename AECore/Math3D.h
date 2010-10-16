@@ -5,7 +5,7 @@
 /* Notes:
 	The main focus for now is simple code.
 	Small structures are passed by value so the compiler has an easier time optimizing.
-	Parts of this were extracted from tutorials and such because I have better things to do than write math code.
+	A part of this was extracted from tutorials and such because I have better things to do than write math code.
 */
 
 static inline float AELerp(float a,float b,float t){return a+t*(b-a);}

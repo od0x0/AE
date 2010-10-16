@@ -6,10 +6,11 @@
 //struct AEMaterial;
 typedef struct AEMaterial AEMaterial;
 
+bool AEMaterialsShadersEnabledGet(void);
+void AEMaterialsShadersEnabledSet(bool on);
 
-extern bool AEMaterialsShadersEnabled;
-
-extern float AEMaterialTime;
+float AEMaterialsTimeGet(void);
+void AEMaterialsTimeSet(float seconds);
 
 AEMaterial* AEMaterialNew(void);
 

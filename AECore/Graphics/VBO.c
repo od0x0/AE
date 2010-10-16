@@ -6,16 +6,16 @@
 
 
 void AEVBOSerializeToFILE(AEVBO* vbo,FILE* file){
-	uint8_t buffer[16];
 	
-	AEUInt64To8Bytes(1, buffer, true);
-	fwrite(buffer, 1, sizeof(uint64_t), file);
+	uint64_t version=AENetU64FromHost(1);
+	fwrite(& version, 1, sizeof(uint64_t), file);
 	
-	buffer[0]=vbo->texUnitCount;
-	buffer[1]=vbo->hasNormals;
-	buffer[2]=vbo->floatsPerVertex;
-	buffer[3]=vbo->usesIndices;
-	fwrite(buffer, 1, 4, file);
+	uint8_t bytes[4];
+	bytes[0]=vbo->texUnitCount;
+	bytes[1]=vbo->hasNormals;
+	bytes[2]=vbo->floatsPerVertex;
+	bytes[3]=vbo->usesIndices;
+	fwrite(bytes, 1, 4, file);
 	
 	AEVASerializeToFILE(&(vbo->va), file);
 	if(vbo->usesIndices)
@@ -23,17 +23,18 @@ void AEVBOSerializeToFILE(AEVBO* vbo,FILE* file){
 }
 
 void AEVBOUnserializeFromFILE(AEVBO* vbo,FILE* file){
-	uint8_t buffer[16];
 	
-	fread(buffer, 1, sizeof(uint64_t), file);
-	uint64_t version=AEUInt64From8Bytes(buffer, true);
+	uint64_t version;
+	fread(& version, 1, sizeof(uint64_t), file);
+	version=AEHostU64FromNet(version);
 	if(version not_eq 1) AEError("Serialized VBO version number must be 1.");
 	
-	fread(buffer, 1, 4, file);
-	vbo->texUnitCount=buffer[0];
-	vbo->hasNormals=buffer[1];
-	vbo->floatsPerVertex=buffer[2];
-	vbo->usesIndices=buffer[3];
+	uint8_t bytes[4];
+	fread(bytes, 1, 4, file);
+	vbo->texUnitCount=bytes[0];
+	vbo->hasNormals=bytes[1];
+	vbo->floatsPerVertex=bytes[2];
+	vbo->usesIndices=bytes[3];
 	
 	AEVAUnserializeFromFILE(&(vbo->va), file);
 	if(vbo->usesIndices)

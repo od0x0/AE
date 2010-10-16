@@ -4,7 +4,7 @@
 #include "VA.h"
 #include "List.h"
 #warning VBO.h is near the point of deprecation, VA will probably soon replace it.
-
+//Unfortunately, AEVBO is still the only way to load a .obj
 typedef struct{
 	unsigned int refcount;
 	AEVA va;

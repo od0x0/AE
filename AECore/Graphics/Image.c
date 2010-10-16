@@ -27,14 +27,13 @@ void AEImageUnserializeFromFILE(AEImage* image, FILE* file){
 	free(image->pixels);
 	free(image->metastring);
 	
-	uint8_t buffer[16];
-	
-	fread(buffer, 1, sizeof(uint64_t), file);
-	uint64_t version=AEUInt64From8Bytes(buffer, true);
+	uint64_t version;
+	fread(&version, 1, sizeof(uint64_t), file);
+	version=AEHostU64FromNet(version);
 	if(version not_eq 1) AEError("Invalid version (must be 1).");
-	
-	fread(buffer, 1, sizeof(uint64_t), file);
-	uint64_t dataSize=AEUInt64From8Bytes(buffer, true);
+	uint64_t dataSize;
+	fread(&dataSize, 1, sizeof(uint64_t), file);
+	dataSize=AEHostU64FromNet(dataSize);
 	
 	void* data=malloc(dataSize);
 	fread(data, 1, dataSize, file);
@@ -48,8 +47,46 @@ void AEImageUnserializeFromFILE(AEImage* image, FILE* file){
 	image->channels=channelCount;
 	image->pixels=pixels;
 	
-	fread(buffer, 1, sizeof(uint64_t), file);
-	uint64_t flags=AEUInt64From8Bytes(buffer, true);
+	uint64_t flags;
+	fread(&flags, 1, sizeof(uint64_t), file);
+	flags=AEHostU64FromNet(flags);
+	AEImageTextureFlagsSet(image,flags);
+}
+
+void AEImageSerializeToMBuffer(AEImage* image,AEMBuffer* mbuffer){
+
+}
+
+void AEImageUnserializeFromMBuffer(AEImage* image,AEMBuffer* mbuffer){
+	free(image->pixels);
+	free(image->metastring);
+	
+	uint64_t version;
+	//fread(&version, 1, sizeof(uint64_t), file);
+	AEMBufferRead(mbuffer, &version, sizeof(uint64_t));
+	version=AEHostU64FromNet(version);
+	if(version not_eq 1) AEError("Invalid version (must be 1).");
+	uint64_t dataSize;
+	//fread(&dataSize, 1, sizeof(uint64_t), file);
+	AEMBufferRead(mbuffer, &dataSize, sizeof(uint64_t));
+	dataSize=AEHostU64FromNet(dataSize);
+	
+	//void* data=malloc(dataSize);
+	//fread(data, 1, dataSize, file);
+	void* data=AEMBufferBytesGet(mbuffer, dataSize);
+	int channelCount,w,h;
+	unsigned char* pixels=SOIL_load_image_from_memory(data,dataSize,&w,&h,&channelCount,SOIL_LOAD_AUTO);
+	//free(data);
+	
+	image->w=w;
+	image->h=h;
+	image->channels=channelCount;
+	image->pixels=pixels;
+	
+	uint64_t flags;
+	//fread(&flags, 1, sizeof(uint64_t), file);
+	AEMBufferRead(mbuffer, &flags, sizeof(uint64_t));
+	flags=AEHostU64FromNet(flags);
 	AEImageTextureFlagsSet(image,flags);
 }
 
@@ -84,10 +121,10 @@ AEImage* AEImageLoadFromMemory(void* data,size_t dataSize){
 	return AEImageRetain(image);
 }
 
-unsigned char* AEImagePixelGet(AEImage* image,int x,int y){
-	if(x > image->w || y> image->h || y < 0 || x < 0) return NULL;
+void AEImagePixelGet(AEImage* image,int x,int y,unsigned char* rgba){
+	if(x > image->w || y> image->h || y < 0 || x < 0) return;
 	int channels=AEImageChannelsPerPixelGet(image);
-	return image->pixels+x*channels+y*image->h*channels;
+	memcpy(rgba,image->pixels+x*channels+y*image->h*channels,4);
 }
 
 void AEImagePixelSet(AEImage* image,int x,int y,unsigned char* rgba){
@@ -118,11 +155,11 @@ void AEImageBlit(AEImage* to,int offsetx,int offsety,AEImage* from){
 		memset(to->pixels,255,to->w*to->h*4);
 		return;
 	}
-	unsigned char *pixelTo=NULL,*pixelFrom=NULL;
+	unsigned char pixelTo[4],pixelFrom[4];
 	for(int x=0;x < from->w;x++)
 		for(int y=0;y < from->h;y++){
-			pixelTo=AEImagePixelGet(to,x+offsetx,y+offsety);
-			pixelFrom=AEImagePixelGet(from,x,y);
+			AEImagePixelGet(to,x+offsetx,y+offsety,pixelTo);
+			AEImagePixelGet(from,x,y,pixelFrom);
 			if(pixelFrom && pixelTo){
 				//to=fromAlpha*from+(1-fromAlpha)*to
 				float srcAlpha=pixelFrom[3]/255.0f;

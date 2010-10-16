@@ -59,38 +59,9 @@ void AEVABind(AEVA* va);
 
 void AEVADraw(unsigned long start, unsigned long end);
 
+//Deprecated, or may just wrap the one below
 void AEVASerializeToFILE(AEVA* va,FILE* file);
 void AEVAUnserializeFromFILE(AEVA* va,FILE* file);
-
-typedef struct{
-	AEVA va, ia;
-}AEVAIAPair;
-
-static inline void AEVAIAPairInit(AEVAIAPair* self){
-	AEVAInit(& self->va, 0, 0, 0, 0);
-	AEVAInit(& self->ia, 0, 0, 0, 0);
-}
-
-static inline void AEVAIAPairDeinit(AEVAIAPair* self){
-	AEVADeinit(& self->va);
-	AEVADeinit(& self->ia);
-}
-
-static inline void AEVAIAPairBind(AEVAIAPair* self){
-	AEVABind(& self->va);
-	AEVABind(& self->ia);
-}
-
-static inline void AEVAIAPairDraw(AEVAIAPair* self){
-	AEVADraw(0, self->ia.length);
-}
-
-static inline void AEVAIAPairSerializeToFILE(AEVAIAPair* self, FILE* file){
-	AEVASerializeToFILE(& self->va, file);
-	AEVASerializeToFILE(& self->ia, file);
-}
-
-static inline void AEVAIAPairUnserializeFromFILE(AEVAIAPair* self, FILE* file){
-	AEVAUnserializeFromFILE(& self->va, file);
-	AEVAUnserializeFromFILE(& self->ia, file);
-}
+//The new and improved version
+void AEVASerializeToMBuffer(AEVA* va,AEMBuffer* mbuffer);
+void AEVAUnserializeFromMBuffer(AEVA* va,AEMBuffer* mbuffer);

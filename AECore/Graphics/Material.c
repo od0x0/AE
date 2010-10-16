@@ -12,7 +12,25 @@ struct AEMaterial{
 	//float time;
 };
 
-float AEMaterialTime;
+static float AEMaterialTime=0.0;
+
+static bool AEMaterialsShadersEnabled=false;
+
+bool AEMaterialsShadersEnabledGet(void){
+	return AEMaterialsShadersEnabled;
+}
+
+void AEMaterialsShadersEnabledSet(bool on){
+	AEMaterialsShadersEnabled=on;
+}
+
+float AEMaterialsTimeGet(void){
+	return AEMaterialTime;
+}
+
+void AEMaterialsTimeSet(float seconds){
+	AEMaterialTime=seconds;
+}
 
 AEMaterial* AEMaterialNew(void){
 	return AEMaterialRetain(calloc(1,sizeof(AEMaterial)));
@@ -41,8 +59,6 @@ void AEMaterialDelete(AEMaterial* material){
 }
 
 static unsigned int AEShaderTextureUnitCount=0;
-
-bool AEMaterialsShadersEnabled=false;
 
 void AEMaterialBindShaderOnlyEXT(AEMaterial* material){
 	if(not AEMaterialsShadersEnabled) return;

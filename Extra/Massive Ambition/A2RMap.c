@@ -88,7 +88,7 @@ struct A2RMapTrigger{
 	
 	uint64_t triggerCount=0;
 	fread(&triggerCount, 1, sizeof(uint64_t), file);
-	triggerCount=AEUInt64From8Bytes((uint8_t*)&triggerCount, true);
+	triggerCount=AEHostU64FromNet(triggerCount);
 	self->triggerCount=triggerCount;
 	
 	for (uint64_t i=0; i<self->triggerCount; i++) {
@@ -96,7 +96,7 @@ struct A2RMapTrigger{
 		
 		uint64_t ID=0;
 		fread(&ID, 1, sizeof(uint64_t), file);
-		ID=AEUInt64From8Bytes((uint8_t*)&ID, true);
+		ID=AEHostU64FromNet(ID);
 		
 		trigger->ID=ID;
 		
@@ -107,7 +107,7 @@ struct A2RMapTrigger{
 	//Load the cells
 	uint64_t cellCount=0;
 	fread(&cellCount, 1, sizeof(uint64_t), file);
-	cellCount=AEUInt64From8Bytes((uint8_t*)&cellCount, true);
+	cellCount=AEHostU64FromNet(cellCount);
 	self->cellCount=cellCount;
 	
 	for (uint64_t i=0; i<self->cellCount; i++) {
@@ -115,7 +115,7 @@ struct A2RMapTrigger{
 		
 		uint64_t ID=0;
 		fread(&ID, 1, sizeof(uint64_t), file);
-		ID=AEUInt64From8Bytes((uint8_t*)&ID, true);
+		ID=AEHostU64FromNet(ID);
 		
 		cell->ID=ID;
 		
@@ -127,7 +127,7 @@ struct A2RMapTrigger{
 		
 		uint64_t textureMemorySize=0;
 		fread(&textureMemorySize, 1, sizeof(uint64_t), file);
-		textureMemorySize=AEUInt64From8Bytes((uint8_t*)&textureMemorySize, true);
+		textureMemorySize=AEHostU64FromNet(textureMemorySize);
 		void* textureMemory=malloc(textureMemorySize);
 		fread(textureMemory, 1, textureMemorySize, file);
 		cell->texture=AETextureLoadFromMemoryWithFlags(textureMemory, textureMemorySize, AETextureLoadFlagDXTCompression | AETextureLoadFlagMipmaps);
