@@ -420,3 +420,63 @@ void AEVAUnserializeFromMBuffer(AEVA* va,AEMBuffer* mbuffer){
 	
 	AEVAUnmap(va);
 }
+
+#include "../Core.h"
+#include "../List.h"
+#include "../VA.h"
+#include "RawMesh.h"
+
+void AEVALoadFromObj(AEVA* va, AEVA* ia, char* objfilename){
+	
+	bool hasColors= (va->dataformat==AEVADataFormat4CUB3VF) or (va->dataformat==AEVADataFormat4CUB3NF3VF);
+	bool hasNormals= (va->dataformat==AEVADataFormat3NF3VF) or (va->dataformat==AEVADataFormat4CUB3NF3VF);
+	int floatcount=hasColors+va->tunit*2+hasNormals*3+3;
+	AEList* vertexList=AEListNewWithTypeSize(floatcount*sizeof(float));
+	AEList* indexList=AEListNew(unsigned int);
+	
+	AERawMesh* m=AERawMeshLoad(objfilename);
+	for(unsigned int i=0;i < m->count.f;i++){
+		AERawMeshFace* face=m->f+i;
+		for(int j=0;j<3;j++){
+			float v[floatcount];
+			int size=0;
+			if(hasColors){
+				unsigned char rgba[4]={255,255,255,255};
+				memcpy(v+(size++), rgba, 4);
+			}
+			for(int k=0;k<(va->tunit*2);k+=2){
+				v[size++]=m->t[face->t[j]].x;
+				v[size++]=m->t[face->t[j]].y;
+			}
+			if(hasNormals){
+				v[size++]=m->n[face->n[j]].x;
+				v[size++]=m->n[face->n[j]].y;
+				v[size++]=m->n[face->n[j]].z;
+			}
+			v[size++]=m->v[face->v[j]].x;
+			v[size++]=m->v[face->v[j]].y;
+			v[size++]=m->v[face->v[j]].z;
+			if(ia){
+				unsigned int index=AEListAddBytesUnique(vertexList, v);
+				AEListAdd(indexList, unsigned int, index);
+			}
+			else AEListAddBytes(vertexList,v);
+		}
+	}
+	AERawMeshDelete(m);
+
+	void* data=NULL;
+	
+	if(ia){
+		data=AEVAMap(ia,AEListLength(indexList),GL_WRITE_ONLY);
+		memcpy(data, AEListAsArray(indexList,unsigned int), AEListLengthInSizeofType(indexList,char));
+		AEVAUnmap(ia);
+	}
+	
+	data=AEVAMap(va,AEListLengthInSizeofType(vertexList,float),GL_WRITE_ONLY);
+	memcpy(data,AEListAsArray(vertexList,void),AEListLengthInSizeofType(vertexList,char));
+	AEVAUnmap(va);
+	
+	AEListDelete(indexList);
+	AEListDelete(vertexList);
+}

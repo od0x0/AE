@@ -65,3 +65,5 @@ void AEVAUnserializeFromFILE(AEVA* va,FILE* file);
 //The new and improved version
 void AEVASerializeToMBuffer(AEVA* va,AEMBuffer* mbuffer);
 void AEVAUnserializeFromMBuffer(AEVA* va,AEMBuffer* mbuffer);
+
+void AEVALoadFromObj(AEVA* va, AEVA* ia, char* objfilename);

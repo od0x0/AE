@@ -59,8 +59,8 @@ sweep:
 
 clean:
 	make sweep
-	cd Tests && make clean
+	cd Examples && make clean
 	rm -rf AE
 
 %:
-	cd Tests && make $@
+	cd Examples && make $@

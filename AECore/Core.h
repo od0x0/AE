@@ -75,7 +75,6 @@ uint64_t AENetU64FromHost(uint64_t hostu64);
 uint32_t AEHostU32FromNet(uint32_t netu32);
 uint32_t AENetU32FromHost(uint32_t hostu32);
 
-
 typedef struct {
 	size_t length;
 	size_t allocated;
