@@ -210,6 +210,9 @@ void AEContextInit(AEContext* context,char* title,int w,int h){
 	glEnable( GL_TEXTURE_2D );
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
+	
+	context->fixedUpdateFrameRateMax=60;
+	context->fixedUpdateFrameRateMin=16;
 }
 
 static void AEDefaultPerframeFunc(AEContext* context, double step, void* arg){}
@@ -219,9 +222,35 @@ void AEContextRun(AEContext* context){
 	//0 is a magical number, simply acts as the default
 	if(context->frameupdate==NULL) context->frameupdate=AEDefaultPerframeFunc;
 	
+	double lastFrameTime = context->secondsget(context, context->secondsgetarg);
+	double cyclesLeftOver = 0.0;
+	
+	double updateInterval = 1.0 / context->fixedUpdateFrameRateMax;
+	double maxCyclesPerFrame = context->fixedUpdateFrameRateMax / context->fixedUpdateFrameRateMin;
+	
 	double now=context->secondsget(context, context->secondsgetarg);
 	double then=now;
 	while(context->pollinput(context, context->pollinputarg)){
+		//Some code borrowed from sacredsoftware.com (code written by Alex Diener, aka ThemsAllTook)
+		if(context->fixedupdate){
+			double currentTime=0;
+			double updateIterations=0;
+	
+			currentTime = context->secondsget(context, context->secondsgetarg);
+			updateIterations = ((currentTime - lastFrameTime) + cyclesLeftOver);
+	
+			if (updateIterations > (maxCyclesPerFrame * updateInterval)) {
+				updateIterations = (maxCyclesPerFrame * updateInterval);
+			}
+	
+			while (updateIterations > updateInterval) {
+				updateIterations -= updateInterval;
+				context->fixedupdate(context, updateInterval, context->fixedupdatearg);
+			}
+	
+			cyclesLeftOver = updateIterations;
+			lastFrameTime = currentTime;
+		}
 		glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT); //This is default
 		//glClear(GL_DEPTH_BUFFER_BIT); // Use this if you always use a skybox
 		AECameraBind(AECameraActiveGet());
@@ -235,6 +264,38 @@ void AEContextRun(AEContext* context){
 	}
 	AEContextDeinit(context);
 }
+
+/*
+#define MAXIMUM_FRAME_RATE 120
+#define MINIMUM_FRAME_RATE 15
+#define UPDATE_INTERVAL (1.0 / MAXIMUM_FRAME_RATE)
+#define MAX_CYCLES_PER_FRAME (MAXIMUM_FRAME_RATE / MINIMUM_FRAME_RATE)
+
+void runGame() {
+  static double lastFrameTime = 0.0;
+  static double cyclesLeftOver = 0.0;
+  double currentTime;
+  double updateIterations;
+  
+  currentTime = GetCurrentTime();
+  updateIterations = ((currentTime - lastFrameTime) + cyclesLeftOver);
+  
+  if (updateIterations > (MAX_CYCLES_PER_FRAME * UPDATE_INTERVAL)) {
+    updateIterations = (MAX_CYCLES_PER_FRAME * UPDATE_INTERVAL);
+  }
+  
+  while (updateIterations > UPDATE_INTERVAL) {
+    updateIterations -= UPDATE_INTERVAL;
+    
+    updateGame();
+  }
+  
+  cyclesLeftOver = updateIterations;
+  lastFrameTime = currentTime;
+  
+  drawScene();
+}
+*/
 
 void AEContextDeinit(AEContext* context){
 	if(not context) context=AEContextActiveGet();

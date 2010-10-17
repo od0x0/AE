@@ -27,6 +27,10 @@ typedef struct AEContext{
 	
 	void (*fixedupdate)(struct AEContext* self, double secondsSinceLastCall, void* arg);
 	void* fixedupdatearg;
+	double fixedUpdateFrameRateMax;
+	double fixedUpdateFrameRateMin;
+
+	
 	void (*frameupdate)(struct AEContext* self, double secondsSinceLastCall, void* arg);
 	void* frameupdatearg;
 }AEContext;
