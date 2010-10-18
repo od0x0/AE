@@ -30,4 +30,4 @@ void AEMaterialShaderSetMulti(AEMaterial* material,char** vshadertextarray,char*
 
 //"Consumes" the image passed into it so that AEMaterialTextureSet(material,"name",AEImageLoad("filename.png"));  will work with out leak.  If you don't want it to delete it, just *Retain() it before passing it in.
 void AEMaterialTextureSetWithFlags(AEMaterial* material,char* name,AEImage* image,unsigned int flags);
-#define AEMaterialTextureSet(material,name,image) AEMaterialTextureSetWithFlags(material,name,image,0)
+#define AEMaterialTextureSet(material,name,image) AEMaterialTextureSetWithFlags(material,name,image,AETextureLoadFlagDefault)

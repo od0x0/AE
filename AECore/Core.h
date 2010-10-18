@@ -70,8 +70,22 @@ AETexture AETextureLoadFromMemoryWithFlags(void* data,size_t dataSize, unsigned 
 static inline void AETextureBind(AETexture texture){glBindTexture(GL_TEXTURE_2D, texture);}
 void AETextureDelete(AETexture texture);
 
-void AEError_internal(char* message,const char* function);
-#define AEError(msg) AEError_internal(msg,__func__)
+//We need a better method of handling errors such as missing files
+/*
+#define AEExceptionTypeGeneric NULL
+#define AEExceptionTypeFile "File Exception"
+
+typedef struct AEException AEException;
+
+AEException* AEExceptionsRootGet(void);
+AEException* AEExceptionsPush(void);
+void AEExceptionsPop(void);
+void AEExceptionsThrow_internal(const char* type, char* message, const char* functionOfOrigin);
+#define AEExceptionThrow(type, message) AEExceptionsThrow_internal(type, message, __func__)
+AEException* AEExceptionsCatch(const char* type);
+*/
+#define AEError(msg) {printf("Error in %s(): %s\n",__func__,(msg)); abort();}
+//AEExceptionThrow(NULL, msg)
 
 uint64_t AEHostU64FromNet(uint64_t netu64);
 uint64_t AENetU64FromHost(uint64_t hostu64);

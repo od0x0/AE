@@ -1,6 +1,5 @@
 #pragma once
 #include "Core.h"
-#include "VBO.h"
 
 #define int32 odeint32
 #define uint32 odeuint32

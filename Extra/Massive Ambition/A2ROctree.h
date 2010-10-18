@@ -1,5 +1,5 @@
 #pragma once
-#include "VBO.h"
+#include "VA.h"
 #include "Material.h"
 //#include "A2RVM.h"
 

@@ -16,7 +16,12 @@ AETexture AETextureLoadWithFlags(const char* filename, unsigned int flags){
 			SOIL_CREATE_NEW_ID,
 			flags | SOIL_FLAG_TEXTURE_REPEATS |  SOIL_FLAG_INVERT_Y
 		);
-	if(texid==0) printf("Texture loading of %s failed because %s",filename,SOIL_last_result());
+	if(texid==0){
+		const char* result=SOIL_last_result();
+		char message[strlen(result)+strlen(filename)+strlen(": ")+1];
+		sprintf(message, "%s: %s", result, filename);
+		AEError(message);
+	}
 	AETextureBind(texid);
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_REPEAT);
@@ -107,12 +112,80 @@ uint32_t AENetU32FromHost(uint32_t hostu32){
 	AEUInt32To4Bytes(hostu32, (uint8_t*)&hostu32, true);
 	return hostu32;
 }
+///////////////////////////////////////////////////
+/*
+#include "setjmp.h"
+struct AEException{
+	jmp_buf jumpbuffer;
+	char* message;
+	const char* functionOfOrigin;
+	const char* type;
+	bool wasThrown;
+	AEException* last;
+};
 
-void AEError_internal(char* message,const char* function){
-	printf("ERROR in %s():\n\t%s\n",function,message);
-	fflush(stdout);
-	abort();
+#ifndef GNUC
+#define __thread
+#endif
+
+static __thread AEException* AEExceptionsRoot=NULL;
+
+AEException* AEExceptionsRootGet(void){
+	return AEExceptionsRoot;
 }
+
+AEException* AEExceptionsPush(void){
+	AEException* exception=calloc(1, sizeof(AEException));
+	exception->last=AEExceptionsRoot;
+	AEExceptionsRoot=exception;
+	if(setjmp(exception->jumpbuffer)) return exception;
+	return NULL;
+}
+
+void AEExceptionsPop(void){
+	if(AEExceptionsRoot->wasThrown){
+		const char* type=AEExceptionsRoot->type;
+		if(type==NULL) type = "Exception";
+		fprintf(stderr,"[%s] %s():%s\n",type,AEExceptionsRoot->functionOfOrigin,AEExceptionsRoot->message);
+		AEException* e=AEExceptionsRoot;
+		AEExceptionsRoot=e->last;
+		free(e->message);
+		free(e);
+		//abort is very magical, it also flushes all streams, so we are saved the 3 lines of typing
+		abort();
+	}
+	AEException* e=AEExceptionsRoot;
+	AEExceptionsRoot=e->last;
+	free(e->message);
+	free(e);
+}
+
+void AEExceptionsThrow_internal(const char* type, char* message, const char* functionOfOrigin){
+
+	if(not AEExceptionsRoot){
+		if(type==NULL) type = "Exception";
+		fprintf(stderr,"[%s] %s():%s\n",type,functionOfOrigin,message);
+		//abort is very magical, it also flushes all streams, so we are saved the 3 lines of typing
+		abort();
+	}
+	
+	AEExceptionsRoot->type=type;
+	AEExceptionsRoot->wasThrown=true;
+	if(message) message=strdup(message);
+	AEExceptionsRoot->message=message;
+	AEExceptionsRoot->functionOfOrigin=functionOfOrigin;
+	longjmp(AEExceptionsRoot->jumpbuffer, 1);
+}
+
+AEException* AEExceptionsCatch(const char* type){
+	if(not AEExceptionsRoot->wasThrown) return NULL;
+	if(type==NULL) return AEExceptionsRoot;
+	if(strcmp(type, AEExceptionsRoot->type)==0) return AEExceptionsRoot;
+	return NULL;
+}
+
+#undef __thread*/
+
 ////////////////////////////////////////////////////
 //File Stuff
 

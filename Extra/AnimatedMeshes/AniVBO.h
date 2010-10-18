@@ -1,6 +1,6 @@
 #pragma once
 #include "Core.h"
-#include "VBO.h"
+#include "VA.h"
 #include "AniMesh.h"
 
 //Unfinished!
