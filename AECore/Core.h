@@ -9,7 +9,8 @@ Ambition Engine Core.
 #include "SOIL.h"
 
 typedef struct AEContext{
-	unsigned int w,h,r,g,b,a,stencil,depth,inFullscreen;
+	unsigned int w,h;
+	unsigned char r, g, b, a, stencil, depth, inFullscreen, multisample;
 	void* aux;
 	
 	void (*init)(struct AEContext* self,char* title, void* arg);

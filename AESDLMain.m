@@ -406,11 +406,17 @@ void AESDLInit(AEContext* context,char* title,void* arg){
 	SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, context->a );
 	SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, context->stencil);
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, context->depth);
+	if(context->multisample){
+		SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
+		SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, context->multisample);
+	}
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 	
 	SDL_SetVideoMode(context->w, context->h, 0, context->inFullscreen?(SDL_OPENGL | SDL_FULLSCREEN):SDL_OPENGL);
 	SDL_WM_SetCaption(title,NULL);
 	SDL_SetEventFilter(AESDLEventFilter);
+	
+	if(context->multisample) glEnable(GL_MULTISAMPLE);
 }
 
 void AESDLSwapBuffers(AEContext* context,void* arg){
