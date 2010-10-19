@@ -13,11 +13,11 @@ int main(int argc, char** argv){
 	//AEContextActiveGet()->inFullscreen=true;
 	AEContextInit(NULL, "A Simple Window", 800, 500);
 	//This is used to set the specified callback, the last argument is the last arg passed back as the last argument of the callback
-	AEContextCallbackSet(NULL, AEContextCallbackFrameUpdate, NULL, NULL);
-	//FrameUpdate
-	//The max should be divisible by the min
-	AEContextActiveGet()->fixedUpdateFrameRateMax=60;
-	AEContextActiveGet()->fixedUpdateFrameRateMin=15;
+	AEContextCallbackSet(NULL, AEContextCallbackFrameUpdate, FrameUpdate, NULL);
+	
+	//The max should be divisible by the min/
+	AEContextActiveGet()->fixedUpdateFrameRateMax=30;//Default is 60
+	AEContextActiveGet()->fixedUpdateFrameRateMin=15;//Default is 15
 	//Same function signature as frameupdate
 	AEContextCallbackSet(NULL, AEContextCallbackFixedUpdate, FixedUpdate, NULL);
 	AEContextRun(NULL);
