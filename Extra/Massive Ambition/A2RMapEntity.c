@@ -45,9 +45,11 @@ void A2RMapEntityRender(A2RMapEntity* self){
 	if(r.y) glRotatef(r.y,	0,1,0);
 	if(r.z) glRotatef(r.z,	0,0,1);
 	
-	AEVADeinit(& self->va);
-	AEVADeinit(& self->ia);
-	AEMaterialDelete(self->material);
+	AEMaterialBind(self->material);
+	AEVABind(& self->va);
+	AEVABind(& self->ia);
+	
+	AEVADraw(0, self->ia.length);
 	
 	if(r.z) glRotatef(-r.z,	0,0,1);
 	if(r.y) glRotatef(-r.y,	0,1,0);
