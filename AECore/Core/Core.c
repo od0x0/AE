@@ -285,7 +285,7 @@ void AEContextInit(AEContext* context,char* title,int w,int h){
 	glCullFace(GL_BACK);
 	
 	context->fixedUpdateFrameRateMax=60;
-	context->fixedUpdateFrameRateMin=16;
+	context->fixedUpdateFrameRateMin=15;
 }
 
 static void AEDefaultPerframeFunc(AEContext* context, double step, void* arg){}
