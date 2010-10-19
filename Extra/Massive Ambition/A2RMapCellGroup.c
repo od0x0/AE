@@ -1,4 +1,4 @@
-#include "A2RMap.h"
+#include "A2RMapCellGroup.h"
 
 struct A2RMapCell{
 	uint64_t ID;
@@ -15,7 +15,7 @@ struct A2RMapTrigger{
 	AEVec3 max;
 };
 
-struct A2RMap{
+struct A2RMapCellGroup{
 	A2RMapCell* cells;
 	uint64_t cellCount;
 	A2RMapTrigger* triggers;
@@ -23,7 +23,7 @@ struct A2RMap{
 	
 	AEVec3 cameraPosition;
 	
-	void (*triggerFunc)(A2RMap* self, A2RMapTrigger* trigger);
+	void (*triggerFunc)(A2RMapCellGroup* self, A2RMapTrigger* trigger);
 	
 	void* userdata;
 };
@@ -32,21 +32,21 @@ uint64_t A2RMapTriggerIDGet(A2RMapTrigger* self){
 	return self->ID;
 }
 
-void A2RMapUserdataSet(A2RMap* self, void* userdata){
+void A2RMapCellGroupUserdataSet(A2RMapCellGroup* self, void* userdata){
 	self->userdata=userdata;
 }
 
-void* A2RMapUserdataGet(A2RMap* self){
+void* A2RMapCellGroupUserdataGet(A2RMapCellGroup* self){
 	return self->userdata;
 }
 
-A2RMap* A2RMapNew(void (*triggerFunc)(A2RMap* self, A2RMapTrigger* trigger)){
-	A2RMap* self=calloc(1, sizeof(A2RMap));
+A2RMapCellGroup* A2RMapCellGroupNew(void (*triggerFunc)(A2RMapCellGroup* self, A2RMapTrigger* trigger)){
+	A2RMapCellGroup* self=calloc(1, sizeof(A2RMapCellGroup));
 	self->triggerFunc=triggerFunc;
 	return self;
 }
 
-void A2RMapRender(A2RMap* self){
+void A2RMapCellGroupRender(A2RMapCellGroup* self){
 	AECamera* camera=AECameraActiveGet();
 	for (uint64_t i=0; i<self->cellCount; i++) {
 		A2RMapCell* cell=self->cells+i;
@@ -63,7 +63,7 @@ void A2RMapRender(A2RMap* self){
 	}
 }
 
-void A2RMapLoadFromFILE(A2RMap* self, FILE* file){
+void A2RMapCellGroupLoadFromFILE(A2RMapCellGroup* self, FILE* file){
 	//Reload the new set of cells and triggers, deleting the old
 	for (uint64_t i=0; i<self->cellCount; i++) {
 		A2RMapCell* cell=self->cells+i;
@@ -135,7 +135,7 @@ struct A2RMapTrigger{
 	}
 }
 
-void A2RMapCameraPositionSet(A2RMap* self, float x, float y, float z){
+void A2RMapCellGroupCameraPositionSet(A2RMapCellGroup* self, float x, float y, float z){
 		
 	{
 		const AEVec3 then=self->cameraPosition;
@@ -159,7 +159,7 @@ void A2RMapCameraPositionSet(A2RMap* self, float x, float y, float z){
 	}
 }
 
-void A2RMapDelete(A2RMap* self){
+void A2RMapCellGroupDelete(A2RMapCellGroup* self){
 	if(not self) return;
 	
 	for (uint64_t i=0; i<self->cellCount; i++) {
