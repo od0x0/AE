@@ -39,11 +39,17 @@ void A2RMapEntityRender(A2RMapEntity* self){
 	const AEVec3 p=self->position;
 	const AEVec3 r=self->rotation;
 	
+	bool matrixWasPushed=false;
+	
 	//Only rotate when we need to rotate
 	glTranslatef(p.x, p.y, p.z);
-	if(r.x) glRotatef(r.x,	1,0,0);
-	if(r.y) glRotatef(r.y,	0,1,0);
-	if(r.z) glRotatef(r.z,	0,0,1);
+	if(r.x or r.y or r.z){
+		matrixWasPushed=true;
+		glPushMatrix();
+		glRotatef(r.x,	1,0,0);
+		glRotatef(r.y,	0,1,0);
+		glRotatef(r.z,	0,0,1);
+	}
 	
 	AEMaterialBind(self->material);
 	AEVABind(& self->va);
@@ -51,9 +57,9 @@ void A2RMapEntityRender(A2RMapEntity* self){
 	
 	AEVADraw(0, self->ia.length);
 	
-	if(r.z) glRotatef(-r.z,	0,0,1);
-	if(r.y) glRotatef(-r.y,	0,1,0);
-	if(r.x) glRotatef(-r.x,	1,0,0);
+	if(matrixWasPushed){
+		glPopMatrix();
+	}
 	glTranslatef(-p.x, -p.y, -p.z);
 }
 
