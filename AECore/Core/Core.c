@@ -266,7 +266,7 @@ void AEContextInit(AEContext* context,char* title,int w,int h){
 	if(context->init==NULL || context->refresh==NULL || context->pollinput==NULL || context->swapbuffers==NULL || context->deinit==NULL || context->secondsget==NULL) AEError("AEContext function pointers need to all be filled before you can use the engine.");
 	
 	context->w=w;context->h=h;
-	context->init(context,title, context->initarg);
+	context->init(context, title, context->initarg);
 	
 	AECamera* cam=AECameraActiveGet();
 	AECameraViewportSet(cam,context->w,context->h);

@@ -5,6 +5,7 @@ AEImage* AEImageNew(int w,int h){
 	image->pixels=calloc(w*h,4);
 	image->w=w;
 	image->h=h;
+	image->channels=4;
 	AEImageTextureFlagsSet(image,AETextureLoadFlagDXTCompression|AETextureLoadFlagMipmaps);
 	return AEImageRetain(image);
 }

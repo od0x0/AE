@@ -3,6 +3,8 @@
 #include <string.h>
 #include <stdio.h>
 
+#warning AEList is deprecated, it will be removed soon.
+
 //Do not access directly
 typedef struct{
 	size_t length,allocated;

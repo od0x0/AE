@@ -1,5 +1,20 @@
 #include "../Camera.h"
 #include <math.h>
+//////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////
+
+//Unstable/Private implementation, only here so the compiler knows how large it is
+struct AECamera{
+	//float x,y,z;
+	AEVec3 position;
+	AEVec3 rotation;///Private, don't use this
+	AEQuat rotationq;//Kept in sync with above for speedups
+	float near,far,fov;//0 fov==Ortho
+	short w,h;
+	float vfPlanes[6][4];
+	unsigned char onlyDoPartialUpdate, vfCullingEnabled, refcount;
+};
 
 AECamera* AECameraNew(void){
 	AECamera* cam=calloc(1,sizeof(AECamera));
@@ -18,14 +33,6 @@ void AECameraDelete(AECamera* cam){
 	cam->refcount--;
 	if(cam->refcount>1) return;
 	free(cam);
-}
-
-void AECameraInit(AECamera* cam){
-
-}
-
-void AECameraDeinit(AECamera* cam){
-
 }
 
 //////////////////////////////////////////////////////////////////

@@ -7,7 +7,7 @@ AETextBuffer* AETextBufferNew(void){
 	return buffer;
 }
 
-//Sorta ripped this from Enough, worked better that what I had, so it's probably under Open/FreeBSD (he doesn't leave any license info in his code)
+//Sorta ripped this from Enough, worked better than what I had, so it's probably under Open/FreeBSD (he doesn't leave any license info in his code)
 void AETextBufferInsert(AETextBuffer *buffer,size_t offset,char *text){
 	size_t	length;
 

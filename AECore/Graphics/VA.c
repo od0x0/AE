@@ -304,7 +304,6 @@ void AEVASerializeToFILE(AEVA* va,FILE* file){
 }
 
 void AEVAUnserializeFromFILE(AEVA* va,FILE* file){
-	uint8_t buffer[16];
 	
 	uint64_t version;
 	fread(&version, 1, sizeof(uint64_t), file);
@@ -379,8 +378,6 @@ void AEVASerializeToMBuffer(AEVA* va,AEMBuffer* mbuffer){
 }
 
 void AEVAUnserializeFromMBuffer(AEVA* va,AEMBuffer* mbuffer){
-	uint8_t buffer[16];
-	
 	uint64_t version;
 	//fread(&version, 1, sizeof(uint64_t), file);
 	AEMBufferRead(mbuffer, &version, sizeof(uint64_t));
