@@ -6,6 +6,7 @@ Ambition Engine Core.
 
 #pragma once
 #include "AE.h"
+#include "AEMath.h"
 #include "SOIL.h"
 
 typedef struct AEContext{

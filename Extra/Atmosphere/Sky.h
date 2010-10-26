@@ -7,7 +7,7 @@
  *
  */
 #pragma once
-#include "Core.h"
+#include "AECore.h"
 
 typedef struct{
 	AETexture front, back, left, right, top, bottom;

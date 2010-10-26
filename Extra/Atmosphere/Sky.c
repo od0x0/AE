@@ -6,7 +6,7 @@
  *  Copyright 2010 __MyCompanyName__. All rights reserved.
  *
  */
-
+#include "AECamera.h"
 #include "Sky.h"
 //This is very old ancient code that is really really really ugly and largely broken.
 void AESkyboxRender(AESkybox* skybox){

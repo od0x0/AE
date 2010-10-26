@@ -1,5 +1,5 @@
 #pragma once
-#include "Core.h"
+#include "AECore.h"
 
 //Somewhat based off of pursuade's idea since it pwn3d'd my own
 /*

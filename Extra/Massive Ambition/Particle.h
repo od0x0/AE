@@ -1,6 +1,6 @@
 #pragma once
-#include "Material.h"
-#include "VA.h"
+#include "AEMaterial.h"
+#include "AEVA.h"
 
 typedef struct{
 	float maxtime;

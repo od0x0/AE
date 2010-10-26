@@ -1,4 +1,4 @@
-#include "../Image.h"
+#include "AEImage.h"
 
 AEImage* AEImageNew(int w,int h){
 	AEImage* image=calloc(1,sizeof(AEImage));

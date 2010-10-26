@@ -1,6 +1,6 @@
 #include "SDL.h"
 //AESDLMain.m does some magic set up for AE that fills in the context for us, you could always use your own set up if you wanted, look at AESDLMain.m to see how it is done.
-#include "Core.h"
+#include "AECore.h"
 
 int main(int argc, char** argv){
 	//NULL is synonymous with AEContextActiveGet() for Init and Run

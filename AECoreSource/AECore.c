@@ -1,8 +1,8 @@
-#include "../Core.h"
-#include "../SOIL/SOIL.h"
+#include "AECore.h"
+#include "SOIL.h"
 #include <math.h>
 #include <string.h>
-#include "../Camera.h"
+#include "AECamera.h"
 
 ///////////////////////////////////////////////////
 //Texture Stuff

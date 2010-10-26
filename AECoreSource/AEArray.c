@@ -1,5 +1,5 @@
-#include "../AEArray.h"
-
+#include "AEArray.h"
+#include <stdio.h>
 void AEArrayDeinit(void* array){
 	if(array==NULL) return;
 	AEArray(void)* self=array;
@@ -7,13 +7,12 @@ void AEArrayDeinit(void* array){
 }
 void AEArrayResize(void* array,size_t length){
 	AEArray(void)* self=array;
-	if(length > self->allocated){
-		self->length=length;
+	self->length=length;
+	if(self->data && length > self->allocated){
 		self->allocated=self->length * 1.2;
 		self->data=realloc(self->data, self->allocated*self->typeSize);
 	}
-	if((self->data==NULL) && ((self->allocated*0.75) > length)){
-		self->length=length;
+	if((self->data==NULL) || ((self->allocated*0.75) > length)){
 		self->allocated=self->length;
 		self->data=realloc(self->data, self->allocated*self->typeSize);
 	}
@@ -21,19 +20,21 @@ void AEArrayResize(void* array,size_t length){
 void* AEArrayCheck(void* array){
 	AEArray(void)* self=array;
 	AEArrayResize(array,self->length+1);
-	return self->data+self->length*self->typeSize;
+	return self->data+(self->length-1)*self->typeSize;
 }
 void AEArraySweep(void* array){
 	AEArrayResize(array,0);
 }
 void AEArrayAddBytes(void* array,void* bytes){
 	AEArray(void)* self=array;
-	memset(AEArrayCheck(array), 0, self->typeSize);
+	AEArrayCheck(array);
+	memcpy(self->data+self->typeSize*(self->length-1), bytes, self->typeSize);
 }
 size_t AEArrayFindIndexOfBytes(void* array,void* bytes){
 	AEArray(void)* self=array;
-	for(size_t i=0; i<self->length; i++)
-		if(memcpy(self->data+self->typeSize*i, bytes, self->typeSize)==0) return i+1;
+	for(size_t i=0; i<self->length; i++){
+		if(memcmp(self->data+self->typeSize*i, bytes, self->typeSize)==0) return i+1;
+	}
 	return 0;
 }
 size_t AEArrayAddBytesUnique(void* array,void* data){
@@ -67,5 +68,5 @@ void AEArrayRemoveBytes(void* array,void* bytes){
 	memcpy(removed,last,self->typeSize);
 	self->length--;
 	
-	if(self->allocated*0.75 > self->length) AEListResize(array,self->length);
+	if(self->allocated*0.75 > self->length) AEArrayResize(array,self->length);
 }

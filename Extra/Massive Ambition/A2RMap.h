@@ -2,6 +2,7 @@
 #include "A2RMapEntity.h"
 #include "A2RMapFIE.h"
 #include "A2RMapCellGroup.h"
+#include "AEArray.h"
 
 typedef struct{
 	A2RMapCellGroup* visibleCells;
@@ -11,5 +12,5 @@ typedef struct{
 	
 	AEVec3* instancePositions;
 	
-	AEList* entityList;//Of A2RMapEntity*
+	AEArray(A2RMapEntity) entityList;
 }A2RMap;

@@ -1,6 +1,6 @@
 #include "LuaBinding.h"
-#include "Core.h"
-#include "Camera.h"
+#include "AECore.h"
+#include "AECamera.h"
 #include "luagl.h"
 #include "luaglu.h"
 /*

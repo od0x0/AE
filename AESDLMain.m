@@ -383,7 +383,7 @@ int main (int argc, char **argv)
     return 0;
 }
 
-#include "Core.h"
+#include "AECore.h"
 
 int AESDLEventFilter(const SDL_Event* event){
 	//So it closes when the user says close

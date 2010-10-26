@@ -1,5 +1,5 @@
 #include "SDL.h"
-#include "Core.h"
+#include "AECore.h"
 
 //There's no header for it, but AESDLMain.m defines these simple wrappers
 int AESDLKey(int key);

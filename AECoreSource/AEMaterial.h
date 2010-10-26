@@ -1,5 +1,5 @@
 #pragma once
-#include "Image.h"
+#include "AEImage.h"
 
 //EXT means that it's not guarranteed to stay in here, be warned when using it
 

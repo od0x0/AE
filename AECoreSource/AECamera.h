@@ -1,6 +1,6 @@
 #pragma once
-#include "Core.h"
-#include "Math3D.h"
+#include "AECore.h"
+#include "AEMath.h"
 
 typedef struct AECamera AECamera;
 

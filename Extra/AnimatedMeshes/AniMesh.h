@@ -1,5 +1,5 @@
-#include "VA.h"
-#include "Math3D.h"
+#include "AEVA.h"
+#include "AEMath.h"
 //Mostly converted from code from http://tfc.duke.free.fr/coding/md5-specs-en.html
 //It'd be best if the user wrote a layer on top of this, this is just to ease the animation internals
 //Format independent, but fits nicely over md5

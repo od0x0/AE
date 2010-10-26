@@ -1,6 +1,5 @@
 #pragma once
-#include "AE.h"
-#include "List.h"
+#include "AECore.h"
 #include "TextBuffer.h"
 
 typedef struct{

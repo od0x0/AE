@@ -1,7 +1,7 @@
 #pragma once
-#include "VA.h"
-#include "Image.h"
-#include "Camera.h"
+#include "AEVA.h"
+#include "AEImage.h"
+#include "AECamera.h"
 
 typedef struct A2RMapCell A2RMapCell;
 typedef struct A2RMapTrigger A2RMapTrigger;

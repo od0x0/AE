@@ -1,6 +1,7 @@
 #pragma once
-#include "VA.h"
-#include "Material.h"
+#include "AEVA.h"
+#include "AEMaterial.h"
+#include "AECamera.h"
 //#include "A2RVM.h"
 
 struct A2ROctree;

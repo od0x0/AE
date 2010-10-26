@@ -26,32 +26,33 @@ all:
 
 core: 	
 	
-	#-I AECore/ODE/ -I AECore/ODE/src/
-	#$(CCXX) -c $(shell find AECore -name "*.cpp") -arch ppc -Os
-	$(CC) -c $(shell find AECore -name "*.c") $(FLAGS) -arch ppc $(INCLUDEPATHS) 
-	#$(CC) -c $(shell find AECore -name "*.m") $(FLAGS) -arch ppc $(INCLUDEPATHS) $(OBJCFLAGS)
-	$(CC) -c AESDLMain.m $(FLAGS) -arch ppc -Os -I /Library/Frameworks/SDL.framework/Headers -I AECore
+	#-I AECoreSource/ODE/ -I AECoreSource/ODE/src/
+	#$(CCXX) -c $(shell find AECoreSource -name "*.cpp") -arch ppc -Os
+	$(CC) -c $(shell find AECoreSource -name "*.c") $(FLAGS) -arch ppc $(INCLUDEPATHS) 
+	#$(CC) -c $(shell find AECoreSource -name "*.m") $(FLAGS) -arch ppc $(INCLUDEPATHS) $(OBJCFLAGS)
+	$(CC) -c AESDLMain.m $(FLAGS) -arch ppc -Os -I /Library/Frameworks/SDL.framework/Headers -I AECoreSource
 	ar cr libAEppc.a *.o
 	rm -f *.o
 	
-	#$(CCXX) -c $(shell find AECore -name "*.cpp") -arch i386 -Os
-	$(CC) -c $(shell find AECore -name "*.c") $(FLAGS) -arch i386 $(INCLUDEPATHS) 
-	#$(CC) -c $(shell find AECore -name "*.m") $(FLAGS) -arch i386 $(INCLUDEPATHS) $(OBJCFLAGS)
-	$(CC) -c AESDLMain.m $(FLAGS) -arch i386 -Os -I /Library/Frameworks/SDL.framework/Headers -I AECore
+	#$(CCXX) -c $(shell find AECoreSource -name "*.cpp") -arch i386 -Os
+	$(CC) -c $(shell find AECoreSource -name "*.c") $(FLAGS) -arch i386 $(INCLUDEPATHS) 
+	#$(CC) -c $(shell find AECoreSource -name "*.m") $(FLAGS) -arch i386 $(INCLUDEPATHS) $(OBJCFLAGS)
+	$(CC) -c AESDLMain.m $(FLAGS) -arch i386 -Os -I /Library/Frameworks/SDL.framework/Headers -I AECoreSource
 	ar cr libAEintel.a *.o
 	rm -f *.o
 	lipo -create libAEintel.a libAEppc.a -output libAE.a
 
 install:
 	mkdir -p AE
-	mkdir -p AE/ode
+	#mkdir -p AE/ode
 	#mkdir -p AE/lua
 	cp libAE.a AE
-	cp AECore/*.h AE
-	cp AECore/SOIL/SOIL.h AE
-	#cp AECore/ode/*.h AE/ode
-	#cp AECore/lua/*.h AE/lua
-	#cp AECore/*.ooc AE
+	cp AECoreSource/*.h AE
+	rm -f AE/AEInternalRawMesh.h AE/image_DXT.h AE/image_helper.h AE/stb_image_aug.h AE/stbi_DDS_aug_c.h AE/stbi_DDS_aug.h
+	#cp AECoreSource/SOIL/SOIL.h AE
+	#cp AECoreSource/ode/*.h AE/ode
+	#cp AECoreSource/lua/*.h AE/lua
+	#cp AECoreSource/*.ooc AE
 
 sweep:
 	rm -f *.o

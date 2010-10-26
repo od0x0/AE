@@ -1,6 +1,6 @@
 #pragma once
 #include "SOIL.h"
-#include "Core.h"
+#include "AECore.h"
 
 
 #define AEImageSerializeToFILETemporaryDirectory ""

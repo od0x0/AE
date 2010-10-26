@@ -3,7 +3,7 @@
 #include "lua/lua.h"
 #include "lua/lauxlib.h"
 #include "lua/lualib.h"
-#include "Core.h"
+#include "AECore.h"
 
 lua_State* AELuaNew(int shouldLoadLibraries);
 

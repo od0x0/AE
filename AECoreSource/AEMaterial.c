@@ -1,4 +1,4 @@
-#include "../Material.h"
+#include "AEMaterial.h"
 
 struct AEMaterial{
 	unsigned int refcount;

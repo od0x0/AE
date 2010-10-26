@@ -1,7 +1,7 @@
 #pragma once
-#include "Core.h"
-#include "Material.h"
-#include "VA.h"
+#include "AECore.h"
+#include "AEMaterial.h"
+#include "AEVA.h"
 
 typedef struct{
 	AEVec3* centers;

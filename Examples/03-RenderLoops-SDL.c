@@ -1,5 +1,5 @@
 #include "SDL.h"
-#include "Core.h"
+#include "AECore.h"
 
 void FrameUpdate(AEContext* context, double timeSinceLastCall, void* arg){
 	puts("I'm supposed to be rendering and handling input, but I decided to SPAMYOURCONSOLEINSTEAD.");

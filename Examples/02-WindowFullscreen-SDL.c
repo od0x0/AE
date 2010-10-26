@@ -1,5 +1,5 @@
 #include "SDL.h"
-#include "Core.h"
+#include "AECore.h"
 
 int main(int argc, char** argv){
 	AEContextActiveGet()->inFullscreen=true;

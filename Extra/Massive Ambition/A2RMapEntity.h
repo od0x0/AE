@@ -1,7 +1,7 @@
 #pragma once
-#include "Core.h"
-#include "VA.h"
-#include "Material.h"
+#include "AECore.h"
+#include "AEVA.h"
+#include "AEMaterial.h"
 
 typedef struct A2RMapEntity A2RMapEntity;
 

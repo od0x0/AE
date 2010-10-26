@@ -1,8 +1,8 @@
 #include "SDL.h"
 //Textures are in Core.h
-#include "Core.h"
+#include "AECore.h"
 //VAs are in VA.h
-#include "VA.h"
+#include "AEVA.h"
 
 int AESDLKey(int key);
 int AESDLMouseButton(char button);

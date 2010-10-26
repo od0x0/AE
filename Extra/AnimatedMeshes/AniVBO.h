@@ -1,6 +1,6 @@
 #pragma once
-#include "Core.h"
-#include "VA.h"
+#include "AECore.h"
+#include "AEVA.h"
 #include "AniMesh.h"
 
 //Unfinished!
@@ -9,7 +9,7 @@ typedef struct{
 	int refcount;
 	AEAniModel* model;
 	AEVA texCoordArray, indexArray;
-	AEList* animations;
+	//AEList* animations;
 }AEAniModelVBOClass;
 
 AEAniModelVBOClass* AEAniModelVBOClassNew(char* filename);

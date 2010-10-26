@@ -1,4 +1,7 @@
-#include "../VA.h"
+#include "AEVA.h"
+#include "AECore.h"
+#include "AEArray.h"
+#include "AEInternalRawMesh.h"
 
 static void* CurrentIterationData=NULL;
 
@@ -418,18 +421,17 @@ void AEVAUnserializeFromMBuffer(AEVA* va,AEMBuffer* mbuffer){
 	AEVAUnmap(va);
 }
 
-#include "../Core.h"
-#include "../List.h"
-#include "../VA.h"
-#include "RawMesh.h"
-
 void AEVALoadFromObj(AEVA* va, AEVA* ia, char* objfilename){
 	
 	bool hasColors= (va->dataformat==AEVADataFormat4CUB3VF) or (va->dataformat==AEVADataFormat4CUB3NF3VF);
 	bool hasNormals= (va->dataformat==AEVADataFormat3NF3VF) or (va->dataformat==AEVADataFormat4CUB3NF3VF);
 	int floatcount=hasColors+va->tunit*2+hasNormals*3+3;
-	AEList* vertexList=AEListNewWithTypeSize(floatcount*sizeof(float));
-	AEList* indexList=AEListNew(unsigned int);
+	AEArray(float) vertexList;
+	AEArrayInitWithTypeOfSize(&vertexList, sizeof(float)*floatcount);
+	AEArray(unsigned int) indexList;
+	AEArrayInitWithTypeOfSize(&indexList, sizeof(unsigned int));
+	//AEList* vertexList=AEListNewWithTypeSize(floatcount*sizeof(float));
+	//AEList* indexList=AEListNew(unsigned int);
 	
 	AERawMesh* m=AERawMeshLoad(objfilename);
 	for(unsigned int i=0;i < m->count.f;i++){
@@ -454,10 +456,13 @@ void AEVALoadFromObj(AEVA* va, AEVA* ia, char* objfilename){
 			v[size++]=m->v[face->v[j]].y;
 			v[size++]=m->v[face->v[j]].z;
 			if(ia){
-				unsigned int index=AEListAddBytesUnique(vertexList, v);
-				AEListAdd(indexList, unsigned int, index);
+				//unsigned int index=AEListAddBytesUnique(vertexList, v);
+				//AEListAdd(indexList, unsigned int, index);
+				unsigned int index=AEArrayAddBytesUnique(&vertexList, v);
+				AEArrayAdd(&indexList, index);
 			}
-			else AEListAddBytes(vertexList,v);
+			else AEArrayAddBytes(&vertexList, v);
+			//AEListAddBytes(vertexList,v);
 		}
 	}
 	AERawMeshDelete(m);
@@ -465,15 +470,31 @@ void AEVALoadFromObj(AEVA* va, AEVA* ia, char* objfilename){
 	void* data=NULL;
 	
 	if(ia){
-		data=AEVAMap(ia,AEListLength(indexList),GL_WRITE_ONLY);
-		memcpy(data, AEListAsArray(indexList,unsigned int), AEListLengthInSizeofType(indexList,char));
+		//data=AEVAMap(ia,AEListLength(indexList),GL_WRITE_ONLY);
+		//memcpy(data, AEListAsArray(indexList,unsigned int), AEListLengthInSizeofType(indexList,char));
+		//AEVAUnmap(ia);
+		data=AEVAMap(ia,AEArrayLength(&indexList),GL_WRITE_ONLY);
+		for(size_t i=0;i<AEArrayLength(&indexList);i++) printf("index[%i]=%u\n",(int)i,AEArrayAsCArray(&indexList)[i]);
+		memcpy(data, AEArrayAsCArray(&indexList), AEArrayLengthInBytes(&indexList));
 		AEVAUnmap(ia);
 	}
 	
-	data=AEVAMap(va,AEListLengthInSizeofType(vertexList,float),GL_WRITE_ONLY);
-	memcpy(data,AEListAsArray(vertexList,void),AEListLengthInSizeofType(vertexList,char));
+	//data=AEVAMap(va,AEListLengthInSizeofType(vertexList,float),GL_WRITE_ONLY);
+	//memcpy(data,AEListAsArray(vertexList,void),AEListLengthInSizeofType(vertexList,char));
+	//AEVAUnmap(va);
+	data=AEVAMap(va,AEArrayLengthInSizeofType(&vertexList,float),GL_WRITE_ONLY);
+	for(size_t i=0;i<AEArrayLengthInSizeofType(&vertexList,float);i++) printf("float[%i]=%f\n",(int)i,AEArrayAsCArray(&vertexList)[i]);
+	memcpy(data,AEArrayAsCArray(&vertexList),AEArrayLengthInBytes(&vertexList));
 	AEVAUnmap(va);
 	
-	AEListDelete(indexList);
-	AEListDelete(vertexList);
+	printf("LengthInFloats: %u\n",(unsigned)AEArrayLengthInSizeofType(&vertexList,float));
+	printf("Length: %u\n",(unsigned)AEArrayLength(&vertexList));
+	printf("As Bytes 1: %u\n",(unsigned)AEArrayLengthInBytes(&vertexList));
+	printf("As Bytes 2: %u\n",(unsigned)AEArrayLengthInSizeofType(&vertexList,char));
+	
+	AEArrayDeinit(&indexList);
+	AEArrayDeinit(&vertexList);
+	
+	//AEListDelete(indexList);
+	//AEListDelete(vertexList);
 }

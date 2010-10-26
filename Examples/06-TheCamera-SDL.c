@@ -1,8 +1,8 @@
 #include "SDL.h"
-#include "Core.h"
+#include "AECore.h"
 //Core.h includes Camera.h, but it doesn't hurt to include it here
-#include "Camera.h"
-#include "VA.h"
+#include "AECamera.h"
+#include "AEVA.h"
 
 int AESDLKey(int key);
 int AESDLMouseButton(char button);

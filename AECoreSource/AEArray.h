@@ -15,14 +15,13 @@ size_t AEArrayAddBytesUnique(void* array,void* data);
 void AEArrayRemoveDuplicates(void* array,void* _outarray,void* _indices);
 void AEArrayRemoveBytes(void* array,void* bytes);
 
-#define AEArrayInitForTypeOfSize(array,size) {memset((array),0,sizeof(*(array))); (array)->typeSize=(size);}
+#define AEArrayInitWithTypeOfSize(array,size) {memset((array),0,sizeof(*(array))); (array)->typeSize=(size);}
 
-#define AEArrayInit(array) AEArrayInitForTypeOfSize((array),sizeof((array)->data[0]))
+#define AEArrayInit(array) AEArrayInitWithTypeOfSize((array),sizeof((array)->data[0]))
 
 #define AEArrayLength(array) ((array)->length)
 
-#define AEArrayTypeSize(array) (sizeof((array)->data[0]))
-//((array)->typeSize)
+#define AEArrayTypeSize(array) ((array)->typeSize)
 
 #define AEArrayLengthInBytes(array) (AEArrayLength(array)*AEArrayTypeSize(array))
 
@@ -30,4 +29,4 @@ void AEArrayRemoveBytes(void* array,void* bytes);
 
 #define AEArrayAsCArray(array) ((array)->data)
 
-#define AEArrayAdd(array,value) {AEArrayCheck((array)); AEArrayAsCArray((array))[AEArrayLength((array))]=(value);}
+#define AEArrayAdd(array,value) {AEArrayCheck((array)); AEArrayAsCArray((array))[AEArrayLength((array))-1]=(value);}

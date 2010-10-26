@@ -1,5 +1,5 @@
 #pragma once
-#include "Core.h"
+#include "AECore.h"
 
 typedef struct{
 	GLfloat start, end;

@@ -1,6 +1,18 @@
 #pragma once
-#include "Core.h"
 #include <math.h>
+
+typedef struct{float x,y;}AEVec2;
+typedef struct{float x,y,z;}AEVec3;
+typedef struct{float x,y,z,w;}AEVec4;
+typedef AEVec4 AEQuat;
+typedef struct{int x,y;}AEVec2i;
+typedef struct{int x,y,z;}AEVec3i;
+typedef struct{int x,y,z,w;}AEVec4i;
+
+typedef struct{float r,g,b;}AERGB;
+typedef struct{float r,g,b,a;}AERGBA;
+typedef struct{unsigned char r,g,b;}AERGBub;
+typedef struct{unsigned char r,g,b,a;}AERGBAub;
 
 /* Notes:
 	The main focus for now is simple code.
