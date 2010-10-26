@@ -1,5 +1,4 @@
 #include "AEArray.h"
-#include <stdio.h>
 void AEArrayDeinit(void* array){
 	if(array==NULL) return;
 	AEArray(void)* self=array;

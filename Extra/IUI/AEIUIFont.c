@@ -130,7 +130,23 @@ static size_t AEIUIFontDrawLine(AEIUIFont* self, char* text, int alignment, floa
 	return i;
 }
 
-void AEIUIFontDraw(AEIUIFont* self, char* text, int alignment, float x, float y, float w, float h, size_t caret){
+void AEIUIFontDrawParametersInit(AEIUIFontDrawParameters* self){
+	memset(self, 0, sizeof(AEIUIFontDrawParameters));
+	self->text="";
+	self->alignment=-1;
+	self->textColor.a=1;
+}
+
+void AEIUIFontDraw(AEIUIFont* self, AEIUIFontDrawParameters* params){
+	float x=params->x;
+	float y=params->y;
+	float w=params->w;
+	float h=params->h;
+	char* text=params->text;
+	int alignment=params->alignment;
+	size_t caret=params->caret;
+	
+	glColor4f(params->textColor.r, params->textColor.g, params->textColor.b, params->textColor.a);
 	size_t read=0;
 	y-=self->lineheight;
 	if(w and h){
@@ -148,6 +164,7 @@ void AEIUIFontDraw(AEIUIFont* self, char* text, int alignment, float x, float y,
 	if(w and h){
 		glDisable(GL_SCISSOR_TEST);
 	}
+	glColor3f(1, 1, 1);
 }
 
 void AEIUIFontDelete(AEIUIFont* self){

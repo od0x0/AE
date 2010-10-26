@@ -474,7 +474,6 @@ void AEVALoadFromObj(AEVA* va, AEVA* ia, char* objfilename){
 		//memcpy(data, AEListAsArray(indexList,unsigned int), AEListLengthInSizeofType(indexList,char));
 		//AEVAUnmap(ia);
 		data=AEVAMap(ia,AEArrayLength(&indexList),GL_WRITE_ONLY);
-		for(size_t i=0;i<AEArrayLength(&indexList);i++) printf("index[%i]=%u\n",(int)i,AEArrayAsCArray(&indexList)[i]);
 		memcpy(data, AEArrayAsCArray(&indexList), AEArrayLengthInBytes(&indexList));
 		AEVAUnmap(ia);
 	}
@@ -483,14 +482,8 @@ void AEVALoadFromObj(AEVA* va, AEVA* ia, char* objfilename){
 	//memcpy(data,AEListAsArray(vertexList,void),AEListLengthInSizeofType(vertexList,char));
 	//AEVAUnmap(va);
 	data=AEVAMap(va,AEArrayLengthInSizeofType(&vertexList,float),GL_WRITE_ONLY);
-	for(size_t i=0;i<AEArrayLengthInSizeofType(&vertexList,float);i++) printf("float[%i]=%f\n",(int)i,AEArrayAsCArray(&vertexList)[i]);
 	memcpy(data,AEArrayAsCArray(&vertexList),AEArrayLengthInBytes(&vertexList));
 	AEVAUnmap(va);
-	
-	printf("LengthInFloats: %u\n",(unsigned)AEArrayLengthInSizeofType(&vertexList,float));
-	printf("Length: %u\n",(unsigned)AEArrayLength(&vertexList));
-	printf("As Bytes 1: %u\n",(unsigned)AEArrayLengthInBytes(&vertexList));
-	printf("As Bytes 2: %u\n",(unsigned)AEArrayLengthInSizeofType(&vertexList,char));
 	
 	AEArrayDeinit(&indexList);
 	AEArrayDeinit(&vertexList);

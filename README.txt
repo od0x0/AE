@@ -1,10 +1,7 @@
-Multiple game engines built around a single core.
+Multiple game engines built around a single core and under the MIT license.
 
+Aimed mainly at open-world games, but AECore can be used as a general opengl utility library.
 
-SOIL was made by Jonathan Dummer, under public domain.
-AE was made by Oliver Daids, under BSD.
-Other licenses are found in Licenses/
-
-
+Licenses are found in Licenses/
 
 Currently only for MacOSX (Universal), help for other OSes would be highly appreciated.

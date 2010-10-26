@@ -8,5 +8,20 @@ AEIUIFont* AEIUIFontLoad(char* filename, int size);
 #define AEIUIFontAlignCenter 0
 #define AEIUIFontAlignRight 1
 
-void AEIUIFontDraw(AEIUIFont* self, char* text, int alignment, float x, float y, float w, float h, size_t caret);
+//This function takes a lot of parameters, necessarily.
+//It's not designed to be friendly, just do a particular job.
+
+typedef struct{
+	float x, y, w, h;
+	char* text;
+	size_t caret;
+	AERGBA textColor;
+	float caretAlpha;
+	char alignment;
+}AEIUIFontDrawParameters;
+
+void AEIUIFontDrawParametersInit(AEIUIFontDrawParameters* self);
+
+void AEIUIFontDraw(AEIUIFont* self, AEIUIFontDrawParameters* params);
+
 void AEIUIFontDelete(AEIUIFont* self);
