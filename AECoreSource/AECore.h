@@ -23,6 +23,7 @@ Ambition Engine Core.
 #include <stdbool.h>
 #include <iso646.h>
 #endif
+
 //Like, stdbool & iso646 zomgftwbbq
 
 #include <math.h>

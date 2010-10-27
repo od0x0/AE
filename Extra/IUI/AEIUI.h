@@ -1,6 +1,7 @@
 #pragma once
 #include "AECore.h"
 #include "TextBuffer.h"
+#include "AEIUIFont.h"
 
 typedef struct{
 	int x,y,w,h;

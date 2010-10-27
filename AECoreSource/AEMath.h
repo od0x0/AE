@@ -1,5 +1,6 @@
 #pragma once
 #include <math.h>
+#include <stdlib.h>
 
 typedef struct{float x,y;}AEVec2;
 typedef struct{float x,y,z;}AEVec3;
@@ -113,10 +114,10 @@ static inline AEVec3 AEVec3NormalizedAccurate(AEVec3 v){return AEVec3Mul(AEVec3F
 static inline AEVec3 AEVec3Max(AEVec3 a,AEVec3 b){return AEVec3FromCoords(AEMax(a.x,b.x),AEMax(a.y,b.y),AEMax(a.z,b.z));}
 static inline AEVec3 AEVec3Min(AEVec3 a,AEVec3 b){return AEVec3FromCoords(AEMin(a.x,b.x),AEMin(a.y,b.y),AEMin(a.z,b.z));}
 static inline int AEVec3IsBetween(AEVec3 hit,AEVec3 min,AEVec3 max){
-	if(hit.x < min.x || max.x < hit.x) return false;
-	if(hit.y < min.y || max.y < hit.y) return false;
-	if(hit.z < min.z || max.z < hit.z) return false;
-	return true;
+	if(hit.x < min.x || max.x < hit.x) return 0;
+	if(hit.y < min.y || max.y < hit.y) return 0;
+	if(hit.z < min.z || max.z < hit.z) return 0;
+	return 1;
 }
 static inline AEVec3 AEVec3RandomBetween(AEVec3 min,AEVec3 max){
 	return AEVec3FromCoords(AERandomBetween(min.x,max.x),AERandomBetween(min.y,max.y),AERandomBetween(min.z,max.z));

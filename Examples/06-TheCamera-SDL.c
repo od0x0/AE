@@ -1,4 +1,5 @@
 #include "SDL.h"
+#include "AE.h"
 #include "AECore.h"
 //Core.h includes Camera.h, but it doesn't hurt to include it here
 #include "AECamera.h"
