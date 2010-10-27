@@ -1,21 +1,21 @@
-#include "AEIUIFont.h"
+#include "AEUIFont.h"
 #define STB_TRUETYPE_IMPLEMENTATION
 #include "stb_truetype.h"
 
-struct AEIUIFont{
+struct AEUIFont{
 	stbtt_bakedchar characters[96];
 	AETexture texture;
 	int lineheight;
 };
 
-AEIUIFont* AEIUIFontLoad(char* filename, int size){
+AEUIFont* AEUIFontLoad(char* filename, int size){
 	
 	FILE* file=fopen(filename, "rb");
 	if(not file){
 		printf("Could not open %s\n", filename);
 		abort();
 	}
-	AEIUIFont* font=calloc(1,sizeof(AEIUIFont));
+	AEUIFont* font=calloc(1,sizeof(AEUIFont));
 	font->lineheight=size;
 	
 	fseek(file, 0, SEEK_END);
@@ -77,9 +77,9 @@ static float GetTextLength(stbtt_bakedchar *chardata, const char* text)
 	return len;
 }
 
-static size_t AEIUIFontDrawLine(AEIUIFont* self, char* text, int alignment, float x, float* y, float w, float h, size_t caret){
-	if (alignment == AEIUIFontAlignCenter) x -= GetTextLength(self->characters, text)/2;
-	else if (alignment == AEIUIFontAlignRight) x -= GetTextLength(self->characters, text);
+static size_t AEUIFontDrawLine(AEUIFont* self, char* text, int alignment, float x, float* y, float w, float h, size_t caret){
+	if (alignment == AEUIFontAlignCenter) x -= GetTextLength(self->characters, text)/2;
+	else if (alignment == AEUIFontAlignRight) x -= GetTextLength(self->characters, text);
 	// assume orthographic projection with units = screen pixels, origin at top left
 	glBindTexture(GL_TEXTURE_2D, self->texture);
 	//glPointSize(10);
@@ -130,14 +130,14 @@ static size_t AEIUIFontDrawLine(AEIUIFont* self, char* text, int alignment, floa
 	return i;
 }
 
-void AEIUIFontDrawParametersInit(AEIUIFontDrawParameters* self){
-	memset(self, 0, sizeof(AEIUIFontDrawParameters));
+void AEUIFontDrawParametersInit(AEUIFontDrawParameters* self){
+	memset(self, 0, sizeof(AEUIFontDrawParameters));
 	self->text="";
 	self->alignment=-1;
 	self->textColor.a=1;
 }
 
-void AEIUIFontDraw(AEIUIFont* self, AEIUIFontDrawParameters* params){
+void AEUIFontDraw(AEUIFont* self, AEUIFontDrawParameters* params){
 	float x=params->x;
 	float y=params->y;
 	float w=params->w;
@@ -153,7 +153,7 @@ void AEIUIFontDraw(AEIUIFont* self, AEIUIFontDrawParameters* params){
 		glEnable(GL_SCISSOR_TEST);
 		glScissor(x, y, w, -h);
 	}
-	while(read=AEIUIFontDrawLine(self, text, alignment, x, &y, w, h, caret)){
+	while(read=AEUIFontDrawLine(self, text, alignment, x, &y, w, h, caret)){
 		y-=self->lineheight;
 		text+=read;
 		if(caret){
@@ -167,7 +167,7 @@ void AEIUIFontDraw(AEIUIFont* self, AEIUIFontDrawParameters* params){
 	glColor3f(1, 1, 1);
 }
 
-void AEIUIFontDelete(AEIUIFont* self){
+void AEUIFontDelete(AEUIFont* self){
 	if(not self) return;
 	AETextureDelete(self->texture);
 	free(self);

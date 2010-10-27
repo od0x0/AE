@@ -19,6 +19,20 @@ void AEArrayRemoveBytes(void* array,void* bytes);
 
 #define AEArrayInit(array) AEArrayInitWithTypeOfSize((array),sizeof((array)->data[0]))
 
+//<Oddity007 being thoughtful and thinking of a certain graveyard monster that doesn't understand what lvalues are, and yet still uses pointers. >.> >
+static inline void* AEArrayNewWithTypeOfSize(size_t typesize){
+	AEArray(void*)* self=malloc(sizeof(AEArray(void*)));
+	AEArrayInitWithTypeOfSize(self, typesize);
+	return (void*)self;
+}
+#define AEArrayNew(type) AEArrayNewWithTypeOfSize(sizeof(type))
+static inline void AEArrayDelete(void* array){
+	if(array==NULL) return;
+	AEArrayDeinit(array);
+	free(array);
+}
+//</Oddity007 being thoughtful>
+
 #define AEArrayLength(array) ((array)->length)
 
 #define AEArrayTypeSize(array) ((array)->typeSize)

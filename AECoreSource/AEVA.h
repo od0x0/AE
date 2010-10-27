@@ -45,6 +45,20 @@ void AEVAInit(AEVA* va,int isAnIndexArray,int vbotype,int tuint, int dataformat)
 void AEVADeinit(AEVA* va);
 void AEVAInitCopy(AEVA* vato,AEVA* vafrom);
 
+//<Oddity007 being thoughtful and thinking of a certain graveyard monster that doesn't understand what lvalues are, and yet still uses pointers. >.> >
+static inline AEVA* AEVANew(int isAnIndexArray,int vbotype,int tuint, int dataformat){
+	AEVA* va=malloc(sizeof(AEVA));
+	AEVAInit(va, isAnIndexArray, vbotype, tuint, dataformat);
+	return va;
+}
+
+static inline void AEVADelete(AEVA* va){
+	if(not va) return;
+	AEVADeinit(va);
+	free(va);
+}
+//</Oddity007 being thoughtful>
+
 void* AEVAMap(AEVA* va, unsigned int length,unsigned int writereadmode);
 void AEVAUnmap(AEVA* va);
 

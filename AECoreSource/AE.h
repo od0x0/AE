@@ -22,6 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
+#include "AETable.h"
 #include "AEMath.h"
 #include "AEArray.h"
 #include "SOIL.h"

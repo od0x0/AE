@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+// A simple void pointer wrapper over khash.h
+
 typedef void AETable;
 
 AETable* AETableGet(AETable* table, char* name);
