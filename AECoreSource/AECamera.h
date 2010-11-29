@@ -5,7 +5,7 @@
 typedef struct AECamera AECamera;
 
 AECamera* AECameraNew(void);
-AECamera* AECameraRetain(AECamera* cam);
+//AECamera* AECameraRetain(AECamera* cam); (deprecated)
 void AECameraDelete(AECamera* cam);
 
 void AECameraPositionGet(AECamera* cam,AEVec3* v3);

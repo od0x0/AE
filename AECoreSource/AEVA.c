@@ -5,7 +5,7 @@
 
 static void* CurrentIterationData=NULL;
 
-static size_t AEVAVertexByteSize(AEVA* va){
+size_t AEVABytesPerVertex(AEVA* va){
 	size_t stride=sizeof(AEVec2)*va->tunit+sizeof(AEVec3);
 	switch (va->dataformat) {
 		case AEVADataFormat3VF:
@@ -24,6 +24,7 @@ static size_t AEVAVertexByteSize(AEVA* va){
 	}
 	return stride;
 }
+#define AEVAVertexByteSize AEVABytesPerVertex
 
 void AEVAIterationBegin(AEVA* va){
 	CurrentIterationData=AEVAMap(va, va->length, GL_READ_WRITE);
@@ -99,7 +100,7 @@ void AEVAInitCopy(AEVA* vato,AEVA* vafrom){
 
 void* AEVAMap(AEVA* va, unsigned int length,unsigned int writereadmode){
 	unsigned int arrayType=va->isAnIndexArray?GL_ELEMENT_ARRAY_BUFFER:GL_ARRAY_BUFFER;
-	if(sizeof(GLfloat)!=sizeof(char[4])) AEError("A GLfloat is not equal to 4 bytes on your system!  This is very, very, bad.");
+	if(sizeof(GLfloat)!=sizeof(char[4]) and sizeof(GLuint)!=sizeof(char[4])) AEError("A GLfloat or GLuint is not equal to 4 bytes on your system!  This is very, very, bad.");
 	//if(va->length && va->length!=length) AEError("You are trying to access a va with a different length than the length it actually has.");
 	if(va->length==0){
 		va->length=length;
@@ -421,7 +422,7 @@ void AEVAUnserializeFromMBuffer(AEVA* va,AEMBuffer* mbuffer){
 	AEVAUnmap(va);
 }
 
-void AEVALoadFromObj(AEVA* va, AEVA* ia, char* objfilename){
+void AEVALoadFromObj(AEVA* va, AEVA* ia, const char* objfilename){
 	
 	bool hasColors= (va->dataformat==AEVADataFormat4CUB3VF) or (va->dataformat==AEVADataFormat4CUB3NF3VF);
 	bool hasNormals= (va->dataformat==AEVADataFormat3NF3VF) or (va->dataformat==AEVADataFormat4CUB3NF3VF);

@@ -11,6 +11,7 @@ typedef struct{
 	unsigned char hasColor: 1;//2 possible
 }AEVAFormat;
 */
+//Should be alright to read from, it's pretty much standard now
 typedef struct{
 	unsigned int length;
 	union{
@@ -33,6 +34,9 @@ typedef struct{
 #define AEVAVBOTypeDynamic 2
 #define AEVAVBOTypeStatic 3
 
+
+size_t AEVABytesPerVertex(AEVA* va);
+
 void AEVAIterationBegin(AEVA* va);
 void AEVAIterationEnd(AEVA* va);
 
@@ -44,20 +48,6 @@ GLuint* AEVAIteratorIndexNext(AEVA* va, GLuint* old);
 void AEVAInit(AEVA* va,int isAnIndexArray,int vbotype,int tuint, int dataformat);
 void AEVADeinit(AEVA* va);
 void AEVAInitCopy(AEVA* vato,AEVA* vafrom);
-
-//<Oddity007 being thoughtful and thinking of a certain graveyard monster that doesn't understand what lvalues are, and yet still uses pointers. >.> >
-static inline AEVA* AEVANew(int isAnIndexArray,int vbotype,int tuint, int dataformat){
-	AEVA* va=malloc(sizeof(AEVA));
-	AEVAInit(va, isAnIndexArray, vbotype, tuint, dataformat);
-	return va;
-}
-
-static inline void AEVADelete(AEVA* va){
-	if(not va) return;
-	AEVADeinit(va);
-	free(va);
-}
-//</Oddity007 being thoughtful>
 
 void* AEVAMap(AEVA* va, unsigned int length,unsigned int writereadmode);
 void AEVAUnmap(AEVA* va);
@@ -80,4 +70,4 @@ void AEVAUnserializeFromFILE(AEVA* va,FILE* file);
 void AEVASerializeToMBuffer(AEVA* va,AEMBuffer* mbuffer);
 void AEVAUnserializeFromMBuffer(AEVA* va,AEMBuffer* mbuffer);
 
-void AEVALoadFromObj(AEVA* va, AEVA* ia, char* objfilename);
+void AEVALoadFromObj(AEVA* va, AEVA* ia, const char* objfilename);

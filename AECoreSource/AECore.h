@@ -31,12 +31,14 @@ Ambition Engine Core.
 #include "AEMath.h"
 #include "SOIL.h"
 
+char* AEStringDuplicate(const char* string);
+
 typedef struct AEContext{
 	unsigned int w,h;
 	unsigned char r, g, b, a, stencil, depth, inFullscreen, multisample;
 	void* aux;
 	
-	void (*init)(struct AEContext* self,char* title, void* arg);
+	void (*init)(struct AEContext* self, const char* title, void* arg);
 	void* initarg;
 	void (*refresh)(struct AEContext* self, void* arg);
 	void* refresharg;
@@ -62,7 +64,7 @@ typedef struct AEContext{
 void AEContextActiveSet(AEContext* context);
 AEContext* AEContextActiveGet(void);
 
-void AEContextInit(AEContext* context,char* title,int w,int h);
+void AEContextInit(AEContext* context,const char* title,int w,int h);
 void AEContextRun(AEContext* context);
 void AEContextDeinit(AEContext* context);
 
@@ -85,8 +87,9 @@ typedef GLuint AETexture;
 #define AETextureLoadFlagDXTCompression SOIL_FLAG_COMPRESS_TO_DXT
 #define AETextureLoadFlagMipmaps SOIL_FLAG_MIPMAPS
 #define AETextureLoadFlagInvertY SOIL_FLAG_INVERT_Y
+#define AETextureLoadFlagRepeat SOIL_FLAG_TEXTURE_REPEATS
 
-#define AETextureLoadFlagDefault SOIL_FLAG_COMPRESS_TO_DXT|SOIL_FLAG_MIPMAPS
+#define AETextureLoadFlagDefault (SOIL_FLAG_COMPRESS_TO_DXT|SOIL_FLAG_MIPMAPS|SOIL_FLAG_TEXTURE_REPEATS)
 
 AETexture AETextureLoadWithFlags(const char* filename,unsigned int flags);
 #define AETextureLoad(filename) AETextureLoadWithFlags(filename,AETextureLoadFlagDefault)

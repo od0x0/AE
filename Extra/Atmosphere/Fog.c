@@ -24,8 +24,8 @@ void AEFogBind(AEFog* fog){
 	glFogf(GL_FOG_START, fog->start);
 	glFogf(GL_FOG_END, fog->end);
 
-	glClearColor(fog->color[0], fog->color[1], fog->color[2], fog->color[3]);
-	glFogfv(GL_FOG_COLOR, fog->color);
+	glClearColor(fog->color.r, fog->color.g, fog->color.b, fog->color.a);
+	glFogfv(GL_FOG_COLOR, (GLfloat*)&fog->color);
 	glFogf(GL_FOG_DENSITY, fog->density);
 	glHint(GL_FOG_HINT, GL_NICEST);
 }

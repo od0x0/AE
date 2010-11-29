@@ -4,36 +4,44 @@
 #include <string.h>
 #include "AECamera.h"
 
+char* AEStringDuplicate(const char* string){
+	if(not string) return NULL;
+	size_t length=strlen(string);
+	char* newstring=malloc(length+1);
+	memcpy(newstring, string, length+1);
+	return newstring;
+}
+
 ///////////////////////////////////////////////////
 //Texture Stuff
 AETexture AETextureLoadWithFlags(const char* filename, unsigned int flags){
 	//SOIL is EPIC, no denial.
 	//Handles EVERYTHING, beautifully too
-	AETexture texid = SOIL_load_OGL_texture
+	AETexture texture = SOIL_load_OGL_texture
 		(
 			filename,
 			SOIL_LOAD_AUTO,
 			SOIL_CREATE_NEW_ID,
-			flags | SOIL_FLAG_TEXTURE_REPEATS |  SOIL_FLAG_INVERT_Y
+			flags | SOIL_FLAG_INVERT_Y
 		);
-	if(texid==0){
+	if(texture==0){
 		const char* result=SOIL_last_result();
 		char message[strlen(result)+strlen(filename)+strlen(": ")+1];
 		sprintf(message, "%s: %s", result, filename);
 		AEError(message);
 	}
-	AETextureBind(texid);
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_REPEAT);
-	return texid;
+	//AETextureBind(texture);
+	//glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_REPEAT);
+	//glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_REPEAT);
+	return texture;
 }
 
 AETexture AETextureLoadFromMemoryWithFlags(void* data,size_t dataSize, unsigned int flags){
-	AETexture texture = SOIL_load_OGL_texture_from_memory(data, dataSize, SOIL_LOAD_AUTO, 0, flags | SOIL_FLAG_TEXTURE_REPEATS |  SOIL_FLAG_INVERT_Y);
+	AETexture texture = SOIL_load_OGL_texture_from_memory(data, dataSize, SOIL_LOAD_AUTO, 0, flags |  SOIL_FLAG_INVERT_Y);
 	if(texture==0) printf("Texture loading from memory failed because %s",SOIL_last_result());
-	AETextureBind(texture);
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_REPEAT);
+	//AETextureBind(texture);
+	//glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_REPEAT);
+	//glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_REPEAT);
 	return texture;
 }
 
@@ -171,7 +179,7 @@ void AEExceptionsThrow_internal(const char* type, char* message, const char* fun
 	
 	AEExceptionsRoot->type=type;
 	AEExceptionsRoot->wasThrown=true;
-	if(message) message=strdup(message);
+	if(message) message=AEStringDuplicate(message);
 	AEExceptionsRoot->message=message;
 	AEExceptionsRoot->functionOfOrigin=functionOfOrigin;
 	longjmp(AEExceptionsRoot->jumpbuffer, 1);
@@ -260,7 +268,7 @@ AEContext* AEContextActiveGet(void){
 	return &AEContextActive;
 }
 
-void AEContextInit(AEContext* context,char* title,int w,int h){
+void AEContextInit(AEContext* context,const char* title,int w,int h){
 	if(not context) context=AEContextActiveGet();
 	
 	if(context->init==NULL || context->refresh==NULL || context->pollinput==NULL || context->swapbuffers==NULL || context->deinit==NULL || context->secondsget==NULL) AEError("AEContext function pointers need to all be filled before you can use the engine.");

@@ -2,10 +2,29 @@
 #include <math.h>
 #include <stdlib.h>
 
+#define AEEpsilon 0.000001
+
 typedef struct{float x,y;}AEVec2;
 typedef struct{float x,y,z;}AEVec3;
 typedef struct{float x,y,z,w;}AEVec4;
+static inline AEVec4 AEVec3AsVec4(AEVec3 v3){
+	AEVec4 v4={v3.x,v3.y,v3.z,0};
+	return v4;
+}
+static inline AEVec3 AEVec4AsVec3(AEVec4 v4){
+	AEVec3 v3={v3.x,v3.y,v3.z};
+	return v3;
+}
+static inline AEVec3 AEVec2AsVec3(AEVec2 v2){
+	AEVec3 v3={v3.x,v3.y,0};
+	return v3;
+}
+static inline AEVec2 AEVec3AsVec2(AEVec3 v3){
+	AEVec2 v2={v3.x,v3.y};
+	return v2;
+}
 typedef AEVec4 AEQuat;
+typedef AEVec4 AEPlane;
 typedef struct{int x,y;}AEVec2i;
 typedef struct{int x,y,z;}AEVec3i;
 typedef struct{int x,y,z,w;}AEVec4i;
@@ -98,7 +117,12 @@ static inline AEVec3 AEVec3FromCoords(float x,float y,float z){
 	AEVec3 v={x,y,z};
 	return v;
 }
-
+static inline AEVec3 AEVec3ScaleTo360Range(AEVec3 v){
+	v.x=fmodf(v.x, 360);
+	v.y=fmodf(v.y, 360);
+	v.z=fmodf(v.z, 360);
+	return v;
+}
 static inline AEVec3 AEVec3FromSingle(float xyz){return AEVec3FromCoords(xyz,xyz,xyz);}
 static inline AEVec3 AEVec3Add(AEVec3 v,AEVec3 v2){return AEVec3FromCoords(v.x+v2.x,v.y+v2.y,v.z+v2.z);}
 static inline AEVec3 AEVec3Sub(AEVec3 v,AEVec3 v2){return AEVec3FromCoords(v.x-v2.x,v.y-v2.y,v.z-v2.z);}
@@ -108,9 +132,8 @@ static inline float AEVec3Dot(AEVec3 v,AEVec3 v2){return v.x*v2.x+v.y*v2.y+v.z*v
 static inline AEVec3 AEVec3Cross(AEVec3 v,AEVec3 v2){return AEVec3FromCoords(v.y*v2.z-v2.y*v.z,v.z*v2.x-v2.z*v.x,v.x*v2.y-v2.x*v.y);}
 static inline float AEVec3LengthSQ(AEVec3 v){return AEVec3Dot(v,v);}
 static inline float AEVec3LengthInv(AEVec3 v){return AESqrtInv(AEVec3LengthSQ(v));}
+static inline float AEVec3Length(AEVec3 v){return AESqrtInv(AEVec3Dot(v,v));}
 static inline AEVec3 AEVec3Normalized(AEVec3 v){return AEVec3Mul(AEVec3FromSingle(AEVec3LengthInv(v)),v);}
-static inline float AEVec3LengthInvAccurate(AEVec3 v){return 1/sqrtf(AEVec3LengthSQ(v));}
-static inline AEVec3 AEVec3NormalizedAccurate(AEVec3 v){return AEVec3Mul(AEVec3FromSingle(AEVec3LengthInvAccurate(v)),v);}
 static inline AEVec3 AEVec3Max(AEVec3 a,AEVec3 b){return AEVec3FromCoords(AEMax(a.x,b.x),AEMax(a.y,b.y),AEMax(a.z,b.z));}
 static inline AEVec3 AEVec3Min(AEVec3 a,AEVec3 b){return AEVec3FromCoords(AEMin(a.x,b.x),AEMin(a.y,b.y),AEMin(a.z,b.z));}
 static inline int AEVec3IsBetween(AEVec3 hit,AEVec3 min,AEVec3 max){
@@ -119,6 +142,12 @@ static inline int AEVec3IsBetween(AEVec3 hit,AEVec3 min,AEVec3 max){
 	if(hit.z < min.z || max.z < hit.z) return 0;
 	return 1;
 }
+static inline float AEVec3DistanceBetween(AEVec3 v, AEVec3 v2){
+	AEVec3 difference=AEVec3Sub(v, v2);
+	return sqrtf(AEVec3Dot(difference, difference));
+}
+static inline AEVec3 AEVec3Round(AEVec3 v){return AEVec3FromCoords(round(v.x), round(v.y), round(v.z));}
+static inline AEVec3 AEVec3Abs(AEVec3 v){return AEVec3FromCoords(fabsf(v.x), fabsf(v.y), fabsf(v.z));}
 static inline AEVec3 AEVec3RandomBetween(AEVec3 min,AEVec3 max){
 	return AEVec3FromCoords(AERandomBetween(min.x,max.x),AERandomBetween(min.y,max.y),AERandomBetween(min.z,max.z));
 }
@@ -148,16 +177,8 @@ static inline AEQuat AEQuatMul(AEQuat q,AEQuat q2){
 	r.w=(q.w*q2.w) - (q.x*q2.x) - (q.y*q2.y) - (q.z*q2.z);
 	return r;
 }
-static inline AEQuat AEQuatNormalizedApprox(AEQuat q){
-	float magnitude = AESqrtInv(((q.x * q.x) +(q.y * q.y) +(q.z * q.z) +(q.w * q.w)));
-	q.x *= magnitude;
-	q.y *= magnitude;
-	q.z *= magnitude;
-	q.w *= magnitude;
-	return q;
-}
 static inline AEQuat AEQuatNormalized(AEQuat q){
-	float magnitude = 1/sqrt(((q.x * q.x) +(q.y * q.y) +(q.z * q.z) +(q.w * q.w)));
+	float magnitude = AESqrtInv(((q.x * q.x) +(q.y * q.y) +(q.z * q.z) +(q.w * q.w)));
 	q.x *= magnitude;
 	q.y *= magnitude;
 	q.z *= magnitude;
@@ -214,6 +235,7 @@ static inline void AEQuatRotateZ(AEQuat* q,float angle){
 }
 static inline AEQuat AEQuatFromEuler(AEVec3 v){
 	AEQuat x,y,z={0,0,0,1};
+	v=AEVec3ScaleTo360Range(v);
 	x=y=z;
 	AEQuatRotateX(&x,v.x);
 	AEQuatRotateY(&y,v.y);
@@ -256,7 +278,7 @@ static inline AEQuat AEQuatBetween(AEVec3 v1,AEVec3 v2){
 	q.z = axis.z;
 	//if (0/*vectors are unit length*/) q.w = 1 + AEVec3Dot(v1,v2);
 	//else
-		q.w = sqrtf(AEVec3LengthSQ(v1) * AEVec3LengthSQ(v2)) + AEVec3Dot(v1,v2);
+		q.w = AESqrtInv(AEVec3LengthSQ(v1) * AEVec3LengthSQ(v2)) + AEVec3Dot(v1,v2);
 	
 	q=AEQuatNormalized(q);
 	return q;
@@ -368,3 +390,16 @@ static inline AEVec3 AEMatrix4x4MulVec3(float* m4x4, AEVec3 v) {
 	result.z = ((m4x4[2] * v.x) + (m4x4[6] * v.y) + (m4x4[10] * v.z) + m4x4[14]);
 	return result;
 }
+
+static inline AEVec3 AERayAtTime(AEVec3 s, AEVec3 d, float t){
+	return AEVec3Add(s, AEVec3Mul(d, AEVec3FromSingle(t)));
+}
+
+static inline float AEPlaneRayIntersectionTime(AEPlane p, AEVec3 s, AEVec3 d){
+	return -(p.x*s.x + p.y*s.y + p.z*s.z + p.w) / (p.x*d.x + p.y*d.y + p.z*d.z);
+}
+
+static inline float AEPlanePointSignedDistance(AEPlane plane, AEVec3 point){
+	return AEVec3Dot(AEVec4AsVec3(plane), point)+plane.w;
+}
+

@@ -15,6 +15,7 @@ void AEMaterialsTimeSet(float seconds);
 AEMaterial* AEMaterialNew(void);
 
 AEMaterial* AEMaterialRetain(AEMaterial* material);
+//(deprecated)
 
 void AEMaterialDelete(AEMaterial* material);
 
@@ -24,10 +25,9 @@ void AEMaterialBindShaderOnlyEXT(AEMaterial* material);
 
 //Does not store a copy of the shader text!
 //Calling it with both texts as NULL links the shaders and generates a program
-void AEMaterialShaderSet(AEMaterial* material,char* vshadertext,char* fshadertext);
+void AEMaterialShaderSet(AEMaterial* material,const char* vshadertext,const char* fshadertext);
 //Null terminated array of Null terminated strings
-void AEMaterialShaderSetMulti(AEMaterial* material,char** vshadertextarray,char** fshadertextarray);
+void AEMaterialShaderSetMulti(AEMaterial* material,const char** vshadertextarray,const char** fshadertextarray);
 
 //"Consumes" the image passed into it so that AEMaterialTextureSet(material,"name",AEImageLoad("filename.png"));  will work with out leak.  If you don't want it to delete it, just *Retain() it before passing it in.
-void AEMaterialTextureSetWithFlags(AEMaterial* material,char* name,AEImage* image,unsigned int flags);
-#define AEMaterialTextureSet(material,name,image) AEMaterialTextureSetWithFlags(material,name,image,AETextureLoadFlagDefault)
+void AEMaterialTextureSet(AEMaterial* material,const char* name,AEImage* image);

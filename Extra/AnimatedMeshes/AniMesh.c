@@ -1,6 +1,6 @@
 #include "AniMesh.h"
 
-//Potential optimization: Use 4x4 Matricies?
+//Potential optimization: Use 4x4 Matrices for multiplication? (ie. generate matrix on interpolation for use in multiplying vertices against)
 
 //The t in r=a+t*(b-a)
 void AEAniJointsInterpolate(AEAniJoint* outjoints, AEAniJoint* joints1, AEAniJoint* joints2, float t, int jointCount){

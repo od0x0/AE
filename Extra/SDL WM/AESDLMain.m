@@ -383,7 +383,7 @@ int main (int argc, char **argv)
     return 0;
 }
 
-#include "Core.h"
+#include "AECore.h"
 
 int AESDLEventFilter(const SDL_Event* event){
 	//So it closes when the user says close
@@ -393,7 +393,7 @@ int AESDLEventFilter(const SDL_Event* event){
 
 //AESDL* AESDLActive=NULL;
 
-void AESDLInit(AEContext* context,char* title){
+void AESDLInit(AEContext* context,char* title,void* arg){
 	int error = SDL_Init(SDL_INIT_EVERYTHING);
 	if(error){
 		puts("SDL failed to start");
@@ -406,45 +406,51 @@ void AESDLInit(AEContext* context,char* title){
 	SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, context->a );
 	SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, context->stencil);
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, context->depth);
+	if(context->multisample){
+		SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
+		SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, context->multisample);
+	}
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 	
 	SDL_SetVideoMode(context->w, context->h, 0, context->inFullscreen?(SDL_OPENGL | SDL_FULLSCREEN):SDL_OPENGL);
 	SDL_WM_SetCaption(title,NULL);
 	SDL_SetEventFilter(AESDLEventFilter);
+	
+	if(context->multisample) glEnable(GL_MULTISAMPLE);
 }
 
-void AESDLSwapBuffers(AEContext* context){
+void AESDLSwapBuffers(AEContext* context,void* arg){
 	SDL_GL_SwapBuffers();
 }
 
-void AESDLRefresh(AEContext* context){
+void AESDLRefresh(AEContext* context,void* arg){
 
 }
 
 int AESDLKey(int key){return SDL_GetKeyState(NULL)[key];}
 int AESDLMouseButton(char button){return (SDL_BUTTON(button)&SDL_GetMouseState(NULL,NULL));}
 
-int AESDLPollInput(AEContext* context){
+int AESDLPollInput(AEContext* context,void* arg){
 	SDL_PumpEvents();
 	if((AESDLKey(SDLK_LMETA)||AESDLKey(SDLK_LSUPER))&&AESDLKey(SDLK_q)) exit(0);
 		//SDLK_LSUPER for Windoze and SDLK_LMETA for OS X
 	return 1;
 }
 
-void AESDLDeInit(AEContext* context){
+void AESDLDeInit(AEContext* context,void* arg){
 	SDL_Quit();
 }
 
-double AESDLSecondsGet(AEContext* context){
+double AESDLSecondsGet(AEContext* context,void* arg){
 	return SDL_GetTicks()*0.001;
 }
 
 void AESDLBridge(void){
 	AEContext* context=AEContextActiveGet();
-	context->init=AESDLInit;
-	context->pollinput=AESDLPollInput;
-	context->swapbuffers=AESDLSwapBuffers;
-	context->deinit=AESDLDeInit;
-	context->seconds=AESDLSecondsGet;
-	context->refresh=AESDLRefresh;
+	AEContextCallbackSet(context, AEContextCallbackInit, AESDLInit, NULL);
+	AEContextCallbackSet(context, AEContextCallbackPollInput, AESDLPollInput, NULL);
+	AEContextCallbackSet(context, AEContextCallbackSwapBuffers, AESDLSwapBuffers, NULL);
+	AEContextCallbackSet(context, AEContextCallbackDeinit, AESDLDeInit, NULL);
+	AEContextCallbackSet(context, AEContextCallbackSecondsGet, AESDLSecondsGet, NULL);
+	AEContextCallbackSet(context, AEContextCallbackRefresh, AESDLRefresh, NULL);
 }

@@ -6,12 +6,12 @@
 
 typedef void AETable;
 
-AETable* AETableGet(AETable* table, char* name);
-void AETableSet(AETable* table, char* name, void* value);
+AETable* AETableGet(AETable* table, const char* name);
+void AETableSet(AETable* table, const char* name, void* value);
 AETable* AETableNew(void);
 void AETableDelete(AETable* table);
 
-typedef void (*AETableEachFunc)(char* name, void* value, void* arg);
+typedef void (*AETableEachFunc)(const char* name, void* value, void* arg);
 
 void AETableEach(AETable* table, AETableEachFunc func, void* arg);
 void* AETableRemove(void* table, char* name);

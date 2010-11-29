@@ -32,14 +32,16 @@ void AEMaterialsTimeSet(float seconds){
 	AEMaterialTime=seconds;
 }
 
-AEMaterial* AEMaterialNew(void){
-	return AEMaterialRetain(calloc(1,sizeof(AEMaterial)));
-}
-
 AEMaterial* AEMaterialRetain(AEMaterial* material){
 	if(material) material->refcount++;
 	return material;
 }
+
+AEMaterial* AEMaterialNew(void){
+	return AEMaterialRetain(calloc(1,sizeof(AEMaterial)));
+}
+
+
 
 void AEMaterialDelete(AEMaterial* material){
 	if(material==NULL) return;
@@ -127,7 +129,7 @@ void AEMaterialBindLightmapEXT(AEMaterial* material,AETexture lightmap){
 	glActiveTexture(GL_TEXTURE0);
 }
 
-void AEMaterialShaderSetMulti(AEMaterial* material,char** vshadertextarray,char** fshadertextarray){
+void AEMaterialShaderSetMulti(AEMaterial* material,const char** vshadertextarray,const char** fshadertextarray){
 	if(AEMaterialsShadersEnabled==false) return;
 	
 	if(vshadertextarray){
@@ -143,8 +145,8 @@ void AEMaterialShaderSetMulti(AEMaterial* material,char** vshadertextarray,char*
 		
 		//Make it easier for copy/paste
 		GLuint object=material->vshader;
-		char* shadertext=vshadertextarray[0];
-		char* shadertype="Vertex";
+		const char* shadertext=vshadertextarray[0];
+		const char* shadertype="Vertex";
 		
 		GLint status=0;
 		glGetShaderiv(object,GL_COMPILE_STATUS,&status);
@@ -172,8 +174,8 @@ void AEMaterialShaderSetMulti(AEMaterial* material,char** vshadertextarray,char*
 		
 		//Make it easier for copy/paste
 		GLuint object=material->fshader;
-		char* shadertext=fshadertextarray[0];
-		char* shadertype="Fragment";
+		const char* shadertext=fshadertextarray[0];
+		const char* shadertype="Fragment";
 		
 		GLint status=0;
 		glGetShaderiv(object,GL_COMPILE_STATUS,&status);
@@ -233,18 +235,18 @@ void AEMaterialShaderSetMulti(AEMaterial* material,char** vshadertextarray,char*
 
 }
 
-void AEMaterialShaderSet(AEMaterial* material,char* vshadertext,char* fshadertext){
-	char* vshadertextarray[2]={vshadertext,NULL};
-	char* fshadertextarray[2]={fshadertext,NULL};
+void AEMaterialShaderSet(AEMaterial* material,const char* vshadertext,const char* fshadertext){
+	const char* vshadertextarray[2]={vshadertext,NULL};
+	const char* fshadertextarray[2]={fshadertext,NULL};
 	AEMaterialShaderSetMulti(material, vshadertext ? vshadertextarray : NULL, fshadertext ? fshadertextarray : NULL);
 }
 
-void AEMaterialTextureSetWithFlags(AEMaterial* material,char* name,AEImage* image,unsigned int flags){
+void AEMaterialTextureSet(AEMaterial* material,const char* name,AEImage* image){
 	material->texUnitCount++;
 	material->textures=realloc(material->textures,material->texUnitCount*sizeof(AETexture));
 	material->textureNames=realloc(material->textureNames,material->texUnitCount*sizeof(char*));
-	material->textureNames[material->texUnitCount-1]=strdup(name);
-	AETexture texture=AEImageToTextureWithFlags(image, flags);
+	material->textureNames[material->texUnitCount-1]=AEStringDuplicate(name);
+	AETexture texture=AEImageToTexture(image);
 	material->textures[material->texUnitCount-1]=texture;
 	AEImageDelete(image);
 }

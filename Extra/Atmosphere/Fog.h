@@ -3,7 +3,7 @@
 
 typedef struct{
 	GLfloat start, end;
-	GLfloat color[4];
+	AERGBA color;
 	GLfloat density;
 	char mode;
 }AEFog;

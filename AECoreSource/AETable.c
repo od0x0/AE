@@ -3,14 +3,14 @@
 
 KHASH_MAP_INIT_STR(Table, void*)
 
-void* AETableGet(void* table, char* name){
+void* AETableGet(void* table, const char* name){
 	khash_t(Table)* h=table;
 	khiter_t k=kh_get(Table, h, name);
 	if(kh_end(h)==k) return NULL;
 	return kh_value(h, k);
 }
 
-void AETableSet(void* table, char* name, void* value){
+void AETableSet(void* table, const char* name, void* value){
 	khash_t(Table)* h=table;
 	khiter_t k=kh_get(Table, h, name);
 	if(kh_end(h)==k){
