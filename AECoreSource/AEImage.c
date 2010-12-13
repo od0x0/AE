@@ -1,6 +1,6 @@
 #include "AEImage.h"
 
-AEImage* AEImageRetain(AEImage* image){
+static AEImage* AEImageRetain(AEImage* image){
 	image->refcount++;
 	return image;
 }
@@ -15,86 +15,13 @@ AEImage* AEImageNew(int w,int h){
 	return AEImageRetain(image);
 }
 
-
-
-AEImage* AEImageClone(AEImage* image){
+static AEImage* AEImageClone(AEImage* image){
 	//Not yet implemented
 	return NULL;//AEImageRetain(image);
 }
 
-void AEImageSerializeToFILE(AEImage* image, FILE* file){
-	
-}
-
-void AEImageUnserializeFromFILE(AEImage* image, FILE* file){
-	free(image->pixels);
-	free((void*)image->metastring);
-	
-	uint64_t version;
-	fread(&version, 1, sizeof(uint64_t), file);
-	version=AEHostU64FromNet(version);
-	if(version not_eq 1) AEError("Invalid version (must be 1).");
-	uint64_t dataSize;
-	fread(&dataSize, 1, sizeof(uint64_t), file);
-	dataSize=AEHostU64FromNet(dataSize);
-	
-	void* data=malloc(dataSize);
-	fread(data, 1, dataSize, file);
-	
-	int channelCount,w,h;
-	unsigned char* pixels=SOIL_load_image_from_memory(data,dataSize,&w,&h,&channelCount,SOIL_LOAD_AUTO);
-	free(data);
-	
-	image->w=w;
-	image->h=h;
-	image->channels=channelCount;
-	image->pixels=pixels;
-	
-	uint64_t flags;
-	fread(&flags, 1, sizeof(uint64_t), file);
-	flags=AEHostU64FromNet(flags);
-	AEImageTextureFlagsSet(image,flags);
-}
-
-void AEImageSerializeToMBuffer(AEImage* image,AEMBuffer* mbuffer){
-
-}
-
-void AEImageUnserializeFromMBuffer(AEImage* image,AEMBuffer* mbuffer){
-	free(image->pixels);
-	free((void*)image->metastring);
-	
-	uint64_t version;
-	//fread(&version, 1, sizeof(uint64_t), file);
-	AEMBufferRead(mbuffer, &version, sizeof(uint64_t));
-	version=AEHostU64FromNet(version);
-	if(version not_eq 1) AEError("Invalid version (must be 1).");
-	uint64_t dataSize;
-	//fread(&dataSize, 1, sizeof(uint64_t), file);
-	AEMBufferRead(mbuffer, &dataSize, sizeof(uint64_t));
-	dataSize=AEHostU64FromNet(dataSize);
-	
-	//void* data=malloc(dataSize);
-	//fread(data, 1, dataSize, file);
-	void* data=AEMBufferBytesGet(mbuffer, dataSize);
-	int channelCount,w,h;
-	unsigned char* pixels=SOIL_load_image_from_memory(data,dataSize,&w,&h,&channelCount,SOIL_LOAD_AUTO);
-	//free(data);
-	
-	image->w=w;
-	image->h=h;
-	image->channels=channelCount;
-	image->pixels=pixels;
-	
-	uint64_t flags;
-	//fread(&flags, 1, sizeof(uint64_t), file);
-	AEMBufferRead(mbuffer, &flags, sizeof(uint64_t));
-	flags=AEHostU64FromNet(flags);
-	AEImageTextureFlagsSet(image,flags);
-}
-
 AEImage* AEImageLoad(const char* filename){
-	if(not filename) return NULL;
+	if(filename==NULL) return NULL;
 	int channelCount,w,h;
 	unsigned char* pixels=SOIL_load_image(filename,&w,&h,&channelCount,SOIL_LOAD_AUTO);
 	if(pixels==NULL){
@@ -172,6 +99,7 @@ void AEImageBlit(AEImage* to,int offsetx,int offsety,AEImage* from){
 				pixelTo[2]=pixelFrom[2]*srcAlpha+pixelTo[2]*(1-srcAlpha);
 				pixelTo[3]=pixelFrom[3]*srcAlpha+pixelTo[3]*(1-srcAlpha);
 			}
+			AEImagePixelSet(to,x+offsetx,y+offsety,pixelTo);
 		}
 }
 
@@ -210,95 +138,4 @@ unsigned int AEImageTextureFlagsGet(AEImage* image){
 
 void AEImageTextureFlagsSet(AEImage* image,unsigned int flags){
 	image->flags=flags;
-}
-
-void AEImagePack(AEImage* self, AEImage** images, size_t imageCount, float* outTC){
-	AEPackNode* root=AEPackNodeNew();
-	root->w=self->w;
-	root->h=self->h;
-	printf("#%i: %p\n",__LINE__,root);
-	for (size_t i=0; i<imageCount; i++) {
-		if(not images[i]) continue;
-		int w=images[i]->w;
-		int h=images[i]->h;
-		AEPackNode* node=AEPackNodeInsert(root, w, h, images[i]);
-		printf("#%i: %p\n",__LINE__,node);
-		outTC[i*4+0]=0;
-		outTC[i*4+1]=0;
-		outTC[i*4+2]=0;
-		outTC[i*4+3]=0;
-		if(not node) continue;
-		AEImageBlit(self, node->x, node->y, images[i]);
-		/*outTC[i*4+0]=(float)node->x/root->w;
-		outTC[i*4+1]=(float)node->y/root->h;
-		outTC[i*4+2]=outTC[i*4+0]+(float)node->w/root->w;
-		outTC[i*4+3]=outTC[i*4+1]+(float)node->h/root->h;*/
-		outTC[i*4+0]=(float)node->x;///root->w;
-		outTC[i*4+1]=(float)node->y;///root->h;
-		outTC[i*4+2]=outTC[i*4+0]+(float)node->w;///root->w;
-		outTC[i*4+3]=outTC[i*4+1]+(float)node->h;///root->h;
-	}
-	AEPackNodeDelete(root);
-}
-
-AEPackNode* AEPackNodeNew(void){
-	return calloc(1, sizeof(AEPackNode));
-}
-
-void AEPackNodeDelete(AEPackNode* self){
-	if(not self) return;
-	AEPackNodeDelete(self->children[0]);
-	AEPackNodeDelete(self->children[1]);
-	free(self);
-}
-
-AEPackNode* AEPackNodeInsert(AEPackNode* self, int w, int h, void* tag){
-	if(not self) return NULL;
-	//if(self->tag) return NULL;
-	
-	if(self->children[0] or self->children[1]){
-		AEPackNode* node=AEPackNodeInsert(self->children[0], w, h, tag);
-		printf("#%i: %p\n",__LINE__,node);
-		if(node) return node;
-		node=AEPackNodeInsert(self->children[1], w, h, tag);
-		printf("#%i: %p\n",__LINE__,node);
-		return node;
-	}
-	
-	if(self->w < w or self->h < h) return NULL;
-	else if(self->w==w and self->h==h){
-		printf("#%i: %p\n",__LINE__,self);
-		return self;
-	}
-
-	self->children[0]=AEPackNodeNew();
-	self->children[1]=AEPackNodeNew();
-	
-	int xdifference = w - self->w;
-	int ydifference = h - self->h;
-	
-	if(xdifference > ydifference) {
-		self->children[0]->x=self->x;
-		self->children[0]->y=self->y;
-		self->children[0]->w=w;
-		self->children[0]->h=h;
-		self->children[1]->x=self->x+w;
-		self->children[1]->y=self->y;
-		self->children[1]->w=self->w-w;
-		self->children[1]->h=self->h;
-	}
-	else {
-		self->children[0]->x=self->x;
-		self->children[0]->y=self->y;
-		self->children[0]->w=w;
-		self->children[0]->h=h;
-		self->children[1]->x=self->x;
-		self->children[1]->y=self->y+h;
-		self->children[1]->w=self->w;
-		self->children[1]->h=self->h-h;
-	}
-	
-	void* node= AEPackNodeInsert(self, w, h, tag);
-	printf("#%i: %p\n",__LINE__,node);
-	return node;
 }

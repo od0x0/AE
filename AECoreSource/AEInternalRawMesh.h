@@ -28,7 +28,7 @@ static void AERawMeshDelete(AERawMesh* m){
 
 static AERawMesh* AERawMeshLoad(const char* filename){
 	AERawMesh* m;
-	int fcount,vcount,ncount,tcount;
+	unsigned int fcount,vcount,ncount,tcount;
 	unsigned int cv,cf,ct,cn,v[3],n[3],t[3];
 	char buffer[256];
 	float x,y,z;
@@ -70,21 +70,21 @@ static AERawMesh* AERawMeshLoad(const char* filename){
 	m->t=(AEVec2*)calloc(tcount,sizeof(AEVec2));
 	
 	if(m->f==NULL){
-		printf("Couldn't allocate %i faces for file named %s\n",fcount,filename);
+		printf("Couldn't allocate %u faces for file named %s\n",fcount,filename);
 		exit(2);
 	}
 
 	if(m->v==NULL){
-		printf("Couldn't allocate %i vertices for file named %s\n",vcount,filename);
+		printf("Couldn't allocate %u vertices for file named %s\n",vcount,filename);
 		exit(2);
 	}
 	if(m->n==NULL){
-		printf("Couldn't allocate %i normals for file named %s\n",ncount,filename);
+		printf("Couldn't allocate %u normals for file named %s\n",ncount,filename);
 		exit(2);
 	}
 
 	if(m->t==NULL){
-		printf("Couldn't allocate %i uv's for file named %s\n",tcount,filename);
+		printf("Couldn't allocate %u uv's for file named %s\n",tcount,filename);
 		exit(2);
 	}
 	
@@ -107,7 +107,7 @@ static AERawMesh* AERawMeshLoad(const char* filename){
 			m->n[cn].z=z;
 			cn++;
 		}
-		else if(9==sscanf(buffer,"f %i/%i/%i %i/%i/%i %i/%i/%i",&v[0],&t[0],&n[0],&v[1],&t[1],&n[1],&v[2],&t[2],&n[2])){
+		else if(9==sscanf(buffer,"f %u/%u/%u %u/%u/%u %u/%u/%u",&v[0],&t[0],&n[0],&v[1],&t[1],&n[1],&v[2],&t[2],&n[2])){
 		
 			if(v[0]<1||v[1]<1||v[2]<1){
 				printf("Invalid vertex id in file %s\n",filename);
@@ -127,7 +127,7 @@ static AERawMesh* AERawMeshLoad(const char* filename){
 			m->f[cf].n[2]=n[2]-1;
 			cf++;
 		}
-		else if(6==sscanf(buffer,"f %d//%d %d//%d %d//%d",&v[0],&n[0],&v[1],&n[1],&v[2],&n[2])){
+		else if(6==sscanf(buffer,"f %u//%u %u//%u %u//%u",&v[0],&n[0],&v[1],&n[1],&v[2],&n[2])){
 		
 			if(v[0]<1||v[1]<1||v[2]<1){
 				printf("Invalid vertex id in file %s\n",filename);
@@ -143,7 +143,7 @@ static AERawMesh* AERawMeshLoad(const char* filename){
 			m->f[cf].n[2]=n[2]-1;
 			cf++;
 		}
-		else if(6==sscanf(buffer,"f %d/%d %d/%d %d/%d",&v[0],&n[0],&v[1],&n[1],&v[2],&n[2])){
+		else if(6==sscanf(buffer,"f %u/%u %u/%u %u/%u",&v[0],&n[0],&v[1],&n[1],&v[2],&n[2])){
 		// Because the guys that wrote the blender .obj exporter don't know the obj file standard -_-
 		
 			if(v[0]<1||v[1]<1||v[2]<1){
@@ -160,7 +160,7 @@ static AERawMesh* AERawMeshLoad(const char* filename){
 			m->f[cf].n[2]=n[2]-1;
 			cf++;
 		}
-		else if(3==sscanf(buffer,"f %d %d %d",&v[0],&v[1],&v[2])){
+		else if(3==sscanf(buffer,"f %u %u %u",&v[0],&v[1],&v[2])){
 		
 			if(v[0]<1||v[1]<1||v[2]<1){
 				printf("Invalid vertex id in file %s\n",filename);
@@ -179,10 +179,10 @@ static AERawMesh* AERawMeshLoad(const char* filename){
 		m->count.t=tcount;
 	}else{
 		printf("\nError loading %s\nFound|Stated to be\n",filename);
-		printf("Vertex:%d|%d\n",cv,vcount);
-		printf("Face:%d|%d\n",cf,fcount);
-		printf("TexCoord:%d|%d\n",ct,tcount);
-		printf("Normals:%d|%d\n",cn,ncount);
+		printf("Vertex:%u|%u\n",cv,vcount);
+		printf("Face:%u|%u\n",cf,fcount);
+		printf("TexCoord:%u|%u\n",ct,tcount);
+		printf("Normals:%u|%u\n",cn,ncount);
 		exit(1);
 	}
 	fclose(file);

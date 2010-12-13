@@ -103,10 +103,14 @@ typedef unsigned int khint32_t;
 typedef unsigned long khint32_t;
 #endif
 
+#ifndef __cplusplus
 #if ULONG_MAX == ULLONG_MAX
 typedef unsigned long khint64_t;
 #else
 typedef unsigned long long khint64_t;
+#endif
+#else
+typedef unsigned long /*C++ doesn't support long long, so unfortunately, we have to do this.*/ khint64_t;
 #endif
 
 #ifdef _MSC_VER

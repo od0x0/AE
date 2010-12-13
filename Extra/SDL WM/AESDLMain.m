@@ -5,10 +5,10 @@
     Feel free to customize this file to suit your needs
 */
 
-#import "SDL.h"
-#import "SDLMain.h"
-#import <sys/param.h> /* for MAXPATHLEN */
-#import <unistd.h>
+#include "SDL.h"
+#include "SDLMain.h"
+#include <sys/param.h> /* for MAXPATHLEN */
+#include <unistd.h>
 
 /* For some reaon, Apple removed setAppleMenu from the headers in 10.4,
  but the method still is there and works. To avoid warnings, we declare
@@ -393,7 +393,7 @@ int AESDLEventFilter(const SDL_Event* event){
 
 //AESDL* AESDLActive=NULL;
 
-void AESDLInit(AEContext* context,char* title,void* arg){
+void AESDLInit(AEContext* context,const char* title,void* arg){
 	int error = SDL_Init(SDL_INIT_EVERYTHING);
 	if(error){
 		puts("SDL failed to start");
@@ -424,7 +424,7 @@ void AESDLSwapBuffers(AEContext* context,void* arg){
 }
 
 void AESDLRefresh(AEContext* context,void* arg){
-
+	//A dud, we don't actually do anything here.
 }
 
 int AESDLKey(int key){return SDL_GetKeyState(NULL)[key];}
@@ -447,10 +447,10 @@ double AESDLSecondsGet(AEContext* context,void* arg){
 
 void AESDLBridge(void){
 	AEContext* context=AEContextActiveGet();
-	AEContextCallbackSet(context, AEContextCallbackInit, AESDLInit, NULL);
-	AEContextCallbackSet(context, AEContextCallbackPollInput, AESDLPollInput, NULL);
-	AEContextCallbackSet(context, AEContextCallbackSwapBuffers, AESDLSwapBuffers, NULL);
-	AEContextCallbackSet(context, AEContextCallbackDeinit, AESDLDeInit, NULL);
-	AEContextCallbackSet(context, AEContextCallbackSecondsGet, AESDLSecondsGet, NULL);
-	AEContextCallbackSet(context, AEContextCallbackRefresh, AESDLRefresh, NULL);
+	context->init=AESDLInit;
+	context->pollInput=AESDLPollInput;
+	context->swapBuffers=AESDLSwapBuffers;
+	context->deinit=AESDLDeInit;
+	context->secondsGet=AESDLSecondsGet;
+	context->refresh=AESDLRefresh;
 }

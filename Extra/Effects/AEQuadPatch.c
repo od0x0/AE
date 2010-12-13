@@ -17,11 +17,9 @@ void AEQuadPatchInit(AEQuadPatch* self, bool cylindrical, size_t quadCount, AEVe
 		const AEVec2 tout[4]={{0,0},{1,0},{1,1},{0,1}};
 		for(char j=0;j<4;j++){
 			self->vertices[i*4+j].texcoord=tout[j];
-			float tint=tout[j].y==0 ? 0.2 : 1;
-			
-			self->vertices[i*4+j].color.r= tint*(colors ? colors[i].r : 255);
-			self->vertices[i*4+j].color.g= tint*(colors ? colors[i].g : 255);
-			self->vertices[i*4+j].color.b= tint*(colors ? colors[i].b : 255);
+			self->vertices[i*4+j].color.r= colors ? colors[i].r : 255;
+			self->vertices[i*4+j].color.g= colors ? colors[i].g : 255;
+			self->vertices[i*4+j].color.b= colors ? colors[i].b : 255;
 			self->vertices[i*4+j].color.a= 255;
 		}
 	}

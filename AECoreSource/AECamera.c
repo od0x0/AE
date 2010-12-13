@@ -22,7 +22,7 @@ AECamera* AECameraNew(void){
 	return cam;
 }
 
-AECamera* AECameraRetain(AECamera* cam){
+static AECamera* AECameraRetain(AECamera* cam){
 	if(cam && cam->refcount) cam->refcount++;
 	return cam;
 }

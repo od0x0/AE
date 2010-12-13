@@ -8,7 +8,7 @@
 //This isn't really going to change much, it should be alright to read from i
 typedef struct{
 	int w,h,channels;
-	short refcount;
+	unsigned short refcount;
 	unsigned char* pixels;
 	unsigned int flags;
 	const char* metastring;
@@ -20,14 +20,6 @@ AEImage* AEImageNew(int w,int h);
 //Retain/Cloning an image (deprecated)
 //AEImage* AEImageRetain(AEImage* image);
 //AEImage* AEImageClone(AEImage* image);
-
-//Serialization, internal format
-//Deprecated
-void AEImageSerializeToFILE(AEImage* image,FILE* file);
-void AEImageUnserializeFromFILE(AEImage* image,FILE* file);
-//The new one
-void AEImageSerializeToMBuffer(AEImage* image,AEMBuffer* mbuffer);
-void AEImageUnserializeFromMBuffer(AEImage* image,AEMBuffer* mbuffer);
 
 ///Loads a file using SOIL and returns it in an image
 AEImage* AEImageLoad(const char* filename);
@@ -54,18 +46,3 @@ AETexture AEImageToTexture(AEImage* image);
 
 ///The only way in which an image will be destroyed
 void AEImageDelete(AEImage* image);
-
-//Packs multiple images into one, stores the texture coordinates in outTC (x,y,x2,y2) (in 0..1 range)
-void AEImagePack(AEImage* self, AEImage** images, size_t imageCount, float* outTC);
-
-//Utility
-typedef struct AEPackNode AEPackNode;
-struct AEPackNode{
-	AEPackNode* children[2];
-	int x, y, w, h;
-	void* tag;
-};
-
-AEPackNode* AEPackNodeNew(void);
-void AEPackNodeDelete(AEPackNode* self);
-AEPackNode* AEPackNodeInsert(AEPackNode* self, int w, int h, void* tag);

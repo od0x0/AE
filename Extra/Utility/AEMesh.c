@@ -24,7 +24,7 @@ void AEMeshTriangleSubdivide4(AEMeshTriangle* self, AEMeshTriangle* t0, AEMeshTr
 }
 
 int AEMeshTriangleSplit(AEMeshTriangle* self, AEVec4 plane, AEMeshTriangle* t0, AEMeshTriangle* t1, AEMeshTriangle* t2){
-	AEError("Unimplemented.");
+	//AEError("Unimplemented.");
 	/*enum{
 		none,
 		coplanar,

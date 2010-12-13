@@ -19,7 +19,7 @@ void AEArrayResize(void* array,size_t length){
 void* AEArrayCheck(void* array){
 	AEArray(void)* self=array;
 	AEArrayResize(array,self->length+1);
-	return self->data+(self->length-1)*self->typeSize;
+	return (void*)((char*)self->data+(self->length-1)*self->typeSize);
 }
 void AEArraySweep(void* array){
 	AEArrayResize(array,0);
@@ -27,12 +27,12 @@ void AEArraySweep(void* array){
 void AEArrayAddBytes(void* array,void* bytes){
 	AEArray(void)* self=array;
 	AEArrayCheck(array);
-	memcpy(self->data+self->typeSize*(self->length-1), bytes, self->typeSize);
+	memcpy((char*)self->data+self->typeSize*(self->length-1), bytes, self->typeSize);
 }
 size_t AEArrayFindIndexOfBytes(void* array,void* bytes){
 	AEArray(void)* self=array;
 	for(size_t i=0; i<self->length; i++){
-		if(memcmp(self->data+self->typeSize*i, bytes, self->typeSize)==0) return i+1;
+		if(memcmp((char*)self->data+self->typeSize*i, bytes, self->typeSize)==0) return i+1;
 	}
 	return 0;
 }
@@ -51,7 +51,7 @@ void AEArrayRemoveDuplicates(void* array,void* _outarray,void* _indices){
 	AEArray(size_t)* indices=_indices;
 	
 	for(size_t i=0; i<self->length; i++){
-		void* data=self->data+i*self->typeSize;
+		void* data=(char*)self->data+i*self->typeSize;
 		size_t index=AEArrayAddBytesUnique(outarray, data);
 		if(indices) AEArrayAdd(indices, index);
 	}
@@ -62,8 +62,8 @@ void AEArrayRemoveBytes(void* array,void* bytes){
 	
 	AEArray(void)* self=array;
 	index--;
-	void* removed=index*self->typeSize+self->data;
-	void* last=(self->length-1)*self->typeSize+self->data;
+	void* removed=index*self->typeSize+(char*)self->data;
+	void* last=(self->length-1)*self->typeSize+(char*)self->data;
 	memcpy(removed,last,self->typeSize);
 	self->length--;
 	

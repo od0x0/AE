@@ -1,4 +1,4 @@
-#include "Fog.h"
+#include "AEFog.h"
 
 void AEFogBind(AEFog* fog){
 	if(not fog){

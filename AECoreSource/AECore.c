@@ -59,7 +59,7 @@ static uint64_t AEUInt64TwoToThe(uint64_t exponent){
 	return x;
 }
 
-uint64_t AEUInt64From8Bytes(uint8_t* bytes,bool bigendian){
+static uint64_t AEUInt64From8Bytes(uint8_t* bytes,bool bigendian){
 	uint64_t integer=0;
 	for(int i=0;i<8;i++){
 		int byteID=i;
@@ -69,7 +69,7 @@ uint64_t AEUInt64From8Bytes(uint8_t* bytes,bool bigendian){
 	return integer;
 }
 
-void AEUInt64To8Bytes(uint64_t integer,uint8_t* bytes,bool bigendian){
+static void AEUInt64To8Bytes(uint64_t integer,uint8_t* bytes,bool bigendian){
 	for(int i=0;i<8;i++) bytes[i]=0;
 	uint64_t quotient=integer;
 	for(int i=0;i<8;i++){
@@ -81,17 +81,17 @@ void AEUInt64To8Bytes(uint64_t integer,uint8_t* bytes,bool bigendian){
 	}
 }
 
-uint32_t AEUInt32From4Bytes(uint8_t* bytes,bool bigendian){
+static uint32_t AEUInt32From4Bytes(uint8_t* bytes,bool bigendian){
 	uint32_t integer=0;
 	for(int i=0;i<4;i++){
 		int byteID=i;
 		if(bigendian) byteID=4-i-1;
-		integer+=(uint32_t)bytes[byteID]*AEUInt64TwoToThe(8*i);
+		integer+=(uint32_t)bytes[byteID]*(uint32_t)AEUInt64TwoToThe(8*i);
 	}
 	return integer;
 }
 
-void AEUInt32To4Bytes(uint32_t integer,uint8_t* bytes,bool bigendian){
+static void AEUInt32To4Bytes(uint32_t integer,uint8_t* bytes,bool bigendian){
 	for(int i=0;i<4;i++) bytes[i]=0;
 	uint32_t quotient=integer;
 	for(int i=0;i<4;i++){
@@ -204,41 +204,74 @@ void AEMBufferInit(AEMBuffer* self){
 
 void AEMBufferDeinit(AEMBuffer* self){
 	if (not self) return;
+	if(self->file) fclose(self->file);
 	free(self->bytes);
 	memset(self, 0, sizeof(AEMBuffer));
 }
 void* AEMBufferBytesGet(AEMBuffer* self, size_t size){
+	if(self->file) {
+		return NULL;
+	}
 	self->position+=size;
 	if(self->position > self->length){
 		self->position=self->length;
 		return NULL;
 	}
-	return self->bytes+(self->position-size);
+	return (void*) (((char*)self->bytes)+(self->position-size));
 }
 
 void AEMBufferRead(AEMBuffer* self, void* data, size_t size){
+	if(self->file) {
+		fread(data, 1, size, self->file);
+		return;
+	}
 	void* from=AEMBufferBytesGet(self, size);
 	if(data and from) memcpy(data, from, size);
 }
 
 void AEMBufferWrite(AEMBuffer* self, void* data, size_t size){
+	if(self->file) {
+		fwrite(data, 1, size, self->file);
+		return;
+	}
 	size_t oldPosition=self->position;
 	void* to=AEMBufferBytesGet(self, size);
 	if(not to){
 		self->position=oldPosition;
 		self->length += size;
-		self->allocated = self->length * 1.2;
+		self->allocated = self->length + (self->length/10)*2;
 		self->bytes=realloc(self->bytes, self->allocated);
 		to=AEMBufferBytesGet(self, size);
 	}
 	if(data and to) memcpy(to, data, size);
 }
 
+void AEMBufferPositionSeek(AEMBuffer* self, long offset, int from){
+	if(self->file) {
+		fseek(self->file, offset, from);
+		return;
+	}
+	switch (from) {
+		case SEEK_CUR:
+			AEMBufferPositionSet(self, self->position+offset);
+			break;
+		case SEEK_END:
+			AEMBufferPositionSet(self, (self->length-1)+offset);
+			break;
+		case SEEK_SET:
+			AEMBufferPositionSet(self, offset);
+			break;
+		default:
+			AEError("Invalid Argument for 'from'.");
+			break;
+	}
+}
 void AEMBufferPositionSet(AEMBuffer* self, size_t position){
 	self->position=position;
 }
 
 size_t AEMBufferPositionGet(AEMBuffer* self){
+	if(self->file) return ftell(self->file);
 	return self->position;
 }
 
@@ -271,11 +304,11 @@ AEContext* AEContextActiveGet(void){
 void AEContextInit(AEContext* context,const char* title,int w,int h){
 	if(not context) context=AEContextActiveGet();
 	
-	if(context->init==NULL || context->refresh==NULL || context->pollinput==NULL || context->swapbuffers==NULL || context->deinit==NULL || context->secondsget==NULL) AEError("AEContext function pointers need to all be filled before you can use the engine.");
+	if(context->init==NULL || context->refresh==NULL || context->pollInput==NULL || context->swapBuffers==NULL || context->deinit==NULL || context->secondsGet==NULL) AEError("AEContext function pointers need to all be filled before you can use the engine.");
 	
 	context->w=w;context->h=h;
-	context->init(context, title, context->initarg);
-	
+	context->init(context, title, context->initArg);
+	context->clearedBuffers=GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT;
 	AECamera* cam=AECameraActiveGet();
 	AECameraViewportSet(cam,context->w,context->h);
 	
@@ -301,23 +334,23 @@ static void AEDefaultPerframeFunc(AEContext* context, double step, void* arg){}
 void AEContextRun(AEContext* context){
 	if(not context) context=AEContextActiveGet();
 	//0 is a magical number, simply acts as the default
-	if(context->frameupdate==NULL) context->frameupdate=AEDefaultPerframeFunc;
+	if(context->frameUpdate==NULL) context->frameUpdate=AEDefaultPerframeFunc;
 	
-	double lastFrameTime = context->secondsget(context, context->secondsgetarg);
+	double lastFrameTime = context->secondsGet(context, context->secondsGetArg);
 	double cyclesLeftOver = 0.0;
 	
 	double updateInterval = 1.0 / context->fixedUpdateFrameRateMax;
 	double maxCyclesPerFrame = context->fixedUpdateFrameRateMax / context->fixedUpdateFrameRateMin;
 	
-	double now=context->secondsget(context, context->secondsgetarg);
+	double now=context->secondsGet(context, context->secondsGetArg);
 	double then=now;
-	while(context->pollinput(context, context->pollinputarg)){
-		//Some code borrowed from sacredsoftware.com (code written by Alex Diener, aka ThemsAllTook)
-		if(context->fixedupdate){
+	while(context->pollInput(context, context->pollInputArg)){
+		//Some code borrowed from sacredsoftware.com (written by Alex Diener, aka ThemsAllTook)
+		if(context->fixedUpdate){
 			double currentTime=0;
 			double updateIterations=0;
 	
-			currentTime = context->secondsget(context, context->secondsgetarg);
+			currentTime = context->secondsGet(context, context->secondsGetArg);
 			updateIterations = ((currentTime - lastFrameTime) + cyclesLeftOver);
 	
 			if (updateIterations > (maxCyclesPerFrame * updateInterval)) {
@@ -326,134 +359,26 @@ void AEContextRun(AEContext* context){
 	
 			while (updateIterations > updateInterval) {
 				updateIterations -= updateInterval;
-				context->fixedupdate(context, updateInterval, context->fixedupdatearg);
+				context->fixedUpdate(context, updateInterval, context->fixedUpdateArg);
 			}
 	
 			cyclesLeftOver = updateIterations;
 			lastFrameTime = currentTime;
 		}
-		glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT); //This is default
-		//glClear(GL_DEPTH_BUFFER_BIT); // Use this if you always use a skybox
+		if(context->clearedBuffers) glClear(context->clearedBuffers);
 		AECameraBind(AECameraActiveGet());
 		
-		now=context->secondsget(context, context->secondsgetarg);
-		context->frameupdate(context, (now-then),context->frameupdatearg);
+		now=context->secondsGet(context, context->secondsGetArg);
+		context->frameUpdate(context, (now-then),context->frameUpdateArg);
 		then=now;
 		//Sounds....  Poetic
 		
-		context->swapbuffers(context, context->swapbuffersarg);
+		context->swapBuffers(context, context->swapBuffersArg);
 	}
 	AEContextDeinit(context);
 }
 
-/*
-#define MAXIMUM_FRAME_RATE 120
-#define MINIMUM_FRAME_RATE 15
-#define UPDATE_INTERVAL (1.0 / MAXIMUM_FRAME_RATE)
-#define MAX_CYCLES_PER_FRAME (MAXIMUM_FRAME_RATE / MINIMUM_FRAME_RATE)
-
-void runGame() {
-  static double lastFrameTime = 0.0;
-  static double cyclesLeftOver = 0.0;
-  double currentTime;
-  double updateIterations;
-  
-  currentTime = GetCurrentTime();
-  updateIterations = ((currentTime - lastFrameTime) + cyclesLeftOver);
-  
-  if (updateIterations > (MAX_CYCLES_PER_FRAME * UPDATE_INTERVAL)) {
-    updateIterations = (MAX_CYCLES_PER_FRAME * UPDATE_INTERVAL);
-  }
-  
-  while (updateIterations > UPDATE_INTERVAL) {
-    updateIterations -= UPDATE_INTERVAL;
-    
-    updateGame();
-  }
-  
-  cyclesLeftOver = updateIterations;
-  lastFrameTime = currentTime;
-  
-  drawScene();
-}
-*/
-
 void AEContextDeinit(AEContext* context){
 	if(not context) context=AEContextActiveGet();
-	if(context->deinit) context->deinit(context, context->deinitarg);
-}
-
-void AEContextCallbackSet(AEContext* context, int funcname, void* func, void* arg){
-	if(not context) context=AEContextActiveGet();
-	switch (funcname) {
-		case AEContextCallbackInit:
-			context->init=func;
-			context->initarg=arg;
-			break;
-		case AEContextCallbackRefresh:
-			context->refresh=func;
-			context->refresharg=arg;
-			break;
-		case AEContextCallbackPollInput:
-			context->pollinput=func;
-			context->pollinputarg=arg;
-			break;
-		case AEContextCallbackSwapBuffers:
-			context->swapbuffers=func;
-			context->swapbuffersarg=arg;
-			break;
-		case AEContextCallbackDeinit:
-			context->deinit=func;
-			context->deinitarg=arg;
-			break;
-		case AEContextCallbackSecondsGet:
-			context->secondsget=func;
-			context->secondsgetarg=arg;
-			break;
-		case AEContextCallbackFixedUpdate:
-			context->fixedupdate=func;
-			context->fixedupdatearg=arg;
-			break;
-		case AEContextCallbackFrameUpdate:
-			context->frameupdate=func;
-			context->frameupdatearg=arg;
-			break;
-		default:
-			AEError("Unknown callback set.");
-			break;
-	}
-}
-
-void* AEContextCallbackGet(AEContext* context, int funcname,void** arg){
-	if(not context) context=AEContextActiveGet();
-	switch (funcname) {
-		case AEContextCallbackInit:
-			if(arg) *arg=context->initarg;
-			return context->init;
-		case AEContextCallbackRefresh:
-			if(arg) *arg=context->refresharg;
-			return context->refresh;
-		case AEContextCallbackPollInput:
-			if(arg) *arg=context->pollinputarg;
-			return context->pollinput;
-		case AEContextCallbackSwapBuffers:
-			if(arg) *arg=context->swapbuffersarg;
-			return context->swapbuffers;
-		case AEContextCallbackDeinit:
-			if(arg) *arg=context->deinitarg;
-			return context->deinit;
-		case AEContextCallbackSecondsGet:
-			if(arg) *arg=context->secondsgetarg;
-			return context->secondsget;
-		case AEContextCallbackFixedUpdate:
-			if(arg) *arg=context->fixedupdatearg;
-			return context->fixedupdate;
-		case AEContextCallbackFrameUpdate:
-			if(arg) *arg=context->frameupdatearg;
-			return context->frameupdate;
-		default:
-			AEError("Unknown callback set.");
-			break;
-	}
-	return NULL;
+	if(context->deinit) context->deinit(context, context->deinitArg);
 }

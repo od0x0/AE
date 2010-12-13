@@ -1,19 +1,7 @@
 #include "SDL.h"
 #include "AE.h"
-#include "EVContext.h"
-#include "EMContext.h"
 
-static EMContext ModelContext;
-static EVContext ViewContext;
-
-static void OnFixedUpdate(AEContext* context, double seconds, void* userdata){
-	EMContextFixedUpdate(& ModelContext, seconds);
-}
-
-static void OnExit(void){
-	EMContextDisconnectFromServer(& ModelContext);
-	printf("Total Memory Allocations: %lu (%lu bytes)\n",(unsigned long)EUMemoryAllocationsTotal, (unsigned long)EUMemoryAllocationBytesTotal);
-}
+int AESDLKey(int);
 
 static void OnFrameUpdate(AEContext* context, double seconds, void* userdata){
 	double difference=(1.0/60.0)-seconds;
@@ -21,14 +9,9 @@ static void OnFrameUpdate(AEContext* context, double seconds, void* userdata){
 }
 
 int main(int argc, char** argv){
-	atexit(OnExit);
 	AEContext* context=AEContextActiveGet();
 	AEContextInit(context, "Ambition Engine Editor", 800, 500);
-	EVContextInit(& ViewContext);
-	EMContextInit(& ModelContext);
-	EMContextConnectToServer(& ModelContext, "127.0.0.1", "Anonymous", "");
-	AEContextCallbackSet(context, AEContextCallbackFixedUpdate, OnFixedUpdate, NULL);
-	AEContextCallbackSet(context, AEContextCallbackFixedUpdate, OnFrameUpdate, NULL);
+	AECameraPositionSet(AECameraActiveGet(), 0, 10, 10);
 	AEContextRun(context);
 	return 0;
 }

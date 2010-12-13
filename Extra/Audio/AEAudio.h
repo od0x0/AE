@@ -32,6 +32,7 @@ typedef struct{
 	bool shouldLoop;
 }AEAudioStream;
 
+//You will probably never need to call any of these manually.
 void AEAudioStreamInit(AEAudioStream* self);
 void AEAudioStreamDeinit(AEAudioStream* self);
 bool AEAudioStreamOpen(AEAudioStream* self, char* filename);

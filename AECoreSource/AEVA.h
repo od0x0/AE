@@ -70,4 +70,6 @@ void AEVAUnserializeFromFILE(AEVA* va,FILE* file);
 void AEVASerializeToMBuffer(AEVA* va,AEMBuffer* mbuffer);
 void AEVAUnserializeFromMBuffer(AEVA* va,AEMBuffer* mbuffer);
 
+//A little note about serialization...  By the nature of serialization, the data that is serialized is highly unportable.  While it is possible to make serialized index arrays cross platform (which deal with integers), it is another matter for vertex arrays (which deal with 32bit floats), as the C standard makes no real guarrantee about the format of a floating point number.  As such, in order for this to be used properly, you should serialize the vertex array for every possible architecture you plan to run on.
+
 void AEVALoadFromObj(AEVA* va, AEVA* ia, const char* objfilename);

@@ -6,7 +6,7 @@ Ambition Engine Core.
 
 #pragma once
 
-//Add known systems
+//Add known systems to make it easier.
 #ifdef __APPLE_CC__
 #include <OpenGL/gl.h>
 #include <OpenGL/glu.h>
@@ -18,6 +18,7 @@ Ambition Engine Core.
 
 #include <stdlib.h>
 #include <stdio.h>
+//If your compiler doesn't have this, then that sucks for you. *cough* MSVC *cough*
 #include <stdint.h>
 #ifndef __cplusplus
 #include <stdbool.h>
@@ -33,33 +34,43 @@ Ambition Engine Core.
 
 char* AEStringDuplicate(const char* string);
 
-typedef struct AEContext{
+typedef struct AEContext AEContext;
+typedef void (*AEContextCallbackInitFunc)(AEContext* self, const char* title, void* arg);
+typedef void (*AEContextCallbackRefreshFunc)(AEContext* self, void* arg);
+typedef int (*AEContextCallbackPollInputFunc)(AEContext* self, void* arg);
+typedef void (*AEContextCallbackSwapBuffersFunc)(AEContext* self, void* arg);
+typedef void (*AEContextCallbackDeinitFunc)(AEContext* self, void* arg);
+typedef double (*AEContextCallbackSecondsGetFunc)(AEContext* self, void* arg);
+typedef void (*AEContextCallbackFixedUpdateFunc)(AEContext* self, double secondsSinceLastCall, void* arg);
+typedef void (*AEContextCallbackFrameUpdateFunc)(AEContext* self, double secondsSinceLastCall, void* arg);
+
+struct AEContext{
 	unsigned int w,h;
 	unsigned char r, g, b, a, stencil, depth, inFullscreen, multisample;
 	void* aux;
+	GLbitfield clearedBuffers;
 	
-	void (*init)(struct AEContext* self, const char* title, void* arg);
-	void* initarg;
-	void (*refresh)(struct AEContext* self, void* arg);
-	void* refresharg;
-	int (*pollinput)(struct AEContext* self, void* arg);
-	void* pollinputarg;
-	void (*swapbuffers)(struct AEContext* self, void* arg);
-	void* swapbuffersarg;
-	void (*deinit)(struct AEContext* self, void* arg);
-	void* deinitarg;
-	double (*secondsget)(struct AEContext* self, void* arg);
-	void* secondsgetarg;
+	AEContextCallbackInitFunc init;
+	void* initArg;
+	AEContextCallbackRefreshFunc refresh;
+	void* refreshArg;
+	AEContextCallbackPollInputFunc pollInput;
+	void* pollInputArg;
+	AEContextCallbackSwapBuffersFunc swapBuffers;
+	void* swapBuffersArg;
+	AEContextCallbackDeinitFunc deinit;
+	void* deinitArg;
+	AEContextCallbackSecondsGetFunc secondsGet;
+	void* secondsGetArg;
 	
-	void (*fixedupdate)(struct AEContext* self, double secondsSinceLastCall, void* arg);
-	void* fixedupdatearg;
+	AEContextCallbackFixedUpdateFunc fixedUpdate;
+	void* fixedUpdateArg;
 	double fixedUpdateFrameRateMax;
 	double fixedUpdateFrameRateMin;
-
 	
-	void (*frameupdate)(struct AEContext* self, double secondsSinceLastCall, void* arg);
-	void* frameupdatearg;
-}AEContext;
+	AEContextCallbackFrameUpdateFunc frameUpdate;
+	void* frameUpdateArg;
+};
 
 void AEContextActiveSet(AEContext* context);
 AEContext* AEContextActiveGet(void);
@@ -67,18 +78,6 @@ AEContext* AEContextActiveGet(void);
 void AEContextInit(AEContext* context,const char* title,int w,int h);
 void AEContextRun(AEContext* context);
 void AEContextDeinit(AEContext* context);
-
-#define AEContextCallbackInit 1
-#define AEContextCallbackRefresh 2
-#define AEContextCallbackPollInput 3
-#define AEContextCallbackSwapBuffers 4
-#define AEContextCallbackDeinit 5
-#define AEContextCallbackSecondsGet 6
-#define AEContextCallbackFixedUpdate 7
-#define AEContextCallbackFrameUpdate 8
-
-void AEContextCallbackSet(AEContext* context, int funcname, void* func, void* arg);
-void* AEContextCallbackGet(AEContext* context, int funcname, void** arg);
 
 ///////////////////////////////////////////
 //////////Utility stuff
@@ -121,6 +120,7 @@ uint32_t AEHostU32FromNet(uint32_t netu32);
 uint32_t AENetU32FromHost(uint32_t hostu32);
 
 typedef struct {
+	FILE* file;//If true, we use this instead.
 	size_t length;
 	size_t allocated;
 	size_t position;
@@ -129,9 +129,10 @@ typedef struct {
 
 void AEMBufferInit(AEMBuffer* self);
 void AEMBufferDeinit(AEMBuffer* self);
-void* AEMBufferBytesGet(AEMBuffer* self, size_t size);
+//void* AEMBufferBytesGet(AEMBuffer* self, size_t size);
 void AEMBufferRead(AEMBuffer* self, void* data, size_t size);
 void AEMBufferWrite(AEMBuffer* self, void* data, size_t size);
+void AEMBufferPositionSeek(AEMBuffer* self, long offset, int from);
 void AEMBufferPositionSet(AEMBuffer* self, size_t position);
 size_t AEMBufferPositionGet(AEMBuffer* self);
 size_t AEMBufferLengthGet(AEMBuffer* self);

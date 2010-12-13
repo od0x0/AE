@@ -61,7 +61,7 @@ static inline float AESqrtInv(float f){
 #include <ppc_intrinsics.h>
 
 static inline float AESqrtInv(float x){
-    return __frsqrtes(x);
+		return __frsqrtes(x);
 }
 
 #else
@@ -72,9 +72,11 @@ static inline float AESqrtInv(float x){
 
 //#endif
 
-#define AEPiOver180 (3.14159265/180)
+#define AEPiOver180 (3.14159265f/180.0f)
+#define AE180OverPI (180.0f/3.14159265f)
 #define AESign(x) (((x)>0)*2-1)
-#define AEAbs(x) (AESign(x)*x)
+//#define AEAbs(x) (AESign(x)*x)
+#define AEAbs fabsf
 
 static inline float AEMax(float a,float b){
 	if(a>b) return a;
@@ -84,6 +86,12 @@ static inline float AEMax(float a,float b){
 static inline float AEMin(float a,float b){
 	if(a<b) return a;
 	else return b;
+}
+
+static inline float AEClamp(float value, float min, float max){
+	if(value < min) value=min;
+	if(value > max) value=max;
+	return value;
 }
 
 static inline float AERandom(void){
@@ -146,7 +154,7 @@ static inline float AEVec3DistanceBetween(AEVec3 v, AEVec3 v2){
 	AEVec3 difference=AEVec3Sub(v, v2);
 	return sqrtf(AEVec3Dot(difference, difference));
 }
-static inline AEVec3 AEVec3Round(AEVec3 v){return AEVec3FromCoords(round(v.x), round(v.y), round(v.z));}
+static inline AEVec3 AEVec3Round(AEVec3 v){return AEVec3FromCoords(roundf(v.x), roundf(v.y), roundf(v.z));}
 static inline AEVec3 AEVec3Abs(AEVec3 v){return AEVec3FromCoords(fabsf(v.x), fabsf(v.y), fabsf(v.z));}
 static inline AEVec3 AEVec3RandomBetween(AEVec3 min,AEVec3 max){
 	return AEVec3FromCoords(AERandomBetween(min.x,max.x),AERandomBetween(min.y,max.y),AERandomBetween(min.z,max.z));
@@ -245,15 +253,15 @@ static inline AEQuat AEQuatFromEuler(AEVec3 v){
 
 static inline AEQuat AEQuatSlerp(AEQuat start, AEQuat end, float alpha) {
 	const float SLERP_TO_LERP_SWITCH_THRESHOLD=0.01f;
-  
+	
 	float difference = ((start.x * end.x) + (start.y * end.y) + (start.z * end.z) + (start.w * end.w));
 	float startWeight, endWeight;
 	
 	if((1.0f - fabs(difference)) > SLERP_TO_LERP_SWITCH_THRESHOLD) {
-		float theta = acos(fabs(difference));
-		float oneOverSinTheta = (1.0f / sin(theta));
-		startWeight = (sin(theta * (1.0f - alpha)) * oneOverSinTheta);
-		endWeight = (sin(theta * alpha) * oneOverSinTheta);
+		float theta = acosf(fabsf(difference));
+		float oneOverSinTheta = (1.0f / sinf(theta));
+		startWeight = (sinf(theta * (1.0f - alpha)) * oneOverSinTheta);
+		endWeight = (sinf(theta * alpha) * oneOverSinTheta);
 		if (difference < 0.0f) startWeight = -startWeight;
 	}
 	else{
@@ -287,25 +295,25 @@ static inline AEQuat AEQuatBetween(AEVec3 v1,AEVec3 v2){
 //From http://www.euclideanspace.com/maths/geometry/rotations/conversions/quaternionToEuler/
 static inline AEVec3 AEQuatToEuler(AEQuat q){
 	AEVec3 result={0,0,0};
-	float factor=1/(AEPiOver180*0.5);
-	double test = q.x*q.y + q.z*q.w;
+	float factor=1/(AEPiOver180*0.5f);
+	float test = q.x*q.y + q.z*q.w;
 	if (test > 0.499) { // singularity at north pole
 		result.x = 2 * atan2f(q.x,q.w)*factor;
-		result.y = M_PI*0.5*factor;
+		result.y = (float)M_PI*0.5f*factor;
 		result.z = 0;
 	}
 	else if (test < -0.499) { // singularity at south pole
-		result.x = -2 * atan2f(q.x,q.w)*factor;
-		result.y = - M_PI*0.5*factor;
+		result.x = -2.0f * atan2f(q.x,q.w)*factor;
+		result.y = (float)- (float)M_PI*0.5f*factor;
 		result.z = 0;
 	}
 	else{
-		double sqx = q.x*q.x;
-		double sqy = q.y*q.y;
-		double sqz = q.z*q.z;
-		result.x = atan2f(2*q.y*q.w-2*q.x*q.z , 1 - 2*sqy - 2*sqz)*factor;
-		result.y = asinf(2*test)*factor;
-		result.z = atan2f(2*q.x*q.w-2*q.y*q.z , 1 - 2*sqx - 2*sqz)*factor;
+		float sqx = q.x*q.x;
+		float sqy = q.y*q.y;
+		float sqz = q.z*q.z;
+		result.x = (float)atan2f(2.0f*q.y*q.w-2.0f*q.x*q.z , 1 - 2*sqy - 2*sqz)*factor;
+		result.y = (float)asinf(2.0f*test)*factor;
+		result.z = (float)atan2f(2.0f*q.x*q.w-2.0f*q.y*q.z , 1.0f - 2.0f*sqx - 2.0f*sqz)*factor;
 	}
 	return result;
 }
@@ -314,14 +322,14 @@ static inline AEVec4 AEQuatToAxisAngle(AEQuat q){
 	float sinAngle;
 	AEVec4 axisangle;
 	q=AEQuatNormalized(q);
-	sinAngle = sqrt(1.0f - (q.w * q.w));
-	if (fabs(sinAngle) < 0.0005f) sinAngle = 1.0f;
+	sinAngle = sqrtf(1.0f - (q.w * q.w));
+	if (fabsf(sinAngle) < 0.0005f) sinAngle = 1.0f;
 	
 	axisangle.x = (q.x / sinAngle);
 	axisangle.y = (q.y / sinAngle);
 	axisangle.z = (q.z / sinAngle);
 
-	axisangle.w = (acos(q.w) * 2.0f);
+	axisangle.w = (acosf(q.w) * 2.0f);
 	/*AEVec4 axisangle={0,0,0,0};
 	if (q.w > 1) q=AEQuatNormalized(q); // if w>1 acos and sqrt will produce errors, this cant happen if quaternion is normalised
 	axisangle.w = 2 * acos(q.w);
@@ -341,17 +349,17 @@ static inline AEVec4 AEQuatToAxisAngle(AEQuat q){
 }
 
 static inline AEVec3 AEMatrix3x3ToEuler(float* m3x3){
-    // Assuming the angles are in radians.
-	float factor=1/(AEPiOver180*0.5);
+		// Assuming the angles are in radians.
+	float factor=1/(AEPiOver180*0.5f);
 	AEVec3 result={0,0,0};
-	if (m3x3[1] > 0.998) { // singularity at north pole
+	if (m3x3[1] > 0.998f) { // singularity at north pole
 		result.x = atan2f(m3x3[6],m3x3[8])*factor;
-		result.y = M_PI*0.5*factor;
+		result.y = (float)M_PI*0.5f*factor;
 		result.z = 0;
 	}
 	else if (m3x3[1] < -0.998) { // singularity at south pole
 		result.x = atan2f(m3x3[6],m3x3[8])*factor;
-		result.y = -M_PI*0.5*factor;
+		result.y = -(float)M_PI*0.5f*factor;
 		result.z = 0;
 	}
 	else{
@@ -363,16 +371,16 @@ static inline AEVec3 AEMatrix3x3ToEuler(float* m3x3){
 }
 
 static inline void AEQuatToMatrix4x4(AEQuat q,float* m4x4){
-	m4x4[0]  = (1.0f - (2.0f * ((q.y * q.y) + (q.z * q.z))));
-	m4x4[1]  =         (2.0f * ((q.x * q.y) + (q.z * q.w)));
-	m4x4[2]  =         (2.0f * ((q.x * q.z) - (q.y * q.w)));
-	m4x4[3]  = 0.0f;
-	m4x4[4]  =         (2.0f * ((q.x * q.y) - (q.z * q.w)));
-	m4x4[5]  = (1.0f - (2.0f * ((q.x * q.x) + (q.z * q.z))));
-	m4x4[6]  =         (2.0f * ((q.y * q.z) + (q.x * q.w)));
-	m4x4[7]  = 0.0f;
-	m4x4[8]  =         (2.0f * ((q.x * q.z) + (q.y * q.w)));
-	m4x4[9]  =         (2.0f * ((q.y * q.z) - (q.x * q.w)));
+	m4x4[0]	= (1.0f - (2.0f * ((q.y * q.y) + (q.z * q.z))));
+	m4x4[1]	=				 (2.0f * ((q.x * q.y) + (q.z * q.w)));
+	m4x4[2]	=				 (2.0f * ((q.x * q.z) - (q.y * q.w)));
+	m4x4[3]	= 0.0f;
+	m4x4[4]	=				 (2.0f * ((q.x * q.y) - (q.z * q.w)));
+	m4x4[5]	= (1.0f - (2.0f * ((q.x * q.x) + (q.z * q.z))));
+	m4x4[6]	=				 (2.0f * ((q.y * q.z) + (q.x * q.w)));
+	m4x4[7]	= 0.0f;
+	m4x4[8]	=				 (2.0f * ((q.x * q.z) + (q.y * q.w)));
+	m4x4[9]	=				 (2.0f * ((q.y * q.z) - (q.x * q.w)));
 	m4x4[10] = (1.0f - (2.0f * ((q.x * q.x) + (q.y * q.y))));
 	m4x4[11] = 0.0f;
 	m4x4[12] = 0.0f;
@@ -385,8 +393,8 @@ static inline void AEQuatToMatrix4x4(AEQuat q,float* m4x4){
 static inline AEVec3 AEMatrix4x4MulVec3(float* m4x4, AEVec3 v) {
 	AEVec3 result;
 	
-	result.x = ((m4x4[0] * v.x) + (m4x4[4] * v.y) + (m4x4[8]  * v.z) + m4x4[12]);
-	result.y = ((m4x4[1] * v.x) + (m4x4[5] * v.y) + (m4x4[9]  * v.z) + m4x4[13]);
+	result.x = ((m4x4[0] * v.x) + (m4x4[4] * v.y) + (m4x4[8]	* v.z) + m4x4[12]);
+	result.y = ((m4x4[1] * v.x) + (m4x4[5] * v.y) + (m4x4[9]	* v.z) + m4x4[13]);
 	result.z = ((m4x4[2] * v.x) + (m4x4[6] * v.y) + (m4x4[10] * v.z) + m4x4[14]);
 	return result;
 }
@@ -403,3 +411,14 @@ static inline float AEPlanePointSignedDistance(AEPlane plane, AEVec3 point){
 	return AEVec3Dot(AEVec4AsVec3(plane), point)+plane.w;
 }
 
+static inline float AEPlaneLineSegmentIntersectionPercent(AEPlane plane, AEVec3 start, AEVec3 end){
+	const float planeDistanceFromStart = AEPlanePointSignedDistance(plane, start);
+	//const float planeDistanceFromEnd = AEPlanePointSignedDistance(plane, end);
+
+	const AEVec3 difference = AEVec3Sub(end, start);
+
+	//const float t = 
+	return AEAbs(planeDistanceFromStart) / AEVec3Dot(AEVec4AsVec3(plane), difference);
+
+	//return AERayAtTime(start, difference, t);//Notice that we do not normalize!
+}
