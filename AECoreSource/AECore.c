@@ -301,13 +301,13 @@ AEContext* AEContextActiveGet(void){
 	return &AEContextActive;
 }
 
-void AEContextInit(AEContext* context,const char* title,int w,int h){
+void AEContextOpen(AEContext* context,const char* title,int w,int h){
 	if(not context) context=AEContextActiveGet();
 	
-	if(context->init==NULL || context->refresh==NULL || context->pollInput==NULL || context->swapBuffers==NULL || context->deinit==NULL || context->secondsGet==NULL) AEError("AEContext function pointers need to all be filled before you can use the engine.");
+	if(context->open==NULL || context->refresh==NULL || context->pollInput==NULL || context->swapBuffers==NULL || context->close==NULL || context->secondsGet==NULL) AEError("AEContext function pointers need to all be filled before you can use the engine.");
 	
 	context->w=w;context->h=h;
-	context->init(context, title, context->initArg);
+	context->open(context, title, context->openArg);
 	context->clearedBuffers=GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT;
 	AECamera* cam=AECameraActiveGet();
 	AECameraViewportSet(cam,context->w,context->h);
@@ -375,10 +375,10 @@ void AEContextRun(AEContext* context){
 		
 		context->swapBuffers(context, context->swapBuffersArg);
 	}
-	AEContextDeinit(context);
+	AEContextClose(context);
 }
 
-void AEContextDeinit(AEContext* context){
+void AEContextClose(AEContext* context){
 	if(not context) context=AEContextActiveGet();
-	if(context->deinit) context->deinit(context, context->deinitArg);
+	if(context->close) context->close(context, context->closeArg);
 }

@@ -3,114 +3,64 @@
 #include "AEArray.h"
 #include "AEInternalRawMesh.h"
 
-static void* CurrentIterationData=NULL;
+//This has a lot of ugly things that need to be cleaned up sometime.
 
-size_t AEVABytesPerVertex(AEVA* va){
-	size_t stride=sizeof(AEVec2)*va->tunit+sizeof(AEVec3);
-	switch (va->dataformat) {
-		case AEVADataFormat3VF:
-			break;
-		case AEVADataFormat3NF3VF:
-			stride+=sizeof(AEVec3);
-			break;
-		case AEVADataFormat4CUB3VF:
-			stride+=sizeof(char[4]);
-			break;
-		case AEVADataFormat4CUB3NF3VF:
-			stride+=sizeof(AEVec3)+sizeof(char[4]);
-			break;
-		default:
-			break;
-	}
+size_t AEVABytesPerVertex(AEVA* self){
+	size_t stride=sizeof(AEVec3);
+	stride+=sizeof(AEVec2)*self->format.textureCoordsPerVertex;
+	if(self->format.hasNormals) stride+=sizeof(AEVec3);
+	if(self->format.hasColors) stride+=sizeof(char[4]);
 	return stride;
 }
 #define AEVAVertexByteSize AEVABytesPerVertex
 
-void AEVAIterationBegin(AEVA* va){
-	CurrentIterationData=AEVAMap(va, va->length, GL_READ_WRITE);
-}
-
-void AEVAIterationEnd(AEVA* va){
-	AEVAUnmap(va);
-	CurrentIterationData=NULL;
-}
-
-AEVec3* AEVAIteratorVertexNext(AEVA* va, AEVec3* old){
-	size_t stride=AEVAVertexByteSize(va);
-	size_t offset=stride-sizeof(AEVec3);
-	if(old==NULL) old=CurrentIterationData+offset;
-	old+=stride;
-	if(((void*)old) > (CurrentIterationData + va->length*sizeof(float))) old=NULL;
-	return old;
-}
-
-AEVec3* AEVAIteratorNormalNext(AEVA* va, AEVec3* old){
-	size_t stride=AEVAVertexByteSize(va);
-	size_t offset=stride-sizeof(AEVec3)-sizeof(AEVec3);
-	if(old==NULL) old=CurrentIterationData+offset;
-	old+=stride;
-	if(((void*)old) > (CurrentIterationData + va->length*sizeof(float))) old=NULL;
-	return old;
-}
-
-AEVec2* AEVAIteratorTexCoordNext(AEVA* va, int unit, AEVec2* old){
-	return NULL;
-}
-
-GLuint* AEVAIteratorIndexNext(AEVA* va, GLuint* old){
-	return NULL;
-}
-
-void AEVAInit(AEVA* va,int isAnIndexArray,int vbotype,int tuint, int dataformat){
+void AEVAInit(AEVA* va){
 	memset(va,0,sizeof(AEVA));
-	va->isAnIndexArray=isAnIndexArray;
-	va->vbotype=vbotype;
-	va->tunit=tuint;
-	va->dataformat=dataformat;
 }
 
-void AEVADeinit(AEVA* va){
-	if(va->length){
-		if(va->vbotype)
-			glDeleteBuffers(1, &va->data.vbo);
+void AEVADeinit(AEVA* self){
+	if(self->length){
+		if(self->format.storageType)
+			glDeleteBuffers(1, &self->data.vbo);
 		else
-			free(va->data.data);
+			free(self->data.data);
 	}
-	va->length=0;
-	memset(va, 0, sizeof(AEVA));
+	self->length=0;
+	memset(self, 0, sizeof(AEVA));
 }
 
-void AEVAInitCopy(AEVA* vato,AEVA* vafrom){
-	AEVAInit(vato,vafrom->isAnIndexArray, vafrom->vbotype, vafrom->tunit, vafrom->dataformat);
+void AEVAInitCopy(AEVA* self,AEVA* from){
+	AEVAInit(self);
+	memcpy(& self->format, & from->format, sizeof(AEVAFormat));
 	
 	//A workaround for me being uncertain on whether I can map multiple vbos at the same time
 	
-	void* memorytemp = malloc(sizeof(float) * vafrom->length);
+	void* memorytemp = malloc(sizeof(float) * from->length);
 	
-	void* memoryfrom = AEVAMap(vafrom, vafrom->length, GL_READ_ONLY);
-	memcpy(memorytemp, memoryfrom, sizeof(float) * vafrom->length);
-	AEVAUnmap(vafrom);
+	void* memoryfrom = AEVAMap(from, from->length, GL_READ_ONLY);
+	memcpy(memorytemp, memoryfrom, sizeof(float) * from->length);
+	AEVAUnmap(from);
 	
-	void* memoryto = AEVAMap(vato, vafrom->length, GL_WRITE_ONLY);
-	memcpy(memoryto, memorytemp, sizeof(float) * vafrom->length);
-	AEVAUnmap(vato);
+	void* memoryto = AEVAMap(self, from->length, GL_WRITE_ONLY);
+	memcpy(memoryto, memorytemp, sizeof(float) * from->length);
+	AEVAUnmap(self);
 	
 	free(memorytemp);
 }
 
 void* AEVAMap(AEVA* va, unsigned int length,unsigned int writereadmode){
-	unsigned int arrayType=va->isAnIndexArray?GL_ELEMENT_ARRAY_BUFFER:GL_ARRAY_BUFFER;
+	unsigned int arrayType=va->format.isAnIndexArray?GL_ELEMENT_ARRAY_BUFFER:GL_ARRAY_BUFFER;
 	if(sizeof(GLfloat)!=sizeof(char[4]) and sizeof(GLuint)!=sizeof(char[4])) AEError("A GLfloat or GLuint is not equal to 4 bytes on your system!  This is very, very, bad.");
-	//if(va->length && va->length!=length) AEError("You are trying to access a va with a different length than the length it actually has.");
+	if(va->length && va->length!=length) AEError("You are trying to access a VA with a different length than the length it actually has.");
 	if(va->length==0){
 		va->length=length;
-		if(va->vbotype){
+		if(va->format.storageType){
 			glGenBuffers(1, &va->data.vbo);
 			//glBindBuffer(GL_ARRAY_BUFFER, va->data.vbo);
 			
 			unsigned int vbotype=0;
 			
-			switch(va->vbotype){
+			switch(va->format.storageType){
 				case AEVAVBOTypeStream:
 					vbotype=GL_STREAM_DRAW;
 					break;
@@ -129,7 +79,7 @@ void* AEVAMap(AEVA* va, unsigned int length,unsigned int writereadmode){
 		}
 		else va->data.data=malloc(sizeof(char[4])*length);
 	}
-	if(va->vbotype){
+	if(va->format.storageType){
 		glBindBuffer(arrayType, va->data.vbo);
 		
 		return glMapBuffer(arrayType, writereadmode);
@@ -138,64 +88,29 @@ void* AEVAMap(AEVA* va, unsigned int length,unsigned int writereadmode){
 }
 
 void AEVAUnmap(AEVA* va){
-	if(va->vbotype){
-		unsigned int arrayType=va->isAnIndexArray?GL_ELEMENT_ARRAY_BUFFER:GL_ARRAY_BUFFER;
+	if(va->format.storageType){
+		unsigned int arrayType=va->format.isAnIndexArray?GL_ELEMENT_ARRAY_BUFFER:GL_ARRAY_BUFFER;
 		glBindBuffer(arrayType, va->data.vbo);
 		glUnmapBuffer(arrayType);
 	}
 }
 
-void AEVABindVertex(AEVA* va){
-	if(va==NULL){
-		glDisableClientState(GL_VERTEX_ARRAY);
-		return;
-	}
-	glEnableClientState(GL_VERTEX_ARRAY);
-	void* offset = NULL;
-	if(va->vbotype) glBindBuffer(GL_ARRAY_BUFFER, va->data.vbo);
-	else{
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		offset=va->data.data;
-	}
-	glVertexPointer(3, GL_FLOAT, 0, offset);
-}
+//Some might be wondering why I am doing slow things here, the truth is, this is not really designed for speed, it is designed to be easier to use.  There was a time that this was designed for speed, it turned out to be fast, but very unforgiving in the event that it was used even the slightest bit incorrectly, the current design is to prevent it from being used improperly.
 
-void AEVABindTexcoord(AEVA* va){
-	if(va==NULL){
-		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-		return;
+void AEVADrawRange(AEVA* va, AEVA* ia, unsigned long start, unsigned long end){
+	GLuint* indexOffset=NULL;
+	if(ia){
+		glEnableClientState(GL_INDEX_ARRAY);
+		indexOffset=NULL;
+		if(ia->format.storageType) glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ia->data.vbo);
+		else indexOffset=ia->data.data;
 	}
-	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-	void* offset = NULL;
-	if(va->vbotype) glBindBuffer(GL_ARRAY_BUFFER, va->data.vbo);
-	else{
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		offset=va->data.data;
-	}
-	glTexCoordPointer(2, GL_FLOAT, 0, offset);
-}
-
-void AEVABindNormal(AEVA* va){
-	if(va==NULL){
-		glDisableClientState(GL_NORMAL_ARRAY);
-		return;
-	}
-	glEnableClientState(GL_NORMAL_ARRAY);
-	void* offset = NULL;
-	if(va->vbotype) glBindBuffer(GL_ARRAY_BUFFER, va->data.vbo);
-	else{
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		offset=va->data.data;
-	}
-	glNormalPointer(GL_FLOAT, 0, offset);
-}
-
-//You might be wondering why I'm using glInterleavedArrays, but the truth is because it doesn't require I enable/disable client state (which shouldn't be slow or anything, but I like the less code required)  Ideally, we'd have a AEVABindInterleavedWith(AEVA* va,int t, int n, int v)
-
-void AEVABindInterleaved(AEVA* va,int tcount,bool hasNormals){
-	if(va==NULL) return;
+	
+	int tcount=va->format.textureCoordsPerVertex;
+	bool hasNormals=va->format.hasNormals;
+	
 	void* offset=NULL;
-	if(va->vbotype) glBindBuffer(GL_ARRAY_BUFFER, va->data.vbo);
+	if(va->format.storageType) glBindBuffer(GL_ARRAY_BUFFER, va->data.vbo);
 	else{
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		offset=va->data.data;
@@ -217,131 +132,31 @@ void AEVABindInterleaved(AEVA* va,int tcount,bool hasNormals){
 		glNormalPointer(GL_FLOAT, stride, offset);
 		offset+=sizeof(float[3]);
 	}
+	
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glVertexPointer(3, GL_FLOAT, stride, offset);
-}
 
-void AEVABindInterleavedTNV(AEVA* va){
-	if(va==NULL) return;
-	void* offset=NULL;
-	if(va->vbotype) glBindBuffer(GL_ARRAY_BUFFER, va->data.vbo);
-	else{
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		offset=va->data.data;
-	}
-	glInterleavedArrays(GL_T2F_N3F_V3F,0,offset);
-}
-
-void AEVABindInterleavedTV(AEVA* va){
-	if(va==NULL) return;
-	void* offset=NULL;
-	if(va->vbotype) glBindBuffer(GL_ARRAY_BUFFER, va->data.vbo);
-	else{
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		offset=va->data.data;
-	}
-	glInterleavedArrays(GL_T2F_V3F,0,offset);
-}
-
-static unsigned long* CurrentIndices;
-//static unsigned int IndicesCount=0;
-static bool UseIndices=false;
-
-void AEVABindIndices(AEVA* va){
-	//IndicesCount=va->length;
+	if(ia) glDrawElements(GL_TRIANGLES, end - start, GL_UNSIGNED_INT,indexOffset+start);
+	else glDrawArrays(GL_TRIANGLES,start,end);
 	
-	if(va==NULL){
+	for(int i=0;i<tcount;i++){
+		glClientActiveTexture(GL_TEXTURE0+i);
+		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+	}
+	glClientActiveTexture(GL_TEXTURE0);
+	
+	if(hasNormals) glDisableClientState(GL_NORMAL_ARRAY);
+	
+	glDisableClientState(GL_VERTEX_ARRAY);
+	
+	if(ia){
 		glDisableClientState(GL_INDEX_ARRAY);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-		UseIndices=false;
-		return;
 	}
-	glEnableClientState(GL_INDEX_ARRAY);
-	CurrentIndices=NULL;
-	if(va->vbotype) glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, va->data.vbo);
-	else CurrentIndices=va->data.data;
-	UseIndices=true;
 }
 
-void AEVABind(AEVA* va){
-	if(va->isAnIndexArray) AEVABindIndices(va);
-	else AEVABindInterleaved(va, va->tunit, va->dataformat);
-}
-
-void AEVADraw(unsigned long start, unsigned long end){
-	//if(start==0 && end==0) end=IndicesCount;
-	
-	if(UseIndices) glDrawElements(GL_TRIANGLES, end - start, GL_UNSIGNED_INT,CurrentIndices+start);
-	else glDrawArrays(GL_TRIANGLES,start,end);
-}
-
-void AEVASerializeToFILE(AEVA* va,FILE* file){
-	
-	uint64_t version=1;
-	version=AENetU64FromHost(version);
-	fwrite(&version, 1, sizeof(uint64_t), file);
-	
-	uint64_t length=va->length;
-	length=AENetU64FromHost(length);
-	fwrite(&length, 1, sizeof(uint64_t), file);
-	
-	uint8_t bytes[4];
-	bytes[0]=va->isAnIndexArray;
-	bytes[1]=va->vbotype;
-	bytes[2]=va->tunit;
-	bytes[3]=va->dataformat;
-	fwrite(bytes, 1, 4, file);
-	
-	void* memory=AEVAMap(va, va->length, GL_READ_ONLY);
-	
-	if(not va->isAnIndexArray)
-		fwrite(memory, sizeof(float), va->length, file);
-	else{
-		uint32_t* ints=memory;
-		for (size_t i=0; i<va->length; i++) {
-			ints[i]=AENetU32FromHost(ints[i]);
-			fwrite(ints+i, sizeof(uint32_t), 1, file);
-		}
-	}
-	
-	AEVAUnmap(va);
-}
-
-void AEVAUnserializeFromFILE(AEVA* va,FILE* file){
-	
-	uint64_t version;
-	fread(&version, 1, sizeof(uint64_t), file);
-	version=AEHostU64FromNet(version);
-	if(version not_eq 1)
-		AEError("Invalid version, only 1 is accepted.");
-	AEVADeinit(va);
-	memset(va, 0, sizeof(AEVA));
-	
-	uint64_t length;
-	fread(&length, 1, sizeof(uint64_t), file);
-	length=AEHostU64FromNet(length);
-	
-	uint8_t bytes[4];
-	fread(bytes, 1, 4, file);
-	va->isAnIndexArray=bytes[0];
-	va->vbotype=bytes[1];
-	va->tunit=bytes[2];
-	va->dataformat=bytes[3];
-	
-	
-	void* memory=AEVAMap(va, length, GL_WRITE_ONLY);
-	
-	if(not va->isAnIndexArray)
-		fread(memory, sizeof(float), va->length, file);
-	else{
-		uint32_t* ints=memory;
-		for (size_t i=0; i<va->length; i++) {
-			fread(ints+i, sizeof(uint32_t), 1, file);
-			ints[i]=AEHostU32FromNet(ints[i]);
-		}
-	}
-	
-	AEVAUnmap(va);
+void AEVADraw(AEVA* va, AEVA* ia){
+	AEVADrawRange(va, ia, 0, (ia ? ia: va)->length);
 }
 
 void AEVASerializeToMBuffer(AEVA* va,AEMBuffer* mbuffer){
@@ -356,17 +171,15 @@ void AEVASerializeToMBuffer(AEVA* va,AEMBuffer* mbuffer){
 	//fwrite(&length, 1, sizeof(uint64_t), file);
 	AEMBufferWrite(mbuffer, &length, sizeof(uint64_t));
 	
-	uint8_t bytes[4];
-	bytes[0]=va->isAnIndexArray;
-	bytes[1]=va->vbotype;
-	bytes[2]=va->tunit;
-	bytes[3]=va->dataformat;
+	uint32_t bytes[1];
+	if(sizeof(AEVAFormat) not_eq sizeof(bytes)) AEError("AEVAFormat is not 32 bits!  This is bad.");
+	memcpy(bytes, & va->format, sizeof(AEVAFormat));
 	//fwrite(bytes, 1, 4, file);
-	AEMBufferWrite(mbuffer, bytes, 4);
+	AEMBufferWrite(mbuffer, bytes, sizeof(bytes));
 	
 	void* memory=AEVAMap(va, va->length, GL_READ_ONLY);
 	
-	if(not va->isAnIndexArray)
+	if(not va->format.isAnIndexArray)
 		//fwrite(memory, sizeof(float), va->length, file);
 		AEMBufferWrite(mbuffer, memory, va->length*sizeof(float));
 	else{
@@ -396,18 +209,15 @@ void AEVAUnserializeFromMBuffer(AEVA* va,AEMBuffer* mbuffer){
 	AEMBufferRead(mbuffer, &length, sizeof(uint64_t));
 	length=AEHostU64FromNet(length);
 	
-	uint8_t bytes[4];
-	AEMBufferRead(mbuffer, bytes, 4);
+	uint32_t bytes[1];
+	if(sizeof(AEVAFormat) not_eq sizeof(bytes)) AEError("AEVAFormat is not 32 bits!  This is bad.");
+	AEMBufferRead(mbuffer, bytes, sizeof(bytes));
+	memcpy(& va->format, bytes, sizeof(AEVAFormat));
 	//fread(bytes, 1, 4, file);
-	va->isAnIndexArray=bytes[0];
-	va->vbotype=bytes[1];
-	va->tunit=bytes[2];
-	va->dataformat=bytes[3];
-	
 	
 	void* memory=AEVAMap(va, length, GL_WRITE_ONLY);
 	
-	if(not va->isAnIndexArray)
+	if(not va->format.isAnIndexArray)
 		//fread(memory, sizeof(float), va->length, file);
 		AEMBufferRead(mbuffer, memory, va->length*sizeof(float));
 	else{
@@ -424,9 +234,9 @@ void AEVAUnserializeFromMBuffer(AEVA* va,AEMBuffer* mbuffer){
 
 void AEVALoadFromObj(AEVA* va, AEVA* ia, const char* objfilename){
 	
-	bool hasColors= (va->dataformat==AEVADataFormat4CUB3VF) or (va->dataformat==AEVADataFormat4CUB3NF3VF);
-	bool hasNormals= (va->dataformat==AEVADataFormat3NF3VF) or (va->dataformat==AEVADataFormat4CUB3NF3VF);
-	int floatcount=hasColors+va->tunit*2+hasNormals*3+3;
+	bool hasColors=va->format.hasColors;
+	bool hasNormals=va->format.hasNormals;
+	int floatcount=hasColors+va->format.textureCoordsPerVertex*2+hasNormals*3+3;
 	AEArray(float) vertexList;
 	AEArrayInitWithTypeOfSize(&vertexList, sizeof(float)*floatcount);
 	AEArray(unsigned int) indexList;
@@ -444,7 +254,7 @@ void AEVALoadFromObj(AEVA* va, AEVA* ia, const char* objfilename){
 				unsigned char rgba[4]={255,255,255,255};
 				memcpy(v+(size++), rgba, 4);
 			}
-			for(int k=0;k<(va->tunit*2);k+=2){
+			for(int k=0;k<(va->format.textureCoordsPerVertex*2);k+=2){
 				v[size++]=m->t[face->t[j]].x;
 				v[size++]=m->t[face->t[j]].y;
 			}

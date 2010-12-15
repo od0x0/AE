@@ -6,8 +6,10 @@ AEAniModelVBOClass* AEAniModelVBOClassNew(char* filename){
 	self->model=AEAniModelLoadMD5(filename);
 	self->refcount++;
 
-	AEVAInit(&(self->texCoordArray), false, AEVAVBOTypeDynamic, 0, 0);
-	AEVAInit(&(self->indexArray), true, AEVAVBOTypeDynamic, 0, 0);
+	AEVAInit(& self->texCoordArray);
+	self->texCoordArray.format.textureCoordsPerVertex=1;
+	AEVAInit(& self->indexArray);
+	self->indexArray.format.isAnIndexArray=true;
 	
 	AEVec2* ts=AEVAMap(&self->texCoordArray,self->model->meshes[0].vertexCount*2,GL_READ_WRITE);
 	for(size_t i=0;i < self->model->meshes[0].vertexCount;i++){
@@ -39,7 +41,8 @@ AEAniModelVBO* AEAniModelVBOLoad(char* filename){
 	AEAniModelVBO* self=calloc(1,sizeof(AEAniModelVBO));
 	self->shared=AEAniModelVBOClassNew(filename);
 	
-	AEVAInit(&(self->vertexArray), false, AEVAVBOTypeDynamic, 0, 0);
+	AEVAInit(& self->vertexArray);
+	self->vertexArray.format.hasVertices=true;
 	
 	return self;
 }
@@ -86,10 +89,10 @@ void AEAniModelVBOStep(AEAniModelVBO* self,float step){
 }
 
 void AEAniModelVBODraw(AEAniModelVBO* self){
-	AEVABindVertex(&self->vertexArray);
-	AEVABindTexcoord(&self->shared->texCoordArray);
+	/*AEVABindInterleaved(&self->vertexArray);
+	AEVABindInterleaved(&self->shared->texCoordArray);
 	AEVABindIndices(&self->shared->indexArray);
-	AEVADraw(0,self->shared->indexArray.length);
+	AEVADraw(& self->shared->indexArray);*/
 }
 
 void AEAniModelVBODelete(AEAniModelVBO* self){

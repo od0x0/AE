@@ -35,11 +35,11 @@ Ambition Engine Core.
 char* AEStringDuplicate(const char* string);
 
 typedef struct AEContext AEContext;
-typedef void (*AEContextCallbackInitFunc)(AEContext* self, const char* title, void* arg);
+typedef void (*AEContextCallbackOpenFunc)(AEContext* self, const char* title, void* arg);
 typedef void (*AEContextCallbackRefreshFunc)(AEContext* self, void* arg);
 typedef int (*AEContextCallbackPollInputFunc)(AEContext* self, void* arg);
 typedef void (*AEContextCallbackSwapBuffersFunc)(AEContext* self, void* arg);
-typedef void (*AEContextCallbackDeinitFunc)(AEContext* self, void* arg);
+typedef void (*AEContextCallbackCloseFunc)(AEContext* self, void* arg);
 typedef double (*AEContextCallbackSecondsGetFunc)(AEContext* self, void* arg);
 typedef void (*AEContextCallbackFixedUpdateFunc)(AEContext* self, double secondsSinceLastCall, void* arg);
 typedef void (*AEContextCallbackFrameUpdateFunc)(AEContext* self, double secondsSinceLastCall, void* arg);
@@ -50,16 +50,16 @@ struct AEContext{
 	void* aux;
 	GLbitfield clearedBuffers;
 	
-	AEContextCallbackInitFunc init;
-	void* initArg;
+	AEContextCallbackOpenFunc open;
+	void* openArg;
 	AEContextCallbackRefreshFunc refresh;
 	void* refreshArg;
 	AEContextCallbackPollInputFunc pollInput;
 	void* pollInputArg;
 	AEContextCallbackSwapBuffersFunc swapBuffers;
 	void* swapBuffersArg;
-	AEContextCallbackDeinitFunc deinit;
-	void* deinitArg;
+	AEContextCallbackCloseFunc close;
+	void* closeArg;
 	AEContextCallbackSecondsGetFunc secondsGet;
 	void* secondsGetArg;
 	
@@ -75,9 +75,9 @@ struct AEContext{
 void AEContextActiveSet(AEContext* context);
 AEContext* AEContextActiveGet(void);
 
-void AEContextInit(AEContext* context,const char* title,int w,int h);
+void AEContextOpen(AEContext* context,const char* title,int w,int h);
 void AEContextRun(AEContext* context);
-void AEContextDeinit(AEContext* context);
+void AEContextClose(AEContext* context);
 
 ///////////////////////////////////////////
 //////////Utility stuff
@@ -120,7 +120,7 @@ uint32_t AEHostU32FromNet(uint32_t netu32);
 uint32_t AENetU32FromHost(uint32_t hostu32);
 
 typedef struct {
-	FILE* file;//If true, we use this instead.
+	FILE* file;//If this is non-null, we use this instead.
 	size_t length;
 	size_t allocated;
 	size_t position;

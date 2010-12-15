@@ -73,7 +73,7 @@ static inline float AESqrtInv(float x){
 //#endif
 
 #define AEPiOver180 (3.14159265f/180.0f)
-#define AE180OverPI (180.0f/3.14159265f)
+#define AE180OverPi (180.0f/3.14159265f)
 #define AESign(x) (((x)>0)*2-1)
 //#define AEAbs(x) (AESign(x)*x)
 #define AEAbs fabsf
@@ -388,7 +388,6 @@ static inline void AEQuatToMatrix4x4(AEQuat q,float* m4x4){
 	m4x4[14] = 0.0f;
 	m4x4[15] = 1.0f;
 }
-
 
 static inline AEVec3 AEMatrix4x4MulVec3(float* m4x4, AEVec3 v) {
 	AEVec3 result;

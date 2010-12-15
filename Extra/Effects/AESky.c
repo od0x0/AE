@@ -21,12 +21,12 @@ void AESkyboxRender(AESkybox* skybox){
 	glDisable(GL_CULL_FACE);
 	
 	glPushMatrix();
-	glLoadIdentity();
-	AECameraBind(AECameraActiveGet());
-	AEVec3 position;
-	AECameraPositionGet(AECameraActiveGet(), &position);
-	glTranslatef(position.x, position.y, position.z);
-	//glTranslatef(0,size.y/2,0);
+	//glLoadIdentity();
+	//AECameraBind(AECameraActiveGet());
+	//AEVec3 position;
+	//AECameraPositionGet(AECameraActiveGet(), &position);
+	//glTranslatef(-position.x, -position.y, -position.z);
+	glTranslatef(0,size.y/2,0);
 	glScalef(size.x,size.y,size.z);
 	// Back
 	AETextureBind(back);

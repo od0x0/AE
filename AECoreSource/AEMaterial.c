@@ -79,7 +79,7 @@ void AEMaterialBindShaderOnlyEXT(AEMaterial* material){
 	if(material->timeUniform) glUniform1f((GLint)material->timeUniform-1,AEMaterialTime*0.001);
 	
 	//It's designed this way so that the last unit accessed is 0, so I have one less state to change
-	for(unsigned char i = material->texUnitCount; i--; /*Intentionally nothing here*/){
+	for(unsigned char i = material->texUnitCount; (--i) + 1;){
 		glActiveTexture(GL_TEXTURE0+i);
 		if(material->textureUniforms) glUniform1i((GLint)material->textureUniforms[i]-1,i);
 	}
@@ -102,7 +102,7 @@ void AEMaterialBind(AEMaterial* material){
 		if(material->timeUniform) glUniform1f((GLint)material->timeUniform-1,AEMaterialTime*0.001);
 	}
 	//It's designed this way so that the last unit accessed is 0, so I have one less state to change
-	for(unsigned char i = material->texUnitCount; i--; /*Intentionally nothing here*/){
+	for(unsigned char i = material->texUnitCount; (--i) + 1; ){
 		glActiveTexture(GL_TEXTURE0+i);
 		if(not AEMaterialsShadersEnabled) glEnable(GL_TEXTURE_2D);
 		AETextureBind(material->textures[i]);

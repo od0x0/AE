@@ -1,6 +1,8 @@
 #pragma once
 #include "AEImage.h"
 
+//A very unstable multitexture/shader material system, don't expect it to remain here.
+
 //EXT means that it's not guarranteed to stay in here, be warned when using it
 
 //struct AEMaterial;
