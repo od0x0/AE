@@ -21,7 +21,7 @@ typedef struct{
 }AETextBuffer;
 
 AETextBuffer* AETextBufferNew(void);
-void AETextBufferInsert(AETextBuffer *self,size_t offset,char *text);
+void AETextBufferInsert(AETextBuffer *self,size_t offset,const char *text);
 void AETextBufferBackspace(AETextBuffer *self,size_t offset,size_t length);
 void AETextBufferDelete(AETextBuffer* self);
 char* AETextBufferTextGet(AETextBuffer* self);

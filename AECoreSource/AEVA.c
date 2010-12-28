@@ -161,7 +161,7 @@ void AEVADraw(AEVA* va, AEVA* ia){
 
 void AEVASerializeToMBuffer(AEVA* va,AEMBuffer* mbuffer){
 	
-	uint64_t version=1;
+	uint64_t version=2;
 	version=AENetU64FromHost(version);
 	//fwrite(&version, 1, sizeof(uint64_t), file);
 	AEMBufferWrite(mbuffer, &version, sizeof(uint64_t));
@@ -171,11 +171,10 @@ void AEVASerializeToMBuffer(AEVA* va,AEMBuffer* mbuffer){
 	//fwrite(&length, 1, sizeof(uint64_t), file);
 	AEMBufferWrite(mbuffer, &length, sizeof(uint64_t));
 	
-	uint32_t bytes[1];
-	if(sizeof(AEVAFormat) not_eq sizeof(bytes)) AEError("AEVAFormat is not 32 bits!  This is bad.");
-	memcpy(bytes, & va->format, sizeof(AEVAFormat));
-	//fwrite(bytes, 1, 4, file);
-	AEMBufferWrite(mbuffer, bytes, sizeof(bytes));
+	uint64_t formatbits;
+	formatbits=AEVAFormatTo64Bits(& va->format);
+	AEMBufferWrite(mbuffer, & formatbits, sizeof(formatbits));
+	
 	
 	void* memory=AEVAMap(va, va->length, GL_READ_ONLY);
 	
@@ -199,8 +198,8 @@ void AEVAUnserializeFromMBuffer(AEVA* va,AEMBuffer* mbuffer){
 	//fread(&version, 1, sizeof(uint64_t), file);
 	AEMBufferRead(mbuffer, &version, sizeof(uint64_t));
 	version=AEHostU64FromNet(version);
-	if(version not_eq 1)
-		AEError("Invalid version, only 1 is accepted.");
+	if(version not_eq 2)
+		AEError("Invalid version, only 2 is accepted.");
 	AEVADeinit(va);
 	memset(va, 0, sizeof(AEVA));
 	
@@ -209,10 +208,9 @@ void AEVAUnserializeFromMBuffer(AEVA* va,AEMBuffer* mbuffer){
 	AEMBufferRead(mbuffer, &length, sizeof(uint64_t));
 	length=AEHostU64FromNet(length);
 	
-	uint32_t bytes[1];
-	if(sizeof(AEVAFormat) not_eq sizeof(bytes)) AEError("AEVAFormat is not 32 bits!  This is bad.");
-	AEMBufferRead(mbuffer, bytes, sizeof(bytes));
-	memcpy(& va->format, bytes, sizeof(AEVAFormat));
+	uint64_t formatbits;
+	AEMBufferRead(mbuffer, & formatbits, sizeof(formatbits));
+	AEVAFormatFrom64Bits(& va->format, formatbits);
 	//fread(bytes, 1, 4, file);
 	
 	void* memory=AEVAMap(va, length, GL_WRITE_ONLY);

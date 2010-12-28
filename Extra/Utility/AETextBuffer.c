@@ -36,7 +36,7 @@ AETextBuffer* AETextBufferNew(void){
 }
 
 //Sorta ripped this from Enough, worked better than what I had, so it's probably under Open/FreeBSD (he doesn't leave any license info in his code)
-void AETextBufferInsert(AETextBuffer* self,size_t offset, char* text){
+void AETextBufferInsert(AETextBuffer* self,size_t offset, const char* text){
 	size_t	length;
 
 	if(text == NULL)

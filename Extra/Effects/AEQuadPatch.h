@@ -12,6 +12,7 @@ typedef struct{
 	AEVec3 center;
 	AEVec3 size;
 	float distance;//Used for sorting
+	uint32_t usertag;
 }AEQuadPatchQuad;
 
 typedef struct{

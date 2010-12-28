@@ -32,6 +32,7 @@ void AETableDelete(void* table){
 }
 
 void AETableEach(AETable* table, AETableEachFunc func, void* arg){
+	if(table==NULL) return;
 	khash_t(Table)* h=table;
 	for (khiter_t k = kh_begin(h); k != kh_end(h); ++k)
 		if (kh_exist(h, k)) func((char*)kh_key(h, k), kh_value(h, k), arg);

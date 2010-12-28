@@ -10,6 +10,9 @@
 #include <sys/param.h> /* for MAXPATHLEN */
 #include <unistd.h>
 
+//#define USE_SDL_DEFAULT_FILE_PATH
+//Comment this out to use the Resources folder of the application bundle.
+
 /* For some reaon, Apple removed setAppleMenu from the headers in 10.4,
  but the method still is there and works. To avoid warnings, we declare
  it ourselves here. */
@@ -446,6 +449,12 @@ double AESDLSecondsGet(AEContext* context,void* arg){
 }
 
 void AESDLBridge(void){
+#ifndef USE_SDL_DEFAULT_FILE_PATH
+	NSAutoreleasePool* pool=[NSAutoreleasePool new];
+	NSString *resourcePath = [[NSBundle mainBundle] resourcePath];
+	[[NSFileManager defaultManager] changeCurrentDirectoryPath:resourcePath];
+	[pool release];
+#endif
 	AEContext* context=AEContextActiveGet();
 	context->open=AESDLInit;
 	context->pollInput=AESDLPollInput;

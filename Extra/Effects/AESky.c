@@ -1,11 +1,3 @@
-/*
- *  Sky.c
- *  AEED
- *
- *  Created by Oliver Daids on 8/25/10.
- *  Copyright 2010 __MyCompanyName__. All rights reserved.
- *
- */
 #include "AE.h"
 #include "AESky.h"
 //This is very old ancient code that is really really really ugly and largely broken.

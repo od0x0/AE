@@ -1,12 +1,3 @@
-/*
- *  EUMemory.c
- *  AE Editor attempt 5
- *
- *  Created by Oliver Daids on 11/20/10.
- *  Copyright 2010 __MyCompanyName__. All rights reserved.
- *
- */
-
 #include "EUMemory.h"
 
 size_t EUMemoryAllocationsTotal;
@@ -32,4 +23,7 @@ void* EUMemoryReallocate(void* old, size_t size){
 		abort();
 	}
 	return pointer;
+}
+void* EUMemoryCopy(void* data, size_t size){
+	return memcpy(EUMemoryAllocate(size), data, size);
 }

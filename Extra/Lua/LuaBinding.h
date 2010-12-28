@@ -7,7 +7,7 @@
 
 lua_State* AELuaNew(int shouldLoadLibraries);
 
-void AELuaRun(lua_State* L,char* file);
+void AELuaRun(lua_State* L,const char* file);
 
 void AELuaAddFunction(lua_State* L,char* name,void* func);
 

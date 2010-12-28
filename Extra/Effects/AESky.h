@@ -1,11 +1,3 @@
-/*
- *  Sky.h
- *  AEED
- *
- *  Created by Oliver Daids on 8/25/10.
- *  Copyright 2010 __MyCompanyName__. All rights reserved.
- *
- */
 #pragma once
 #include "AECore.h"
 

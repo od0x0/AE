@@ -421,3 +421,36 @@ static inline float AEPlaneLineSegmentIntersectionPercent(AEPlane plane, AEVec3 
 
 	//return AERayAtTime(start, difference, t);//Notice that we do not normalize!
 }
+
+static inline float AEBinomialCoefficient(float n, float k){
+	if(k > n-k) k = n - k;
+	float c = 1;
+	for(size_t i=0; i<k; i++){
+		c *= n-i;
+		c /= i+1;
+	}
+	return c;
+}
+
+static inline AEVec3 AEVec3sEvaluateBezierCurve(AEVec3* points, size_t count, float t){
+	AEVec3 r={0,0,0};
+	for (size_t i=0; i<count; i++) {
+		const float c = AEBinomialCoefficient(count-1, i);
+		const float factor = c * powf(1.0f-t, (count-1)-i) * powf(t, i);
+		r.x+=points[i].x*factor;
+		r.y+=points[i].y*factor;
+		r.z+=points[i].z*factor;
+	}
+	return r;
+}
+
+static inline AEVec2 AEVec2sEvaluateBezierCurve(AEVec2* points, size_t count, float t){
+	AEVec2 r={0,0};
+	for (size_t i=0; i<count; i++) {
+		const float c = AEBinomialCoefficient(count-1, i);
+		const float factor = c * powf(1.0f-t, (count-1)-i) * powf(t, i);
+		r.x+=points[i].x*factor;
+		r.y+=points[i].y*factor;
+	}
+	return r;
+}

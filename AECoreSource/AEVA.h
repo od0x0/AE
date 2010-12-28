@@ -15,6 +15,26 @@ typedef struct{
 		unused :32-10;
 }AEVAFormat;
 
+static inline uint64_t AEVAFormatTo64Bits(AEVAFormat* self){
+	uint64_t bits=0;
+	bits |= self->isAnIndexArray << 0;
+	bits |= self->storageType << 1;
+	bits |= self->textureCoordsPerVertex << 1+2;
+	bits |= self->hasNormals << 1+2+4;
+	bits |= self->hasColors << 1+2+4+1;
+	bits |= self->hasVertices << 1+2+4+1+1;
+	return bits;
+}
+
+static inline void AEVAFormatFrom64Bits(AEVAFormat* self, uint64_t bits){
+	self->isAnIndexArray = (bits >> 0) & 1;
+	self->storageType = (bits >> 1) & 2;
+	self->textureCoordsPerVertex = (bits >> 1+2) & 4;
+	self->hasNormals = (bits >> 1+2+4) & 1;
+	self->hasColors = (bits >> 1+2+4+1) & 1;
+	self->hasVertices = (bits >> 1+2+4+1+1) & 1;
+}
+
 //Should be alright to read from, it's pretty much standard now
 typedef struct AEVA{
 	GLuint length;

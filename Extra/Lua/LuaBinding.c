@@ -9,7 +9,7 @@ lua_State* AELuaNew(int shouldLoadLibraries){
 	return L;
 }
 
-void AELuaRun(lua_State* L,char* file){
+void AELuaRun(lua_State* L,const char* file){
 	//Gotta love lazy operators here
 	int error = luaL_loadfile(L,file) || lua_pcall(L, 0, 0, 0);
 	if (error) {
