@@ -6,7 +6,7 @@ void ECContextInit(ECContext* self){
 }
 
 static void ECContextDeinit_deleteOperationLists(const char* name, void* value, void* arg){
-	ECOperationListDeinit(value);
+	EUOperationListDeinit(value);
 	EUMemoryFree(value);
 }
 
@@ -15,12 +15,12 @@ void ECContextDeinit(ECContext* self){
 	AETableDelete(self->operationListTable);
 }
 
-void ECContextAddOperation(ECContext* self, const char* listName, const char* name, ECOperationFunc function, void* userdata){
-	ECOperationList* list=AETableGet(self->operationListTable, listName);
+void ECContextAddOperation(ECContext* self, const char* listName, const char* name, EUOperationFunc function, void* userdata){
+	EUOperationList* list=AETableGet(self->operationListTable, listName);
 	if(list==NULL){
-		list=EUMemoryAllocate(sizeof(ECOperationList));
-		ECOperationListInit(list);
+		list=EUMemoryAllocate(sizeof(EUOperationList));
+		EUOperationListInit(list);
 	}
-	ECOperationListAdd(list, name, function, userdata);
+	EUOperationListAdd(list, name, function, userdata);
 	AETableSet(self->operationListTable, listName, list);
 }

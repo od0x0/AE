@@ -2,24 +2,24 @@
 #include "EUMemory.h"
 #include "AE.h"
 
-typedef struct ECOperation ECOperation;
-typedef void (*ECOperationFunc)(ECOperation* operation, void* target);
+typedef struct EUOperation EUOperation;
+typedef void (*EUOperationFunc)(EUOperation* operation, void* target);
 
-struct ECOperation{
+struct EUOperation{
 	char* name;
 	void* userdata;
-	ECOperationFunc function;
+	EUOperationFunc function;
 };
 
-static inline void ECOperationExecute(ECOperation* self, void* target){
+static inline void EUOperationExecute(EUOperation* self, void* target){
 	self->function(self, target);
 }
 typedef struct{
-	AEArray(ECOperation) operations;
-}ECOperationList;
+	AEArray(EUOperation) operations;
+}EUOperationList;
 
-void ECOperationListInit(ECOperationList* self);
-void ECOperationListDeinit(ECOperationList* self);
-void ECOperationListSortAlphabetically(ECOperationList* self);
-void ECOperationListSortBySearch(ECOperationList* self, const char* name);
-void ECOperationListAdd(ECOperationList* self, const char* name, ECOperationFunc function, void* userdata);
+void EUOperationListInit(EUOperationList* self);
+void EUOperationListDeinit(EUOperationList* self);
+void EUOperationListSortAlphabetically(EUOperationList* self);
+void EUOperationListSortBySearch(EUOperationList* self, const char* name);
+void EUOperationListAdd(EUOperationList* self, const char* name, EUOperationFunc function, void* userdata);

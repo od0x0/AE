@@ -3,7 +3,7 @@
 int AESDLMouseButton(char);
 int AESDLKey(int);
 
-size_t EVContextUIDoOperationList(EVContext* self, ECOperationList* list, EVUIRect* bounds){
+size_t EVContextUIDoOperationList(EVContext* self, EUOperationList* list, EVUIRect* bounds){
 	
 	//The render styles
 	EVUIRenderStyle backgroundStyle;
@@ -46,7 +46,7 @@ size_t EVContextUIDoOperationList(EVContext* self, ECOperationList* list, EVUIRe
 	if(EVUIDoTextBox(self->ui, & searchboxBounds, self->listBox.searchText, & searchboxStyle, & searchboxStyle, 1)){
 		free(self->listBox.searchText);
 		self->listBox.searchText=AEStringDuplicate(EVUITextboxTextGet(self->ui));
-		ECOperationListSortBySearch(list, self->listBox.searchText);
+		EUOperationListSortBySearch(list, self->listBox.searchText);
 		self->listBox.scroll.y=1;
 	}
 	
@@ -116,6 +116,7 @@ size_t EVContextUIDoOperationList(EVContext* self, ECOperationList* list, EVUIRe
 	return itemID;
 }
 
+
 void EVContextInit(EVContext* self){
 	memset(self, 0, sizeof(EVContext));
 	SDL_EnableUNICODE(1);
@@ -130,17 +131,17 @@ void EVContextInit(EVContext* self){
 }
 
 void EVContextFrameUpdate(EVContext* self, double seconds){
-	static ECOperationList* ops;
+	static EUOperationList* ops;
 	if(not ops){
-		ops=EUMemoryAllocate(sizeof(ECOperationList));
-		ECOperationListInit(ops);
-		ECOperationListAdd(ops, "Undo", NULL, NULL);
-		ECOperationListAdd(ops, "Redo", NULL, NULL);
-		ECOperationListAdd(ops, "Try To Do", NULL, NULL);
-		ECOperationListAdd(ops, "Fail To Do", NULL, NULL);
-		ECOperationListAdd(ops, "Do Again", NULL, NULL);
-		ECOperationListAdd(ops, "Do Once More", NULL, NULL);
-		ECOperationListAdd(ops, "Do Now", NULL, NULL);
+		ops=EUMemoryAllocate(sizeof(EUOperationList));
+		EUOperationListInit(ops);
+		EUOperationListAdd(ops, "Undo", NULL, NULL);
+		EUOperationListAdd(ops, "Redo", NULL, NULL);
+		EUOperationListAdd(ops, "Try To Do", NULL, NULL);
+		EUOperationListAdd(ops, "Fail To Do", NULL, NULL);
+		EUOperationListAdd(ops, "Do Again", NULL, NULL);
+		EUOperationListAdd(ops, "Do Once More", NULL, NULL);
+		EUOperationListAdd(ops, "Do Now", NULL, NULL);
 	}
 
 	EVUIBeginRender(self->ui);
