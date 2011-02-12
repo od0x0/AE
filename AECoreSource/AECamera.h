@@ -8,23 +8,23 @@ AECamera* AECameraNew(void);
 //AECamera* AECameraRetain(AECamera* cam); (deprecated)
 void AECameraDelete(AECamera* cam);
 
-void AECameraPositionGet(AECamera* cam,AEVec3* v3);
-void AECameraPositionSet(AECamera* cam,float x,float y,float z);
-void AECameraRotationGet(AECamera* cam, AEVec3* v3);
-void AECameraRotationSet(AECamera* cam,float x,float y,float z);
+void AECameraGetPosition(AECamera* cam, AEVec3* v3);
+void AECameraSetPosition(AECamera* cam, float x, float y, float z);
+void AECameraGetRotation(AECamera* cam, AEVec3* v3);
+void AECameraSetRotation(AECamera* cam, float x, float y, float z);
 
-void AECameraBoundsSet(AECamera* cam,float near,float far,float fov);
-void AECameraBoundsGet(AECamera* cam,float* near,float* far,float* fov);
-void AECameraViewportSet(AECamera* cam,int w,int h);
-void AECameraViewportGet(AECamera* cam,int* w,int* h);
+void AECameraSetBounds(AECamera* cam, float near, float far, float fov);
+void AECameraGetBounds(AECamera* cam, float* near, float* far, float* fov);
+void AECameraSetViewport(AECamera* cam, int w, int h);
+void AECameraGetViewport(AECamera* cam, int* w, int* h);
 
-AECamera* AECameraActiveGet(void);
-void AECameraActiveSet(AECamera* cam);
+AECamera* AECamerasGetActive(void);
+void AECamerasSetActive(AECamera* cam);//Does a copy of it's value!
 
 void AECameraBind(AECamera* cam);
 
-void AECameraVFCSet(AECamera* cam, bool enabled);
-bool AECameraVFCGet(AECamera* cam);
+void AECameraSetVFCEnabled(AECamera* cam, bool enabled);
+bool AECameraGetVFCEnabled(AECamera* cam);
 
 void AECameraVFCalculate(AECamera* cam);
-int AECameraVFCheckSphere(AECamera* cam,float x,float y,float z,float r);
+int AECameraVFCheckSphere(AECamera* cam, float x, float y, float z, float r);

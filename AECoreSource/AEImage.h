@@ -2,47 +2,25 @@
 #include "SOIL.h"
 #include "AECore.h"
 
-
-#define AEImageSerializeToFILETemporaryDirectory ""
-
-//This isn't really going to change much, it should be alright to read from i
+//It is safe to assume that once "pixels" is allocated, it is never freed until deinit.
 typedef struct{
-	int w,h,channels;
-	unsigned short refcount;
+	uint32_t w,h,channels;
 	unsigned char* pixels;
-	unsigned int flags;
-	const char* metastring;
 }AEImage;
 
-///Allocates an image with w*h pixels
-AEImage* AEImageNew(int w,int h);
-
-//Retain/Cloning an image (deprecated)
-//AEImage* AEImageRetain(AEImage* image);
-//AEImage* AEImageClone(AEImage* image);
-
+static void AEImageInit(AEImage* self){memset(self, 0, sizeof(AEImage));}
+void AEImageInitWithSize(AEImage* self, int w,int h);
 ///Loads a file using SOIL and returns it in an image
-AEImage* AEImageLoad(const char* filename);
-
-AEImage* AEImageLoadFromMemory(void* data,size_t dataSize);
-
-//Control textureflags and metastring
-const char* AEImageMetaStringGet(AEImage* image);
-void AEImageMetaStringSet(AEImage* image,char* string);
-unsigned int AEImageTextureFlagsGet(AEImage* image);
-void AEImageTextureFlagsSet(AEImage* image,unsigned int flags);
+void AEImageInitFromFile(AEImage* self, const char* filename);
+void AEImageInitFromMemory(AEImage* self, void* data,size_t dataSize);
+void AEImageDeinit(AEImage* self);
 
 ///Returns a pointer to an array of color components for a pixel (r is 0, g is 1, b is 2, a is 3)
-void AEImagePixelGet(AEImage* image,int x,int y,unsigned char* rgba);
-void AEImagePixelSet(AEImage* image,int x,int y,unsigned char* rgba);
+void AEImageGetPixel(AEImage* self,int x,int y,unsigned char* rgba);
+void AEImageSetPixel(AEImage* self,int x,int y,unsigned char* rgba);
 
-int AEImageChannelsPerPixelGet(AEImage* image);
+///Blits "from" into "to" at "offsetx" and "offsety" using blending, this is very slow right now, as it's only here for the sake of usefulness.  Does not dilate!
+void AEImageBlit(AEImage* self,int offsetx,int offsety,AEImage* from);
 
-///Blits "from" into "to" at "offsetx" and "offsety" using blending, this is very slow right now (6 fps on my G4 for 4 128x128 blits), does not scale!
-void AEImageBlit(AEImage* to,int offsetx,int offsety,AEImage* from);
-
-///Returns the image as an OpenGL texture with mipmaps
-AETexture AEImageToTexture(AEImage* image);
-
-///The only way in which an image will be destroyed
-void AEImageDelete(AEImage* image);
+///Returns the image as an OpenGL texture
+AETexture AEImageToTextureWithFlags(AEImage* self, AETextureFlag textureLoadFlags);

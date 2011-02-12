@@ -13,7 +13,7 @@ void AEQuadPatchInit(AEQuadPatch* self, bool cylindrical, size_t quadCount, AEVe
 	for(size_t i=0;i < quadCount;i++){
 		if(centers) self->quads[i].center=centers[i];
 		if(sizes) self->quads[i].size=sizes[i];
-		else self->quads[i].size=AEVec3FromCoords(1, 1, 1);
+		else self->quads[i].size=AEVec3From3(1, 1, 1);
 		const AEVec2 tout[4]={{0,0},{1,0},{1,1},{0,1}};
 		for(char j=0;j<4;j++){
 			self->vertices[i*4+j].texcoord=tout[j];
@@ -42,7 +42,7 @@ void AEQuadPatchUpdate(AEQuadPatch* self, const AEVec3 up, const AEVec3 right){
 	
 	if(self->depthSort){
 		AEVec3 position;
-		AECameraPositionGet(AECameraActiveGet(), &position);
+		AECameraGetPosition(AECamerasGetActive(), &position);
 		for (size_t i=0; i<self->quadCount; i++) {
 			AEVec3 difference=AEVec3Sub(self->quads[i].center, position);
 			self->quads[i].distance=AEVec3Dot(difference,difference);
@@ -51,13 +51,13 @@ void AEQuadPatchUpdate(AEQuadPatch* self, const AEVec3 up, const AEVec3 right){
 		//qsort_withuserdata(self->quads, self->quadCount, sizeof(AEQuadPatchQuad), (int(*)(const void*,const void*,void*))SortQuads, &position);
 	}
 	
-	const AEVec3 modifiedUp=self->cylindrical ? AEVec3FromCoords(0, 1, 0) : up;
+	const AEVec3 modifiedUp=self->cylindrical ? AEVec3From3(0, 1, 0) : up;
 	
 	for(size_t i=0; i < self->quadCount; i++){
 		const AEVec3 center=self->quads[i].center;
 		const AEVec3 size=self->quads[i].size;
-		const AEVec3 scaledRight = AEVec3Mul(right, AEVec3FromSingle(size.x));
-		const AEVec3 scaledUp = AEVec3Mul(modifiedUp, AEVec3FromSingle(size.y));
+		const AEVec3 scaledRight = AEVec3Mul(right, AEVec3From1(size.x));
+		const AEVec3 scaledUp = AEVec3Mul(modifiedUp, AEVec3From1(size.y));
 		const AEVec3 rightPlusUp=AEVec3Add(scaledRight, scaledUp);
 		const AEVec3 rightMinusUp=AEVec3Sub(scaledRight, scaledUp);
 		self->vertices[i*4+0].position=AEVec3Sub(center, rightPlusUp);

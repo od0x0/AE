@@ -24,6 +24,6 @@ AETextBuffer* AETextBufferNew(void);
 void AETextBufferInsert(AETextBuffer *self,size_t offset,const char *text);
 void AETextBufferBackspace(AETextBuffer *self,size_t offset,size_t length);
 void AETextBufferDelete(AETextBuffer* self);
-char* AETextBufferTextGet(AETextBuffer* self);
-size_t AETextBufferLengthGet(AETextBuffer* self);
+char* AETextBufferGetText(AETextBuffer* self);
+size_t AETextBufferGetLength(AETextBuffer* self);
 void AETextBufferApplyEditChain(AETextBuffer* self, AETextBufferEdit* edit);

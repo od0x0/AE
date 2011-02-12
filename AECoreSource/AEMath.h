@@ -121,29 +121,32 @@ static inline AEVec3 AEVec3ExtrapolateForA(AEVec3 r,AEVec3 b,float t){
 	return a;
 }
 
-static inline AEVec3 AEVec3FromCoords(float x,float y,float z){
+static inline AEVec3 AEVec3From3(float x,float y,float z){
 	AEVec3 v={x,y,z};
 	return v;
 }
+static inline AEVec3 AEVec3From1(float xyz){return AEVec3From3(xyz,xyz,xyz);}
 static inline AEVec3 AEVec3ScaleTo360Range(AEVec3 v){
 	v.x=fmodf(v.x, 360);
 	v.y=fmodf(v.y, 360);
 	v.z=fmodf(v.z, 360);
 	return v;
 }
-static inline AEVec3 AEVec3FromSingle(float xyz){return AEVec3FromCoords(xyz,xyz,xyz);}
-static inline AEVec3 AEVec3Add(AEVec3 v,AEVec3 v2){return AEVec3FromCoords(v.x+v2.x,v.y+v2.y,v.z+v2.z);}
-static inline AEVec3 AEVec3Sub(AEVec3 v,AEVec3 v2){return AEVec3FromCoords(v.x-v2.x,v.y-v2.y,v.z-v2.z);}
-static inline AEVec3 AEVec3Mul(AEVec3 v,AEVec3 v2){return AEVec3FromCoords(v.x*v2.x,v.y*v2.y,v.z*v2.z);}
-static inline AEVec3 AEVec3Div(AEVec3 v,AEVec3 v2){return AEVec3FromCoords(v.x/v2.x,v.y/v2.y,v.z/v2.z);}
+static inline AEVec3 AEVec3Add(AEVec3 v,AEVec3 v2){return AEVec3From3(v.x+v2.x,v.y+v2.y,v.z+v2.z);}
+static inline AEVec3 AEVec3Sub(AEVec3 v,AEVec3 v2){return AEVec3From3(v.x-v2.x,v.y-v2.y,v.z-v2.z);}
+static inline AEVec3 AEVec3Mul(AEVec3 v,AEVec3 v2){return AEVec3From3(v.x*v2.x,v.y*v2.y,v.z*v2.z);}
+static inline AEVec3 AEVec3Div(AEVec3 v,AEVec3 v2){return AEVec3From3(v.x/v2.x,v.y/v2.y,v.z/v2.z);}
 static inline float AEVec3Dot(AEVec3 v,AEVec3 v2){return v.x*v2.x+v.y*v2.y+v.z*v2.z;}
-static inline AEVec3 AEVec3Cross(AEVec3 v,AEVec3 v2){return AEVec3FromCoords(v.y*v2.z-v2.y*v.z,v.z*v2.x-v2.z*v.x,v.x*v2.y-v2.x*v.y);}
+static inline AEVec3 AEVec3Cross(AEVec3 v,AEVec3 v2){return AEVec3From3(v.y*v2.z-v2.y*v.z,v.z*v2.x-v2.z*v.x,v.x*v2.y-v2.x*v.y);}
 static inline float AEVec3LengthSQ(AEVec3 v){return AEVec3Dot(v,v);}
 static inline float AEVec3LengthInv(AEVec3 v){return AESqrtInv(AEVec3LengthSQ(v));}
 static inline float AEVec3Length(AEVec3 v){return AESqrtInv(AEVec3Dot(v,v));}
-static inline AEVec3 AEVec3Normalized(AEVec3 v){return AEVec3Mul(AEVec3FromSingle(AEVec3LengthInv(v)),v);}
-static inline AEVec3 AEVec3Max(AEVec3 a,AEVec3 b){return AEVec3FromCoords(AEMax(a.x,b.x),AEMax(a.y,b.y),AEMax(a.z,b.z));}
-static inline AEVec3 AEVec3Min(AEVec3 a,AEVec3 b){return AEVec3FromCoords(AEMin(a.x,b.x),AEMin(a.y,b.y),AEMin(a.z,b.z));}
+static inline AEVec3 AEVec3Normalized(AEVec3 v){return AEVec3Mul(AEVec3From1(AEVec3LengthInv(v)),v);}
+static inline AEVec3 AEVec3Max(AEVec3 a,AEVec3 b){return AEVec3From3(AEMax(a.x,b.x),AEMax(a.y,b.y),AEMax(a.z,b.z));}
+static inline AEVec3 AEVec3Min(AEVec3 a,AEVec3 b){return AEVec3From3(AEMin(a.x,b.x),AEMin(a.y,b.y),AEMin(a.z,b.z));}
+static inline AEVec3 AEVec3Clamp(AEVec3 a, AEVec3 b, AEVec3 c){
+	return AEVec3From3(AEClamp(a.x, b.x, c.x), AEClamp(a.y, b.y, c.y), AEClamp(a.z, b.z, c.z));
+}
 static inline int AEVec3IsBetween(AEVec3 hit,AEVec3 min,AEVec3 max){
 	if(hit.x < min.x || max.x < hit.x) return 0;
 	if(hit.y < min.y || max.y < hit.y) return 0;
@@ -154,10 +157,10 @@ static inline float AEVec3DistanceBetween(AEVec3 v, AEVec3 v2){
 	AEVec3 difference=AEVec3Sub(v, v2);
 	return sqrtf(AEVec3Dot(difference, difference));
 }
-static inline AEVec3 AEVec3Round(AEVec3 v){return AEVec3FromCoords(roundf(v.x), roundf(v.y), roundf(v.z));}
-static inline AEVec3 AEVec3Abs(AEVec3 v){return AEVec3FromCoords(fabsf(v.x), fabsf(v.y), fabsf(v.z));}
+static inline AEVec3 AEVec3Round(AEVec3 v){return AEVec3From3(roundf(v.x), roundf(v.y), roundf(v.z));}
+static inline AEVec3 AEVec3Abs(AEVec3 v){return AEVec3From3(fabsf(v.x), fabsf(v.y), fabsf(v.z));}
 static inline AEVec3 AEVec3RandomBetween(AEVec3 min,AEVec3 max){
-	return AEVec3FromCoords(AERandomBetween(min.x,max.x),AERandomBetween(min.y,max.y),AERandomBetween(min.z,max.z));
+	return AEVec3From3(AERandomBetween(min.x,max.x),AERandomBetween(min.y,max.y),AERandomBetween(min.z,max.z));
 }
 static inline AEVec3 AEVec3AngleTo(AEVec3 v){
 	AEVec3 r={atan2f(v.y,v.z),atan2f(v.z,v.z),atan2f(v.y,v.x)};
@@ -399,7 +402,7 @@ static inline AEVec3 AEMatrix4x4MulVec3(float* m4x4, AEVec3 v) {
 }
 
 static inline AEVec3 AERayAtTime(AEVec3 s, AEVec3 d, float t){
-	return AEVec3Add(s, AEVec3Mul(d, AEVec3FromSingle(t)));
+	return AEVec3Add(s, AEVec3Mul(d, AEVec3From1(t)));
 }
 
 static inline float AEPlaneRayIntersectionTime(AEPlane p, AEVec3 s, AEVec3 d){

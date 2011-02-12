@@ -14,7 +14,7 @@ char* AEStringDuplicate(const char* string){
 
 ///////////////////////////////////////////////////
 //Texture Stuff
-AETexture AETextureLoadWithFlags(const char* filename, unsigned int flags){
+AETexture AETextureLoadWithFlags(const char* filename, AETextureFlag flags){
 	//SOIL is EPIC, no denial.
 	//Handles EVERYTHING, beautifully too
 	AETexture texture = SOIL_load_OGL_texture
@@ -36,7 +36,7 @@ AETexture AETextureLoadWithFlags(const char* filename, unsigned int flags){
 	return texture;
 }
 
-AETexture AETextureLoadFromMemoryWithFlags(void* data,size_t dataSize, unsigned int flags){
+AETexture AETextureLoadFromMemoryWithFlags(void* data,size_t dataSize, AETextureFlag flags){
 	AETexture texture = SOIL_load_OGL_texture_from_memory(data, dataSize, SOIL_LOAD_AUTO, 0, flags |  SOIL_FLAG_INVERT_Y);
 	if(texture==0) printf("Texture loading from memory failed because %s",SOIL_last_result());
 	//AETextureBind(texture);
@@ -246,42 +246,42 @@ void AEMBufferWrite(AEMBuffer* self, void* data, size_t size){
 	if(data and to) memcpy(to, data, size);
 }
 
-void AEMBufferPositionSeek(AEMBuffer* self, long offset, int from){
+void AEMBufferSeek(AEMBuffer* self, long offset, int from){
 	if(self->file) {
 		fseek(self->file, offset, from);
 		return;
 	}
 	switch (from) {
 		case SEEK_CUR:
-			AEMBufferPositionSet(self, self->position+offset);
+			AEMBufferSetPosition(self, self->position+offset);
 			break;
 		case SEEK_END:
-			AEMBufferPositionSet(self, (self->length-1)+offset);
+			AEMBufferSetPosition(self, (self->length-1)+offset);
 			break;
 		case SEEK_SET:
-			AEMBufferPositionSet(self, offset);
+			AEMBufferSetPosition(self, offset);
 			break;
 		default:
 			AEError("Invalid Argument for 'from'.");
 			break;
 	}
 }
-void AEMBufferPositionSet(AEMBuffer* self, size_t position){
+void AEMBufferSetPosition(AEMBuffer* self, size_t position){
 	self->position=position;
 }
 
-size_t AEMBufferPositionGet(AEMBuffer* self){
+size_t AEMBufferGetPosition(AEMBuffer* self){
 	if(self->file) return ftell(self->file);
 	return self->position;
 }
 
-size_t AEMBufferLengthGet(AEMBuffer* self){
+size_t AEMBufferGetLength(AEMBuffer* self){
 	return self->length;
 }
 
 ////////////////////////////////////////////////////
 //View Stuff
-AEContext AEContextActive={
+AEContext AEContextsActive={
 	.w=800,
 	.h=500,
 	.r=8,
@@ -293,24 +293,24 @@ AEContext AEContextActive={
 	.inFullscreen=0
 };
 
-void AEContextActiveSet(AEContext* context){
-	AEContextActive=*context;
+void AEContextsSetActive(AEContext* context){
+	AEContextsActive=*context;
 }
 
-AEContext* AEContextActiveGet(void){
-	return &AEContextActive;
+AEContext* AEContextsGetActive(void){
+	return &AEContextsActive;
 }
 
 void AEContextOpen(AEContext* context,const char* title,int w,int h){
-	if(not context) context=AEContextActiveGet();
+	if(not context) context=AEContextsGetActive();
 	
-	if(context->open==NULL || context->refresh==NULL || context->pollInput==NULL || context->swapBuffers==NULL || context->close==NULL || context->secondsGet==NULL) AEError("AEContext function pointers need to all be filled before you can use the engine.");
+	if(context->open==NULL || context->refresh==NULL || context->pollInput==NULL || context->swapBuffers==NULL || context->close==NULL || context->seconds==NULL) AEError("AEContext function pointers need to all be filled before you can use the engine.");
 	
 	context->w=w;context->h=h;
-	context->open(context, title, context->openArg);
+	context->open(context, title);
 	context->clearedBuffers=GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT;
-	AECamera* cam=AECameraActiveGet();
-	AECameraViewportSet(cam,context->w,context->h);
+	AECamera* cam=AECamerasGetActive();
+	AECameraSetViewport(cam,context->w,context->h);
 	
 	//Because it also affects the modelview matrix unfortunately
 	glPushMatrix();
@@ -329,28 +329,28 @@ void AEContextOpen(AEContext* context,const char* title,int w,int h){
 	context->fixedUpdateFrameRateMin=15;
 }
 
-static void AEDefaultPerframeFunc(AEContext* context, double step, void* arg){}
+static void AEDefaultPerframeFunc(AEContext* context, double step){}
 
 void AEContextRun(AEContext* context){
-	if(not context) context=AEContextActiveGet();
+	if(not context) context=AEContextsGetActive();
 	//0 is a magical number, simply acts as the default
 	if(context->frameUpdate==NULL) context->frameUpdate=AEDefaultPerframeFunc;
 	
-	double lastFrameTime = context->secondsGet(context, context->secondsGetArg);
+	double lastFrameTime = context->seconds(context);
 	double cyclesLeftOver = 0.0;
 	
 	double updateInterval = 1.0 / context->fixedUpdateFrameRateMax;
 	double maxCyclesPerFrame = context->fixedUpdateFrameRateMax / context->fixedUpdateFrameRateMin;
 	
-	double now=context->secondsGet(context, context->secondsGetArg);
+	double now=context->seconds(context);
 	double then=now;
-	while(context->pollInput(context, context->pollInputArg)){
+	while(context->pollInput(context)){
 		//Some code borrowed from sacredsoftware.com (written by Alex Diener, aka ThemsAllTook)
 		if(context->fixedUpdate){
 			double currentTime=0;
 			double updateIterations=0;
 	
-			currentTime = context->secondsGet(context, context->secondsGetArg);
+			currentTime = context->seconds(context);
 			updateIterations = ((currentTime - lastFrameTime) + cyclesLeftOver);
 	
 			if (updateIterations > (maxCyclesPerFrame * updateInterval)) {
@@ -359,26 +359,26 @@ void AEContextRun(AEContext* context){
 	
 			while (updateIterations > updateInterval) {
 				updateIterations -= updateInterval;
-				context->fixedUpdate(context, updateInterval, context->fixedUpdateArg);
+				context->fixedUpdate(context, updateInterval);
 			}
 	
 			cyclesLeftOver = updateIterations;
 			lastFrameTime = currentTime;
 		}
 		if(context->clearedBuffers) glClear(context->clearedBuffers);
-		AECameraBind(AECameraActiveGet());
+		AECameraBind(AECamerasGetActive());
 		
-		now=context->secondsGet(context, context->secondsGetArg);
-		context->frameUpdate(context, (now-then),context->frameUpdateArg);
+		now=context->seconds(context);
+		context->frameUpdate(context, (now-then));
 		then=now;
 		//Sounds....  Poetic
 		
-		context->swapBuffers(context, context->swapBuffersArg);
+		context->swapBuffers(context);
 	}
 	AEContextClose(context);
 }
 
 void AEContextClose(AEContext* context){
-	if(not context) context=AEContextActiveGet();
-	if(context->close) context->close(context, context->closeArg);
+	if(not context) context=AEContextsGetActive();
+	if(context->close) context->close(context);
 }

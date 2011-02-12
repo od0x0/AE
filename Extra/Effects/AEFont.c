@@ -2,6 +2,12 @@
 #include "AEFont.h"
 //This code is ugly, stay out until I eventually clean it!
 
+struct AEFont{
+	stbtt_bakedchar characters[96];
+	AETexture texture;
+	int lineheight;
+};
+
 ///Some code ripped from the Recast demo
 static void GetBakedQuad(stbtt_bakedchar *chardata, int pw, int ph, int char_index,
 						 float *xpos, float *ypos, stbtt_aligned_quad *q)
@@ -119,9 +125,11 @@ static size_t AEFontRenderLine(AEFont* self, const char* text, int alignment, fl
 	return i;
 }
 
+static AEFontStyle DefaultStyle;
+
 void AEFontRenderText(AEFont* self, AEFontStyle* style, float x, float y, float w, float h, const char* text, size_t caret){
 	if(text==NULL) text="";
-	
+	if(style==NULL) style = & DefaultStyle;
 	glColor4f(style->textColor.r, style->textColor.g, style->textColor.b, style->textColor.a);
 	size_t read=0;
 	y-=self->lineheight;
@@ -150,6 +158,9 @@ AEFont* AEFontLoadFromTTF(const char* filename, float size){
 		printf("%s(): Could not open %s\n", __func__, filename);
 		abort();
 	}
+	
+	AEFontStyleInit(& DefaultStyle);
+	
 	AEFont* font=calloc(1, sizeof(AEFont));
 	font->lineheight=size;
 	
@@ -173,7 +184,7 @@ AEFont* AEFontLoadFromTTF(const char* filename, float size){
 	return font;
 }
 
-float AEFontLineHeightGet(AEFont* self){return self ? self->lineheight : 0;}
+float AEFontGetLineHeight(AEFont* self){return self ? self->lineheight : 0;}
 float AEFontMeasureTextLength(AEFont* self, const char* text, size_t stop){
 	if(self==NULL) return 0;
 	if(text==NULL) text="";

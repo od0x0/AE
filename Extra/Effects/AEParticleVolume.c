@@ -11,7 +11,7 @@ void AEParticleVolumeDeinit(AEParticleVolume* self){
 }
 
 void AEParticleVolumeStep(AEParticleVolume* self, double seconds, const AEVec3 up, const AEVec3 right){
-	const AEVec3 movement = AEVec3Mul(self->movement, AEVec3FromSingle(seconds));
+	const AEVec3 movement = AEVec3Mul(self->movement, AEVec3From1(seconds));
 	for (size_t i=0; i<self->quadPatch.quadCount; i++) {
 		const AEVec3 p=self->quadPatch.quads[i].center;
 		

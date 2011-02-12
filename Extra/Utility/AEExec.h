@@ -7,8 +7,8 @@ typedef struct AEExecItem AEExecItem;
 
 typedef void (*AEExecItemFunc)(AEExecItem* item);
 
-AEExecItemFunc AEExecItemFuncGet(AEExecItem* self);
-void* AEExecItemArgGet(AEExecItem* self);
+AEExecItemFunc AEExecItemGetFunc(AEExecItem* self);
+void* AEExecItemGetArg(AEExecItem* self);
 
 struct AEExecQueue;
 typedef struct AEExecQueue AEExecQueue;

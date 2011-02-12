@@ -18,7 +18,7 @@ void AELuaRun(lua_State* L,const char* file){
 	}
 }
 
-void AELuaAddFunction(lua_State* L,char* name,void* func){
+void AELuaAddFunction(lua_State* L,char* name,lua_CFunction func){
 	lua_register(L,name,func);
 }
 

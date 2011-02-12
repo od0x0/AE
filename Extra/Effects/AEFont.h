@@ -10,23 +10,18 @@
 typedef struct{
 	AERGBA textColor;
 	float caretAlpha;
-	char alignment;
+	int alignment;
 }AEFontStyle;
 
-static void AEFontStyleInit(AEFontStyle* self){
+static inline void AEFontStyleInit(AEFontStyle* self){
 	memset(self, 0, sizeof(AEFontStyle));
 	self->alignment=-1;
 	self->textColor.a=1;
 }
 
 typedef struct AEFont AEFont;
-struct AEFont{
-	stbtt_bakedchar characters[96];
-	AETexture texture;
-	int lineheight;
-};
 
-float AEFontLineHeightGet(AEFont* self);
+float AEFontGetLineHeight(AEFont* self);
 float AEFontMeasureTextLength(AEFont* self, const char* text, size_t stop);
 
 void AEFontRenderText(AEFont* self, AEFontStyle* style, float x, float y, float w, float h, const char* text, size_t caret);

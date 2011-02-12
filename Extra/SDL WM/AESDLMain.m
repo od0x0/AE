@@ -396,7 +396,7 @@ int AESDLEventFilter(const SDL_Event* event){
 
 //AESDL* AESDLActive=NULL;
 
-void AESDLInit(AEContext* context,const char* title,void* arg){
+void AESDLInit(AEContext* context,const char* title){
 	int error = SDL_Init(SDL_INIT_EVERYTHING);
 	if(error){
 		puts("SDL failed to start");
@@ -422,29 +422,29 @@ void AESDLInit(AEContext* context,const char* title,void* arg){
 	if(context->multisample) glEnable(GL_MULTISAMPLE);
 }
 
-void AESDLSwapBuffers(AEContext* context,void* arg){
+void AESDLSwapBuffers(AEContext* context){
 	SDL_GL_SwapBuffers();
 }
 
-void AESDLRefresh(AEContext* context,void* arg){
+void AESDLRefresh(AEContext* context){
 	//A dud, we don't actually do anything here.
 }
 
 int AESDLKey(int key){return SDL_GetKeyState(NULL)[key];}
 int AESDLMouseButton(char button){return (SDL_BUTTON(button)&SDL_GetMouseState(NULL,NULL));}
 
-int AESDLPollInput(AEContext* context,void* arg){
+int AESDLPollInput(AEContext* context){
 	SDL_PumpEvents();
 	if((AESDLKey(SDLK_LMETA)||AESDLKey(SDLK_LSUPER))&&AESDLKey(SDLK_q)) exit(0);
 		//SDLK_LSUPER for Windoze and SDLK_LMETA for OS X
 	return 1;
 }
 
-void AESDLDeInit(AEContext* context,void* arg){
+void AESDLDeInit(AEContext* context){
 	SDL_Quit();
 }
 
-double AESDLSecondsGet(AEContext* context,void* arg){
+double AESDLSecondsGet(AEContext* context){
 	return SDL_GetTicks()*0.001;
 }
 
@@ -455,11 +455,16 @@ void AESDLBridge(void){
 	[[NSFileManager defaultManager] changeCurrentDirectoryPath:resourcePath];
 	[pool release];
 #endif
-	AEContext* context=AEContextActiveGet();
+	AEContext* context=AEContextsGetActive();
 	context->open=AESDLInit;
 	context->pollInput=AESDLPollInput;
 	context->swapBuffers=AESDLSwapBuffers;
 	context->close=AESDLDeInit;
-	context->secondsGet=AESDLSecondsGet;
+	context->seconds=AESDLSecondsGet;
 	context->refresh=AESDLRefresh;
+}
+
+void AESDLRefreshContext(void){
+	
+	[[NSOpenGLContext currentContext] update];
 }

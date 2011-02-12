@@ -82,11 +82,11 @@ void AETextBufferDelete(AETextBuffer* self){
 	free(self);
 }
 
-char* AETextBufferTextGet(AETextBuffer* self){
+char* AETextBufferGetText(AETextBuffer* self){
 	return self->text;
 }
 
-size_t AETextBufferLengthGet(AETextBuffer* self){
+size_t AETextBufferGetLength(AETextBuffer* self){
 	return self->length;
 }
 

@@ -9,7 +9,7 @@ lua_State* AELuaNew(int shouldLoadLibraries);
 
 void AELuaRun(lua_State* L,const char* file);
 
-void AELuaAddFunction(lua_State* L,char* name,void* func);
+void AELuaAddFunction(lua_State* L,char* name,lua_CFunction func);
 
 //"" or NULL puts it in the global namespace
 void AELuaAddLibrary(lua_State* L,char* libname,const luaL_reg* funcs);

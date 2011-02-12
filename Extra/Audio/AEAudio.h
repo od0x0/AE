@@ -53,12 +53,12 @@ typedef struct{
 void AEAudioContextInit(AEAudioContext* self);
 void AEAudioContextDeinit(AEAudioContext* self);
 
-void AEAudioContextPositionSet(AEAudioContext* self, float x, float y, float z);
-void AEAudioContextPositionGet(AEAudioContext* self, AEVec3* v3);
-void AEAudioContextRotationSet(AEAudioContext* self, float x, float y, float z);
-void AEAudioContextRotationGet(AEAudioContext* self, AEVec3* v3);
-void AEAudioContextVelocitySet(AEAudioContext* self, float x, float y, float z);
-void AEAudioContextVelocityGet(AEAudioContext* self, AEVec3* v3);
+void AEAudioContextSetPosition(AEAudioContext* self, float x, float y, float z);
+void AEAudioContextGetPosition(AEAudioContext* self, AEVec3* v3);
+void AEAudioContextSetRotation(AEAudioContext* self, float x, float y, float z);
+void AEAudioContextGetRotation(AEAudioContext* self, AEVec3* v3);
+void AEAudioContextSetVelocity(AEAudioContext* self, float x, float y, float z);
+void AEAudioContextGetVelocity(AEAudioContext* self, AEVec3* v3);
 
 ALuint AEAudioContextBufferLoad(AEAudioContext* self, char* filename);
 void AEAudioContextBufferDelete(AEAudioContext* self, ALuint buffer);
@@ -72,15 +72,15 @@ void AEAudioContextSourceDelete(AEAudioContext* self, ALuint source);
 
 void AEAudioContextUpdateStreams(AEAudioContext* self);
 
-void AEAudioContextSourcePausedSet(AEAudioContext* self, ALuint source, bool to);
-bool AEAudioContextSourcePausedGet(AEAudioContext* self, ALuint source);
-void AEAudioContextSourceVolumeSet(AEAudioContext* self, ALuint source, float amount);
-float AEAudioContextSourceVolumeGet(AEAudioContext* self, ALuint source);
-void AEAudioContextSourcePitchSet(AEAudioContext* self, ALuint source, float amount);
-float AEAudioContextSourcePitchGet(AEAudioContext* self, ALuint source);
-void AEAudioContextSourcePositionSet(AEAudioContext* self, ALuint source, float x, float y, float z);
-void AEAudioContextSourcePositionGet(AEAudioContext* self, ALuint source, AEVec3* v3);
-void AEAudioContextSourceVelocitySet(AEAudioContext* self, ALuint source, float x, float y, float z);
-void AEAudioContextSourceVelocityGet(AEAudioContext* self, ALuint source, AEVec3* v3);
-void AEAudioContextSourceLoopingSet(AEAudioContext* self, ALuint source, bool loop);
-bool AEAudioContextSourceLoopingGet(AEAudioContext* self, ALuint source);
+void AEAudioContextSourceSetPaused(AEAudioContext* self, ALuint source, bool to);
+bool AEAudioContextSourceGetPaused(AEAudioContext* self, ALuint source);
+void AEAudioContextSourceSetVolume(AEAudioContext* self, ALuint source, float amount);
+float AEAudioContextSourceGetVolume(AEAudioContext* self, ALuint source);
+void AEAudioContextSourceSetPitch(AEAudioContext* self, ALuint source, float amount);
+float AEAudioContextSourceGetPitch(AEAudioContext* self, ALuint source);
+void AEAudioContextSourceSetPosition(AEAudioContext* self, ALuint source, float x, float y, float z);
+void AEAudioContextSourceGetPosition(AEAudioContext* self, ALuint source, AEVec3* v3);
+void AEAudioContextSourceSetVelocity(AEAudioContext* self, ALuint source, float x, float y, float z);
+void AEAudioContextSourceGetVelocity(AEAudioContext* self, ALuint source, AEVec3* v3);
+void AEAudioContextSourceSetLooping(AEAudioContext* self, ALuint source, bool loop);
+bool AEAudioContextSourceGetLooping(AEAudioContext* self, ALuint source);

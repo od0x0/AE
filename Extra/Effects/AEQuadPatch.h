@@ -44,6 +44,6 @@ static inline void AEQuadPatchGetUpAndRightBasedOnOpenGLModelViewMatrix(AEVec3* 
 	float modelview[16];
 	glGetFloatv(GL_MODELVIEW_MATRIX, modelview);
 
-	*right = AEVec3FromCoords(modelview[0], modelview[4], modelview[8]);
-	*up = AEVec3FromCoords(modelview[1], modelview[5], modelview[9]);
+	*right = AEVec3From3(modelview[0], modelview[4], modelview[8]);
+	*up = AEVec3From3(modelview[1], modelview[5], modelview[9]);
 }

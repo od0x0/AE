@@ -5,11 +5,11 @@ struct AEExecItem{
 	void* arg;
 };
 
-AEExecItemFunc AEExecItemFuncGet(AEExecItem* self){
+AEExecItemFunc AEExecItemGetFunc(AEExecItem* self){
 	return self->func;
 }
 
-void* AEExecItemArgGet(AEExecItem* self){
+void* AEExecItemGetArg(AEExecItem* self){
 	return self->arg;
 }
 

@@ -35,45 +35,36 @@ Ambition Engine Core.
 char* AEStringDuplicate(const char* string);
 
 typedef struct AEContext AEContext;
-typedef void (*AEContextCallbackOpenFunc)(AEContext* self, const char* title, void* arg);
-typedef void (*AEContextCallbackRefreshFunc)(AEContext* self, void* arg);
-typedef int (*AEContextCallbackPollInputFunc)(AEContext* self, void* arg);
-typedef void (*AEContextCallbackSwapBuffersFunc)(AEContext* self, void* arg);
-typedef void (*AEContextCallbackCloseFunc)(AEContext* self, void* arg);
-typedef double (*AEContextCallbackSecondsGetFunc)(AEContext* self, void* arg);
-typedef void (*AEContextCallbackFixedUpdateFunc)(AEContext* self, double secondsSinceLastCall, void* arg);
-typedef void (*AEContextCallbackFrameUpdateFunc)(AEContext* self, double secondsSinceLastCall, void* arg);
+typedef void (*AEContextCallbackOpenFunc)(AEContext* self, const char* title);
+typedef void (*AEContextCallbackRefreshFunc)(AEContext* self);
+typedef int (*AEContextCallbackPollInputFunc)(AEContext* self);
+typedef void (*AEContextCallbackSwapBuffersFunc)(AEContext* self);
+typedef void (*AEContextCallbackCloseFunc)(AEContext* self);
+typedef double (*AEContextCallbackSecondsFunc)(AEContext* self);
+typedef void (*AEContextCallbackFixedUpdateFunc)(AEContext* self, double secondsSinceLastCall);
+typedef void (*AEContextCallbackFrameUpdateFunc)(AEContext* self, double secondsSinceLastCall);
 
 struct AEContext{
 	unsigned int w,h;
 	unsigned char r, g, b, a, stencil, depth, inFullscreen, multisample;
-	void* aux;
+	void* userdata;
 	GLbitfield clearedBuffers;
 	
 	AEContextCallbackOpenFunc open;
-	void* openArg;
 	AEContextCallbackRefreshFunc refresh;
-	void* refreshArg;
 	AEContextCallbackPollInputFunc pollInput;
-	void* pollInputArg;
 	AEContextCallbackSwapBuffersFunc swapBuffers;
-	void* swapBuffersArg;
 	AEContextCallbackCloseFunc close;
-	void* closeArg;
-	AEContextCallbackSecondsGetFunc secondsGet;
-	void* secondsGetArg;
-	
+	AEContextCallbackSecondsFunc seconds;
 	AEContextCallbackFixedUpdateFunc fixedUpdate;
-	void* fixedUpdateArg;
 	double fixedUpdateFrameRateMax;
 	double fixedUpdateFrameRateMin;
 	
 	AEContextCallbackFrameUpdateFunc frameUpdate;
-	void* frameUpdateArg;
 };
 
-void AEContextActiveSet(AEContext* context);
-AEContext* AEContextActiveGet(void);
+void AEContextsSetActive(AEContext* context);
+AEContext* AEContextsGetActive(void);
 
 void AEContextOpen(AEContext* context,const char* title,int w,int h);
 void AEContextRun(AEContext* context);
@@ -83,16 +74,20 @@ void AEContextClose(AEContext* context);
 //////////Utility stuff
 //////////////////////////////////////////
 typedef GLuint AETexture;
-#define AETextureLoadFlagDXTCompression SOIL_FLAG_COMPRESS_TO_DXT
-#define AETextureLoadFlagMipmaps SOIL_FLAG_MIPMAPS
-#define AETextureLoadFlagInvertY SOIL_FLAG_INVERT_Y
-#define AETextureLoadFlagRepeat SOIL_FLAG_TEXTURE_REPEATS
+typedef GLuint AETextureFlag;
 
-#define AETextureLoadFlagDefault (SOIL_FLAG_COMPRESS_TO_DXT|SOIL_FLAG_MIPMAPS|SOIL_FLAG_TEXTURE_REPEATS)
+#define AETextureFlagForcePowerOfTwo SOIL_FLAG_POWER_OF_TWO
+#define AETextureFlagMipMap SOIL_FLAG_MIPMAPS
+#define AETextureFlagRepeat SOIL_FLAG_TEXTURE_REPEATS
+#define AETextureFlagPremultiplyAlpha SOIL_FLAG_MULTIPLY_ALPHA
+#define AETextureFlagCompressDXT SOIL_FLAG_COMPRESS_TO_DXT
+#define AETextureFlagLoadDXT SOIL_FLAG_DDS_LOAD_DIRECT
+#define AETextureFlagNTSC SOIL_FLAG_NTSC_SAFE_RGB
+#define AETextureFlagDefault (AETextureFlagCompressDXT|AETextureFlagMipMap|AETextureFlagRepeat)
 
-AETexture AETextureLoadWithFlags(const char* filename,unsigned int flags);
-#define AETextureLoad(filename) AETextureLoadWithFlags(filename,AETextureLoadFlagDefault)
-AETexture AETextureLoadFromMemoryWithFlags(void* data,size_t dataSize, unsigned int flags);
+AETexture AETextureLoadWithFlags(const char* filename, AETextureFlag flags);
+#define AETextureLoad(filename) AETextureLoadWithFlags(filename,AETextureFlagDefault)
+AETexture AETextureLoadFromMemoryWithFlags(void* data,size_t dataSize, AETextureFlag flags);
 static inline void AETextureBind(AETexture texture){glBindTexture(GL_TEXTURE_2D, texture);}
 void AETextureDelete(AETexture texture);
 
@@ -132,7 +127,7 @@ void AEMBufferDeinit(AEMBuffer* self);
 //void* AEMBufferBytesGet(AEMBuffer* self, size_t size);
 void AEMBufferRead(AEMBuffer* self, void* data, size_t size);
 void AEMBufferWrite(AEMBuffer* self, void* data, size_t size);
-void AEMBufferPositionSeek(AEMBuffer* self, long offset, int from);
-void AEMBufferPositionSet(AEMBuffer* self, size_t position);
-size_t AEMBufferPositionGet(AEMBuffer* self);
-size_t AEMBufferLengthGet(AEMBuffer* self);
+void AEMBufferSeek(AEMBuffer* self, long offset, int from);
+void AEMBufferSetPosition(AEMBuffer* self, size_t position);
+size_t AEMBufferGetPosition(AEMBuffer* self);
+size_t AEMBufferGetLength(AEMBuffer* self);

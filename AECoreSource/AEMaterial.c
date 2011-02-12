@@ -241,12 +241,10 @@ void AEMaterialShaderSet(AEMaterial* material,const char* vshadertext,const char
 	AEMaterialShaderSetMulti(material, vshadertext ? vshadertextarray : NULL, fshadertext ? fshadertextarray : NULL);
 }
 
-void AEMaterialTextureSet(AEMaterial* material,const char* name,AEImage* image){
+void AEMaterialTextureSet(AEMaterial* material,const char* name,AETexture texture){
 	material->texUnitCount++;
 	material->textures=realloc(material->textures,material->texUnitCount*sizeof(AETexture));
 	material->textureNames=realloc(material->textureNames,material->texUnitCount*sizeof(char*));
 	material->textureNames[material->texUnitCount-1]=AEStringDuplicate(name);
-	AETexture texture=AEImageToTexture(image);
 	material->textures[material->texUnitCount-1]=texture;
-	AEImageDelete(image);
 }

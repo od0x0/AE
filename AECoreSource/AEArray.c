@@ -3,6 +3,7 @@ void AEArrayDeinit(void* array){
 	if(array==NULL) return;
 	AEArray(void)* self=array;
 	free(self->data);
+	//memset(self, 0, sizeof(*self));
 }
 void AEArrayResize(void* array,size_t length){
 	AEArray(void)* self=array;
@@ -31,6 +32,11 @@ void AEArrayAddBytes(void* array,void* bytes){
 }
 size_t AEArrayFindIndexOfBytes(void* array,void* bytes){
 	AEArray(void)* self=array;
+	char blankBytes[self->typeSize];
+	if(bytes==NULL){
+		bytes=blankBytes;
+		memset(blankBytes, 0, self->typeSize);
+	}
 	for(size_t i=0; i<self->length; i++){
 		if(memcmp((char*)self->data+self->typeSize*i, bytes, self->typeSize)==0) return i+1;
 	}
@@ -56,9 +62,9 @@ void AEArrayRemoveDuplicates(void* array,void* _outarray,void* _indices){
 		if(indices) AEArrayAdd(indices, index);
 	}
 }
-void AEArrayRemoveBytes(void* array,void* bytes){
+int AEArrayRemoveBytes(void* array,void* bytes){
 	size_t index=AEArrayFindIndexOfBytes(array,bytes);
-	if(index==0) return;
+	if(index==0) return 0;
 	
 	AEArray(void)* self=array;
 	index--;
@@ -68,4 +74,20 @@ void AEArrayRemoveBytes(void* array,void* bytes){
 	self->length--;
 	
 	if(self->allocated*0.75 > self->length) AEArrayResize(array,self->length);
+	
+	return 1;
+}
+int AEArrayRemoveIndex(void* array,size_t index){
+	if(index==0) return 0;
+	
+	AEArray(void)* self=array;
+	index--;
+	void* removed=index*self->typeSize+(char*)self->data;
+	void* last=(self->length-1)*self->typeSize+(char*)self->data;
+	memcpy(removed,last,self->typeSize);
+	self->length--;
+	
+	if(self->allocated*0.75 > self->length) AEArrayResize(array,self->length);
+	
+	return 1;
 }

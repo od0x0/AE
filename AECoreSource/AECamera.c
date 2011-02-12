@@ -38,22 +38,22 @@ void AECameraDelete(AECamera* cam){
 //////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////
-void AECameraPositionGet(AECamera* cam,AEVec3* v3){
+void AECameraGetPosition(AECamera* cam,AEVec3* v3){
 	*v3=cam->position;
 }
 
-void AECameraPositionSet(AECamera* cam,float x,float y,float z){
+void AECameraSetPosition(AECamera* cam,float x,float y,float z){
 	cam->position.x=x;
 	cam->position.y=y;
 	cam->position.z=z;
 }
 
 //////////////////////////////////////////////////////////////////
-void AECameraRotationGet(AECamera* cam, AEVec3* v3){
+void AECameraGetRotation(AECamera* cam, AEVec3* v3){
 	*v3=cam->rotation;
 }
 
-void AECameraRotationSet(AECamera* cam,float x,float y,float z){
+void AECameraSetRotation(AECamera* cam,float x,float y,float z){
 	AEVec3 rotation={x,y,z};
 	cam->rotation=rotation;
 	///*
@@ -70,26 +70,29 @@ void AECameraRotationSet(AECamera* cam,float x,float y,float z){
 //////////////////////////////////////////////////////////////////
 //These "dirty" the camera and force a full update on next bind
 
-void AECameraBoundsSet(AECamera* cam,float near,float far,float fov){
-	if(near) cam->near=near;
-	if(far) cam->far=far;
-	if(fov) cam->fov=fov;
+void AECameraSetBounds(AECamera* cam,float near,float far,float fov){
+	//if(near) 
+	cam->near=near;
+	//if(far) 
+	cam->far=far;
+	//if(fov) 
+	cam->fov=fov;
 	cam->onlyDoPartialUpdate=false;
 }
 
-void AECameraBoundsGet(AECamera* cam,float* near,float* far,float* fov){
+void AECameraGetBounds(AECamera* cam,float* near,float* far,float* fov){
 	if(near) *near=cam->near;
 	if(far) *far=cam->far;
 	if(fov) *fov=cam->fov;
 }
 
-void AECameraViewportSet(AECamera* cam,int w,int h){
+void AECameraSetViewport(AECamera* cam,int w,int h){
 	if(w) cam->w=w;
 	if(h) cam->h=h;
 	cam->onlyDoPartialUpdate=false;
 }
 
-void AECameraViewportGet(AECamera* cam,int* w,int* h){
+void AECameraGetViewport(AECamera* cam,int* w,int* h){
 	if(w) *w=cam->w;
 	if(h) *h=cam->h;
 }
@@ -132,11 +135,11 @@ AECamera AECameraActive={
 	.near=1, .far=3000, .fov=60
 };
 
-void AECameraActiveSet(AECamera* cam){
+void AECamerasSetActive(AECamera* cam){
 	AECameraActive=*cam;
 }
 
-AECamera* AECameraActiveGet(void){
+AECamera* AECamerasGetActive(void){
 	return &AECameraActive;
 }
 
@@ -147,11 +150,11 @@ AECamera* AECameraActiveGet(void){
 // Based off of http://www.crownandcutlass.com/features/technicaldetails/frustum.html
 // Slow, only here until I get a faster method
 
-void AECameraVFCSet(AECamera* cam, bool enabled){
+void AECameraSetVFCEnabled(AECamera* cam, bool enabled){
 	cam->vfCullingEnabled=enabled;
 }
 
-bool AECameraVFCGet(AECamera* cam){
+bool AECameraGetVFCEnabled(AECamera* cam){
 	return cam->vfCullingEnabled;
 }
 

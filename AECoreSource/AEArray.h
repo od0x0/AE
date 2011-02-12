@@ -13,8 +13,8 @@ void AEArrayAddBytes(void* array,void* bytes);
 size_t AEArrayFindIndexOfBytes(void* array,void* bytes);
 size_t AEArrayAddBytesUnique(void* array,void* data);
 void AEArrayRemoveDuplicates(void* array,void* _outarray,void* _indices);
-void AEArrayRemoveBytes(void* array,void* bytes);
-
+int AEArrayRemoveBytes(void* array,void* bytes);
+int AEArrayRemoveIndex(void* array,size_t index);
 #define AEArrayInitWithTypeOfSize(array,size) {memset((array),0,sizeof(*(array))); (array)->typeSize=(size);}
 
 #define AEArrayInit(array) AEArrayInitWithTypeOfSize((array),sizeof((array)->data[0]))
