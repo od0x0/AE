@@ -77,6 +77,7 @@ static inline float AESqrtInv(float x){
 #define AESign(x) (((x)>0)*2-1)
 //#define AEAbs(x) (AESign(x)*x)
 #define AEAbs fabsf
+#define AESqrt sqrtf
 
 static inline float AEMax(float a,float b){
 	if(a>b) return a;
@@ -136,11 +137,12 @@ static inline AEVec3 AEVec3Add(AEVec3 v,AEVec3 v2){return AEVec3From3(v.x+v2.x,v
 static inline AEVec3 AEVec3Sub(AEVec3 v,AEVec3 v2){return AEVec3From3(v.x-v2.x,v.y-v2.y,v.z-v2.z);}
 static inline AEVec3 AEVec3Mul(AEVec3 v,AEVec3 v2){return AEVec3From3(v.x*v2.x,v.y*v2.y,v.z*v2.z);}
 static inline AEVec3 AEVec3Div(AEVec3 v,AEVec3 v2){return AEVec3From3(v.x/v2.x,v.y/v2.y,v.z/v2.z);}
+static inline AEVec3 AEVec3Neg(AEVec3 v){return AEVec3From3(-v.x,-v.y,-v.z);}
 static inline float AEVec3Dot(AEVec3 v,AEVec3 v2){return v.x*v2.x+v.y*v2.y+v.z*v2.z;}
 static inline AEVec3 AEVec3Cross(AEVec3 v,AEVec3 v2){return AEVec3From3(v.y*v2.z-v2.y*v.z,v.z*v2.x-v2.z*v.x,v.x*v2.y-v2.x*v.y);}
 static inline float AEVec3LengthSQ(AEVec3 v){return AEVec3Dot(v,v);}
 static inline float AEVec3LengthInv(AEVec3 v){return AESqrtInv(AEVec3LengthSQ(v));}
-static inline float AEVec3Length(AEVec3 v){return AESqrtInv(AEVec3Dot(v,v));}
+static inline float AEVec3Length(AEVec3 v){return AESqrt(AEVec3Dot(v,v));}
 static inline AEVec3 AEVec3Normalized(AEVec3 v){return AEVec3Mul(AEVec3From1(AEVec3LengthInv(v)),v);}
 static inline AEVec3 AEVec3Max(AEVec3 a,AEVec3 b){return AEVec3From3(AEMax(a.x,b.x),AEMax(a.y,b.y),AEMax(a.z,b.z));}
 static inline AEVec3 AEVec3Min(AEVec3 a,AEVec3 b){return AEVec3From3(AEMin(a.x,b.x),AEMin(a.y,b.y),AEMin(a.z,b.z));}
@@ -163,7 +165,7 @@ static inline AEVec3 AEVec3RandomBetween(AEVec3 min,AEVec3 max){
 	return AEVec3From3(AERandomBetween(min.x,max.x),AERandomBetween(min.y,max.y),AERandomBetween(min.z,max.z));
 }
 static inline AEVec3 AEVec3AngleTo(AEVec3 v){
-	AEVec3 r={atan2f(v.y,v.z),atan2f(v.z,v.z),atan2f(v.y,v.x)};
+	AEVec3 r={AE180OverPi*atan2f(v.y,v.z),AE180OverPi*atan2f(v.z,v.z),AE180OverPi*atan2f(v.y,v.x)};
 	return r;
 }
 

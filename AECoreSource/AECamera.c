@@ -4,7 +4,6 @@
 
 //////////////////////////////////////////////////////////////////
 
-//Unstable/Private implementation, only here so the compiler knows how large it is
 struct AECamera{
 	//float x,y,z;
 	AEVec3 position;
@@ -19,11 +18,6 @@ struct AECamera{
 AECamera* AECameraNew(void){
 	AECamera* cam=calloc(1,sizeof(AECamera));
 	cam->refcount=1;
-	return cam;
-}
-
-static AECamera* AECameraRetain(AECamera* cam){
-	if(cam && cam->refcount) cam->refcount++;
 	return cam;
 }
 
@@ -151,7 +145,7 @@ AECamera* AECamerasGetActive(void){
 // Slow, only here until I get a faster method
 
 void AECameraSetVFCEnabled(AECamera* cam, bool enabled){
-	cam->vfCullingEnabled=enabled;
+	//cam->vfCullingEnabled=enabled;
 }
 
 bool AECameraGetVFCEnabled(AECamera* cam){
@@ -159,6 +153,7 @@ bool AECameraGetVFCEnabled(AECamera* cam){
 }
 
 void AECameraVFCalculate(AECamera* cam){
+	/*
 	cam->vfCullingEnabled=true;
 	
 	float   proj[16];
@@ -166,13 +161,10 @@ void AECameraVFCalculate(AECamera* cam){
 	float   clip[16];
 	float   t;
 	
-	/* Get the current PROJECTION matrix from OpenGL */
 	glGetFloatv( GL_PROJECTION_MATRIX, proj );
 	
-	/* Get the current MODELVIEW matrix from OpenGL */
 	glGetFloatv( GL_MODELVIEW_MATRIX, modl );
 	
-	/* Combine the two matrices (multiply projection by modelview) */
 	clip[ 0] = modl[ 0] * proj[ 0] + modl[ 1] * proj[ 4] + modl[ 2] * proj[ 8] + modl[ 3] * proj[12];
 	clip[ 1] = modl[ 0] * proj[ 1] + modl[ 1] * proj[ 5] + modl[ 2] * proj[ 9] + modl[ 3] * proj[13];
 	clip[ 2] = modl[ 0] * proj[ 2] + modl[ 1] * proj[ 6] + modl[ 2] * proj[10] + modl[ 3] * proj[14];
@@ -193,92 +185,82 @@ void AECameraVFCalculate(AECamera* cam){
 	clip[14] = modl[12] * proj[ 2] + modl[13] * proj[ 6] + modl[14] * proj[10] + modl[15] * proj[14];
 	clip[15] = modl[12] * proj[ 3] + modl[13] * proj[ 7] + modl[14] * proj[11] + modl[15] * proj[15];
 	
-	/* Extract the numbers for the RIGHT plane */
 	cam->vfPlanes[0][0] = clip[ 3] - clip[ 0];
 	cam->vfPlanes[0][1] = clip[ 7] - clip[ 4];
 	cam->vfPlanes[0][2] = clip[11] - clip[ 8];
 	cam->vfPlanes[0][3] = clip[15] - clip[12];
 	
-	/* Normalize the result */
 	t = sqrtf( cam->vfPlanes[0][0] * cam->vfPlanes[0][0] + cam->vfPlanes[0][1] * cam->vfPlanes[0][1] + cam->vfPlanes[0][2] * cam->vfPlanes[0][2] );
 	cam->vfPlanes[0][0] /= t;
 	cam->vfPlanes[0][1] /= t;
 	cam->vfPlanes[0][2] /= t;
 	cam->vfPlanes[0][3] /= t;
 	
-	/* Extract the numbers for the LEFT plane */
 	cam->vfPlanes[1][0] = clip[ 3] + clip[ 0];
 	cam->vfPlanes[1][1] = clip[ 7] + clip[ 4];
 	cam->vfPlanes[1][2] = clip[11] + clip[ 8];
 	cam->vfPlanes[1][3] = clip[15] + clip[12];
 	
-	/* Normalize the result */
 	t = sqrtf( cam->vfPlanes[1][0] * cam->vfPlanes[1][0] + cam->vfPlanes[1][1] * cam->vfPlanes[1][1] + cam->vfPlanes[1][2] * cam->vfPlanes[1][2] );
 	cam->vfPlanes[1][0] /= t;
 	cam->vfPlanes[1][1] /= t;
 	cam->vfPlanes[1][2] /= t;
 	cam->vfPlanes[1][3] /= t;
 	
-	/* Extract the BOTTOM plane */
 	cam->vfPlanes[2][0] = clip[ 3] + clip[ 1];
 	cam->vfPlanes[2][1] = clip[ 7] + clip[ 5];
 	cam->vfPlanes[2][2] = clip[11] + clip[ 9];
 	cam->vfPlanes[2][3] = clip[15] + clip[13];
 	
-	/* Normalize the result */
 	t = sqrtf( cam->vfPlanes[2][0] * cam->vfPlanes[2][0] + cam->vfPlanes[2][1] * cam->vfPlanes[2][1] + cam->vfPlanes[2][2] * cam->vfPlanes[2][2] );
 	cam->vfPlanes[2][0] /= t;
 	cam->vfPlanes[2][1] /= t;
 	cam->vfPlanes[2][2] /= t;
 	cam->vfPlanes[2][3] /= t;
 	
-	/* Extract the TOP plane */
 	cam->vfPlanes[3][0] = clip[ 3] - clip[ 1];
 	cam->vfPlanes[3][1] = clip[ 7] - clip[ 5];
 	cam->vfPlanes[3][2] = clip[11] - clip[ 9];
 	cam->vfPlanes[3][3] = clip[15] - clip[13];
 	
-	/* Normalize the result */
 	t = sqrtf( cam->vfPlanes[3][0] * cam->vfPlanes[3][0] + cam->vfPlanes[3][1] * cam->vfPlanes[3][1] + cam->vfPlanes[3][2] * cam->vfPlanes[3][2] );
 	cam->vfPlanes[3][0] /= t;
 	cam->vfPlanes[3][1] /= t;
 	cam->vfPlanes[3][2] /= t;
 	cam->vfPlanes[3][3] /= t;
 	
-	/* Extract the FAR plane */
 	cam->vfPlanes[4][0] = clip[ 3] - clip[ 2];
 	cam->vfPlanes[4][1] = clip[ 7] - clip[ 6];
 	cam->vfPlanes[4][2] = clip[11] - clip[10];
 	cam->vfPlanes[4][3] = clip[15] - clip[14];
 	
-	/* Normalize the result */
 	t = sqrtf( cam->vfPlanes[4][0] * cam->vfPlanes[4][0] + cam->vfPlanes[4][1] * cam->vfPlanes[4][1] + cam->vfPlanes[4][2] * cam->vfPlanes[4][2] );
 	cam->vfPlanes[4][0] /= t;
 	cam->vfPlanes[4][1] /= t;
 	cam->vfPlanes[4][2] /= t;
 	cam->vfPlanes[4][3] /= t;
 	
-	/* Extract the NEAR plane */
 	cam->vfPlanes[5][0] = clip[ 3] + clip[ 2];
 	cam->vfPlanes[5][1] = clip[ 7] + clip[ 6];
 	cam->vfPlanes[5][2] = clip[11] + clip[10];
 	cam->vfPlanes[5][3] = clip[15] + clip[14];
 	
-	/* Normalize the result */
 	t = sqrtf( cam->vfPlanes[5][0] * cam->vfPlanes[5][0] + cam->vfPlanes[5][1] * cam->vfPlanes[5][1] + cam->vfPlanes[5][2] * cam->vfPlanes[5][2] );
 	cam->vfPlanes[5][0] /= t;
 	cam->vfPlanes[5][1] /= t;
 	cam->vfPlanes[5][2] /= t;
 	cam->vfPlanes[5][3] /= t;
+	*/
 }
 
-int AECameraVFCheckSphere(AECamera* cam,float x,float y,float z,float r){
-	if(cam->vfCullingEnabled==false) return 1;
+float AECameraVFCheckSphere(AECamera* cam,float x,float y,float z,float r){
+	return false;
+	/*if(cam->vfCullingEnabled==false) return 1;
 	float d=0;
 	for(char i= 0; i < 6; i++ ){
 		d = cam->vfPlanes[i][0] * x +cam->vfPlanes[i][1] * y + cam->vfPlanes[i][2] * z + cam->vfPlanes[i][3];
 		if( d <= -r )
 			return 0;
 	}
-	return d + r;
+	return d + r;*/
 }

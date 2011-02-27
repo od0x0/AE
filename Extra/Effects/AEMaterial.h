@@ -1,7 +1,5 @@
 #pragma once
-#include "AEImage.h"
-
-#warning AEMaterial is deprecated.
+#include "AE.h"
 
 //A very unstable multitexture/shader material system, don't expect it to remain here.
 

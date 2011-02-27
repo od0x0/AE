@@ -23,11 +23,11 @@ THE SOFTWARE.
 
 */
 
-#include "AETable.h"
+//#include "AETable.h"
 #include "AEMath.h"
 #include "AEArray.h"
 #include "SOIL.h"
-#include "khash.h"
+//#include "khash.h"
 
 #include "AECore.h"
 #include "AECamera.h"

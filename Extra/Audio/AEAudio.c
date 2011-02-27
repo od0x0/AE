@@ -40,8 +40,8 @@ bool AEAudioStreamStream(AEAudioStream* self, ALuint buffer){
 	return true;
 }
 
-bool AEAudioStreamOpen(AEAudioStream* self, char* filename){
-	self->stream = stb_vorbis_open_filename(filename, NULL, NULL);
+bool AEAudioStreamOpen(AEAudioStream* self, const char* filename){
+	self->stream = stb_vorbis_open_filename((char*)filename, NULL, NULL);
 	if(not self->stream) return false;
 	// Get file info
 	self->info = stb_vorbis_get_info(self->stream);
@@ -139,11 +139,11 @@ void AEAudioContextGetVelocity(AEAudioContext* self, AEVec3* v3){
 	*v3=self->velocity;
 }
 
-ALuint AEAudioContextBufferLoad(AEAudioContext* self, char* filename){
+ALuint AEAudioContextBufferLoad(AEAudioContext* self, const char* filename){
 	ALuint buffer=0;
 	alGenBuffers(1, &buffer);
 	
-	stb_vorbis *stream = stb_vorbis_open_filename(filename, NULL, NULL);
+	stb_vorbis *stream = stb_vorbis_open_filename((char*)filename, NULL, NULL);
 	if(not stream) return 0;
 
 	stb_vorbis_info info = stb_vorbis_get_info(stream);
@@ -166,7 +166,7 @@ void AEAudioContextBufferDelete(AEAudioContext* self, ALuint buffer){
 	alDeleteBuffers(1, &buffer);
 }
 
-ALuint AEAudioContextStreamLoad(AEAudioContext* self, char* filename){
+ALuint AEAudioContextStreamLoad(AEAudioContext* self, const char* filename){
 	ALuint streamID=0;
 	AEAudioStream stream;
 	AEAudioStreamInit(& stream);
@@ -179,14 +179,17 @@ ALuint AEAudioContextStreamLoad(AEAudioContext* self, char* filename){
 		if(streamID < AEArrayAsCArray(& self->streams)[i].ID) streamID=AEArrayAsCArray(& self->streams)[i].ID;
 	streamID++;
 	if(streamID==0) streamID++;
+	stream.ID=streamID;
 	AEArrayAddBytes(& self->streams, & stream);
 	return streamID;
 }
 
 AEAudioStream* AEAudioContextGetStreamForID(AEAudioContext* self, ALuint streamID){
 	size_t length=AEArrayLength(& self->streams);
-	for (size_t i=0; i<length; i++) 
+	for (size_t i=0; i<length; i++) {
+		//printf("#%i: %i\n", (int)i, (int)AEArrayAsCArray(& self->streams)[i].ID);
 		if(streamID==AEArrayAsCArray(& self->streams)[i].ID) return AEArrayAsCArray(& self->streams)+i;
+	}
 	return NULL;
 }
 

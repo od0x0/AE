@@ -686,13 +686,12 @@ static inline unsigned long Index(int x, int y, int z, int w, int h, int d){
 	return x+y*w+z*w*h;
 }
 
-static void AEMarchingCubes(uint8_t* voxels, uint32_t stepX, uint32_t stepY, uint32_t stepZ, double isovalue, uint32_t w, uint32_t h, uint32_t d, AEMCTriangleArray* tArray) {
-	AEArray(AEMCTriangle)* triangleArray=tArray;
+static void AEMarchingCubes(uint8_t* voxels, uint32_t stepX, uint32_t stepY, uint32_t stepZ, double isovalue, uint32_t w, uint32_t h, uint32_t d, AEMCTriangleArray* triangleArray) {
     // Run the processCube function on every cube in the grid
 	for(uint32_t x = stepX; x < w-2*stepX; x += stepX) {
 		for(uint32_t y = stepY; y < h-2*stepY; y += stepY) {
 			for(uint32_t z = stepZ; z < d-2*stepZ; z += stepZ) {
-				GRIDCELL c = {{
+				/*GRIDCELL c = {{
 					{x,y,z, 
                         (double)(voxels[Index(x+stepX,y,z,w,h,d)]-voxels[Index(x-stepX,y,z,w,h,d)]) / -stepX,
                         (double)(voxels[Index(x,y+stepY,z,w,h,d)]-voxels[Index(x,y-stepY,z,w,h,d)]) / -stepY,
@@ -742,8 +741,8 @@ static void AEMarchingCubes(uint8_t* voxels, uint32_t stepX, uint32_t stepY, uin
 					voxels[Index(x+stepX,y+stepY,z,w,h,d)],
 					voxels[Index(x+stepX,y+stepY,z+stepZ,w,h,d)],
 					voxels[Index(x,y+stepY,z+stepZ,w,h,d)]
-				}};
-				/*GRIDCELL c={{
+				}};*/
+				GRIDCELL c={{
 					{x,y,z,0,0,0},
 					{x+stepX,y,z,0,0,0},
 					{x+stepX,y,z+stepZ,0,0,0},
@@ -761,7 +760,7 @@ static void AEMarchingCubes(uint8_t* voxels, uint32_t stepX, uint32_t stepY, uin
 					voxels[Index(x+stepX,y+stepY,z,w,h,d)],
 					voxels[Index(x+stepX,y+stepY,z+stepZ,w,h,d)],
 					voxels[Index(x,y+stepY,z+stepZ,w,h,d)]
-				}};*/
+				}};
 				///Polygonise(c, isovalue);
 				TRIANGLE triangles[5];
 				size_t count=Polygonise(c, isovalue, triangles);

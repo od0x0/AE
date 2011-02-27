@@ -5,7 +5,6 @@
 typedef struct AECamera AECamera;
 
 AECamera* AECameraNew(void);
-//AECamera* AECameraRetain(AECamera* cam); (deprecated)
 void AECameraDelete(AECamera* cam);
 
 void AECameraGetPosition(AECamera* cam, AEVec3* v3);
@@ -27,4 +26,4 @@ void AECameraSetVFCEnabled(AECamera* cam, bool enabled);
 bool AECameraGetVFCEnabled(AECamera* cam);
 
 void AECameraVFCalculate(AECamera* cam);
-int AECameraVFCheckSphere(AECamera* cam, float x, float y, float z, float r);
+float AECameraVFCheckSphere(AECamera* cam, float x, float y, float z, float r);

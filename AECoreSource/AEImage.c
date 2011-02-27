@@ -39,13 +39,13 @@ void AEImageInitFromMemory(AEImage* image, void* data,size_t dataSize){
 void AEImageGetPixel(AEImage* image,int x,int y,unsigned char* rgba){
 	if(x > image->w || y> image->h || y < 0 || x < 0) return;
 	int channels=image->channels;
-	memcpy(rgba,image->pixels+x*channels+y*image->h*channels,4);
+	memcpy(rgba,image->pixels+x*channels+y*image->w*channels,4);
 }
 
 void AEImageSetPixel(AEImage* image,int x,int y,unsigned char* rgba){
 	if(x > image->w || y> image->h || y < 0 || x < 0) return;
 	int channels=image->channels;
-	unsigned char* pixel = image->pixels+x*channels+y*image->h*channels;
+	unsigned char* pixel = image->pixels+x*channels+y*image->w*channels;
 	for(int i=0;i<channels;i++) pixel[i]=rgba[i];
 }
 

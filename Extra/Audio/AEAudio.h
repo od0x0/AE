@@ -35,7 +35,7 @@ typedef struct{
 //You will probably never need to call any of these manually.
 void AEAudioStreamInit(AEAudioStream* self);
 void AEAudioStreamDeinit(AEAudioStream* self);
-bool AEAudioStreamOpen(AEAudioStream* self, char* filename);
+bool AEAudioStreamOpen(AEAudioStream* self, const char* filename);
 bool AEAudioStreamUpdate(AEAudioStream* self);
 
 typedef struct{
@@ -60,10 +60,10 @@ void AEAudioContextGetRotation(AEAudioContext* self, AEVec3* v3);
 void AEAudioContextSetVelocity(AEAudioContext* self, float x, float y, float z);
 void AEAudioContextGetVelocity(AEAudioContext* self, AEVec3* v3);
 
-ALuint AEAudioContextBufferLoad(AEAudioContext* self, char* filename);
+ALuint AEAudioContextBufferLoad(AEAudioContext* self, const char* filename);
 void AEAudioContextBufferDelete(AEAudioContext* self, ALuint buffer);
 
-ALuint AEAudioContextStreamLoad(AEAudioContext* self, char* filename);
+ALuint AEAudioContextStreamLoad(AEAudioContext* self, const char* filename);
 AEAudioStream* AEAudioContextGetStreamForID(AEAudioContext* self, ALuint streamID);
 void AEAudioContextStreamDelete(AEAudioContext* self, ALuint streamID);
 
