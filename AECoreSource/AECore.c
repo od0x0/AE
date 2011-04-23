@@ -2,7 +2,8 @@
 #include "SOIL.h"
 #include <math.h>
 #include <string.h>
-#include "AECamera.h"
+//because of a circular dependency
+//#include "AECamera.h"
 
 char* AEStringDuplicate(const char* string){
 	if(not string) return NULL;
@@ -30,9 +31,10 @@ AETexture AETextureLoadWithFlags(const char* filename, AETextureFlag flags){
 		sprintf(message, "%s: %s", result, filename);
 		AEError(message);
 	}
-	//AETextureBind(texture);
-	//glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_REPEAT);
-	//glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_REPEAT);
+	if(flags & AETextureFlagRepeat) return texture;
+	AETextureBind(texture);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_CLAMP_TO_EDGE);
 	return texture;
 }
 
@@ -53,13 +55,13 @@ void AETextureDelete(AETexture texture){
 
 
 
-static uint64_t AEUInt64TwoToThe(uint64_t exponent){
+static inline uint64_t AEUInt64TwoToThe(uint64_t exponent){
 	uint64_t x=1;
 	for(uint64_t i=0;i<exponent;i++) x*=2;
 	return x;
 }
 
-static uint64_t AEUInt64From8Bytes(uint8_t* bytes,bool bigendian){
+static inline uint64_t AEUInt64From8Bytes(uint8_t* bytes,bool bigendian){
 	uint64_t integer=0;
 	for(int i=0;i<8;i++){
 		int byteID=i;
@@ -69,9 +71,9 @@ static uint64_t AEUInt64From8Bytes(uint8_t* bytes,bool bigendian){
 	return integer;
 }
 
-static void AEUInt64To8Bytes(uint64_t integer,uint8_t* bytes,bool bigendian){
-	for(int i=0;i<8;i++) bytes[i]=0;
+static inline void AEUInt64To8Bytes(uint64_t integer,uint8_t* bytes,bool bigendian){
 	uint64_t quotient=integer;
+	for(int i=0;i<8;i++) bytes[i]=0;
 	for(int i=0;i<8;i++){
 		int byteID=i;
 		if(bigendian) byteID=8-i-1;
@@ -81,7 +83,7 @@ static void AEUInt64To8Bytes(uint64_t integer,uint8_t* bytes,bool bigendian){
 	}
 }
 
-static uint32_t AEUInt32From4Bytes(uint8_t* bytes,bool bigendian){
+static inline uint32_t AEUInt32From4Bytes(uint8_t* bytes,bool bigendian){
 	uint32_t integer=0;
 	for(int i=0;i<4;i++){
 		int byteID=i;
@@ -91,9 +93,9 @@ static uint32_t AEUInt32From4Bytes(uint8_t* bytes,bool bigendian){
 	return integer;
 }
 
-static void AEUInt32To4Bytes(uint32_t integer,uint8_t* bytes,bool bigendian){
-	for(int i=0;i<4;i++) bytes[i]=0;
+static inline void AEUInt32To4Bytes(uint32_t integer,uint8_t* bytes,bool bigendian){
 	uint32_t quotient=integer;
+	for(int i=0;i<4;i++) bytes[i]=0;
 	for(int i=0;i<4;i++){
 		int byteID=i;
 		if(bigendian) byteID=4-i-1;
@@ -101,6 +103,29 @@ static void AEUInt32To4Bytes(uint32_t integer,uint8_t* bytes,bool bigendian){
 		bytes[byteID]=quotient%256;
 		quotient/=256;
 	}
+}
+
+void AEHostU64FromNetMultiSwizzle(void* netu64, size_t u64Count){
+	uint64_t* data=netu64;
+	for (size_t i=0; i<u64Count; i++) 
+		data[i]=AEUInt64From8Bytes((uint8_t*)(data+i), true);
+}
+
+void AENetU64FromHostMultiSwizzle(void* hostu64, size_t u64Count){
+	uint64_t* data=hostu64;
+	for (size_t i=0; i<u64Count; i++) 
+		AEUInt64To8Bytes(data[i], (uint8_t*)(data+i), true);
+}
+
+void AEHostU32FromNetMultiSwizzle(void* netu32, size_t u32Count){
+	uint32_t* data=netu32;
+	for (size_t i=0; i<u32Count; i++) 
+		data[i]=AEUInt32From4Bytes((uint8_t*)(data+i), true);
+}
+void AENetU32FromHostMultiSwizzle(void* hostu32, size_t u32Count){
+	uint32_t* data=hostu32;
+	for (size_t i=0; i<u32Count; i++) 
+		AEUInt32To4Bytes(data[i], (uint8_t*)(data+i), true);
 }
 
 uint64_t AEHostU64FromNet(uint64_t netu64){
@@ -198,17 +223,18 @@ AEException* AEExceptionsCatch(const char* type){
 //File Stuff
 
 
-void AEMBufferInit(AEMBuffer* self){
-	memset(self, 0, sizeof(AEMBuffer));
+void AEIOInit(AEIO* self){
+	memset(self, 0, sizeof(AEIO));
 }
 
-void AEMBufferDeinit(AEMBuffer* self){
+void AEIODeinit(AEIO* self){
 	if (not self) return;
-	if(self->file) fclose(self->file);
-	free(self->bytes);
-	memset(self, 0, sizeof(AEMBuffer));
+	//if(self->file) fclose(self->file); //We didn't allocate, so we shouldn't release
+	//free(self->bytes);
+	if(self->deinit) self->deinit(self);
+	memset(self, 0, sizeof(AEIO));
 }
-void* AEMBufferBytesGet(AEMBuffer* self, size_t size){
+/*void* AEIOBytesGet(AEIO* self, size_t size){
 	if(self->file) {
 		return NULL;
 	}
@@ -219,69 +245,153 @@ void* AEMBufferBytesGet(AEMBuffer* self, size_t size){
 	}
 	return (void*) (((char*)self->bytes)+(self->position-size));
 }
-
-void AEMBufferRead(AEMBuffer* self, void* data, size_t size){
-	if(self->file) {
+*/
+void AEIORead(AEIO* self, void* data, size_t size){
+/*	if(self->file) {
 		fread(data, 1, size, self->file);
 		return;
 	}
-	void* from=AEMBufferBytesGet(self, size);
-	if(data and from) memcpy(data, from, size);
+	void* from=AEIOBytesGet(self, size);
+	if(data and from) memcpy(data, from, size);*/
+	if(self->read) self->read(self, data, size);
 }
 
-void AEMBufferWrite(AEMBuffer* self, void* data, size_t size){
-	if(self->file) {
+void AEIOWrite(AEIO* self, void* data, size_t size){
+/*	if(self->file) {
 		fwrite(data, 1, size, self->file);
 		return;
 	}
 	size_t oldPosition=self->position;
-	void* to=AEMBufferBytesGet(self, size);
+	void* to=AEIOBytesGet(self, size);
 	if(not to){
 		self->position=oldPosition;
 		self->length += size;
 		self->allocated = self->length + (self->length/10)*2;
 		self->bytes=realloc(self->bytes, self->allocated);
-		to=AEMBufferBytesGet(self, size);
+		to=AEIOBytesGet(self, size);
 	}
-	if(data and to) memcpy(to, data, size);
+	if(data and to) memcpy(to, data, size);*/
+	if(self->write) self->write(self, data, size);
 }
 
-void AEMBufferSeek(AEMBuffer* self, long offset, int from){
-	if(self->file) {
+void AEIOSeek(AEIO* self, long offset, int from){
+/*	if(self->file) {
 		fseek(self->file, offset, from);
 		return;
 	}
 	switch (from) {
 		case SEEK_CUR:
-			AEMBufferSetPosition(self, self->position+offset);
+			AEIOSetPosition(self, self->position+offset);
 			break;
 		case SEEK_END:
-			AEMBufferSetPosition(self, (self->length-1)+offset);
+			AEIOSetPosition(self, (self->length-1)+offset);
 			break;
 		case SEEK_SET:
-			AEMBufferSetPosition(self, offset);
+			AEIOSetPosition(self, offset);
+			break;
+		default:
+			AEError("Invalid Argument for 'from'.");
+			break;
+	}*/
+	if(self->seek) self->seek(self, offset, from);
+}
+
+static void FileIORead(AEIO* self, void* data, size_t size){
+	fread(data, 1, size, self->userdata);
+}
+
+static void FileIOWrite(AEIO* self, void* data, size_t size){
+	fwrite(data, 1, size, self->userdata);
+}
+static void FileIOSeek(AEIO* self, long offset, int from){
+	fseek(self->userdata, offset, from);
+}
+static void FileIODeinit(AEIO* self){
+	//fclose(self->userdata);
+}
+
+void AEIOInitFromFILE(AEIO* self, FILE* file){
+	AEIOInit(self);
+	self->read=FileIORead;
+	self->write=FileIOWrite;
+	self->seek=FileIOSeek;
+	self->deinit=FileIODeinit;
+	self->userdata=file;
+}
+
+typedef struct {
+	void* memory;
+	size_t size;
+	size_t current;
+}AEIOMemoryBlock;
+
+static void MemoryIORead(AEIO* self, void* data, size_t size){
+	AEIOMemoryBlock* block=self->userdata;
+	if(block->current + size > block->size) return;
+	memcpy(data, block->memory+block->current, size);
+}
+
+static void MemoryIOWrite(AEIO* self, void* data, size_t size){
+	AEIOMemoryBlock* block=self->userdata;
+	if(block->current + size > block->size) return;
+	memcpy(block->memory+block->current, data, size);
+}
+static void MemoryIOSeek(AEIO* self, long offset, int from){
+	AEIOMemoryBlock* block=self->userdata;
+	switch (from) {
+		case SEEK_CUR:{
+			if(block->current + offset < 0) return;
+			if(block->current + offset >= block->size) return;
+			block->current+=offset;
+			}break;
+		case SEEK_END:{
+			if(offset > 0) return;
+			if(-offset > block->size) return;
+			block->current=(block->size-1)+offset;
+			}break;
+		case SEEK_SET:
+			if(offset < 0) return;
+			if(offset >= block->size) return;
+			block->current=offset;
 			break;
 		default:
 			AEError("Invalid Argument for 'from'.");
 			break;
 	}
 }
-void AEMBufferSetPosition(AEMBuffer* self, size_t position){
+static void MemoryIODeinit(AEIO* self){
+	free(self->userdata);
+}
+
+void AEIOInitFromMemory(AEIO* self, void* memory, size_t size){
+	AEIOInit(self);
+	self->read=MemoryIORead;
+	self->write=MemoryIOWrite;
+	self->seek=MemoryIOSeek;
+	self->deinit=MemoryIODeinit;
+	AEIOMemoryBlock* block=calloc(1, sizeof(AEIOMemoryBlock));
+	block->memory=memory;
+	block->size=size;
+	self->userdata=block;
+}
+
+/*
+void AEIOSetPosition(AEIO* self, size_t position){
 	self->position=position;
 }
 
-size_t AEMBufferGetPosition(AEMBuffer* self){
+size_t AEIOGetPosition(AEIO* self){
 	if(self->file) return ftell(self->file);
 	return self->position;
 }
 
-size_t AEMBufferGetLength(AEMBuffer* self){
+size_t AEIOGetLength(AEIO* self){
 	return self->length;
 }
-
+*/
 ////////////////////////////////////////////////////
 //View Stuff
-AEContext AEContextsActive={
+/*AEContext AEContextsActive={
 	.w=800,
 	.h=500,
 	.r=8,
@@ -300,22 +410,49 @@ void AEContextsSetActive(AEContext* context){
 AEContext* AEContextsGetActive(void){
 	return &AEContextsActive;
 }
+*/
+/*
+void AEContextInit(AEContext* context){
+	memset(context, 0, sizeof(AEContext));
+	context->w=800;
+	context->h=500;
+	context->r=8;
+	context->g=8;
+	context->b=8;
+	context->a=8;
+	context->stencil=8;
+	context->depth=8;
+	context->inFullscreen=false;
+	AEArrayInit(& context->cameras);
+}
+
+void AEContextDeinit(AEContext* context){
+	size_t cameraCount=AEArrayLength(& context->cameras);
+	AECamera* cameras=AEArrayAsCArray(& context->cameras);
+	for (size_t i=0; i<cameraCount; i++) {
+		AECamera* camera=cameras[i];
+		cameras[i]=NULL;//It's important that we do this so that the deletion doesn't try to remove it!
+		AECameraDelete(camera);
+	}
+	AEArrayDeinit(& context->cameras);
+	memset(context, 0, sizeof(AEContext));
+}
 
 void AEContextOpen(AEContext* context,const char* title,int w,int h){
-	if(not context) context=AEContextsGetActive();
 	
 	if(context->open==NULL || context->refresh==NULL || context->pollInput==NULL || context->swapBuffers==NULL || context->close==NULL || context->seconds==NULL) AEError("AEContext function pointers need to all be filled before you can use the engine.");
 	
 	context->w=w;context->h=h;
 	context->open(context, title);
-	context->clearedBuffers=GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT;
-	AECamera* cam=AECamerasGetActive();
-	AECameraSetViewport(cam,context->w,context->h);
+	
+	//context->clearedBuffers=GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT;
+	//AECamera* cam=context->camera;
+	//AECameraSetViewport(cam,0,0,context->w,context->h);
 	
 	//Because it also affects the modelview matrix unfortunately
-	glPushMatrix();
-	AECameraBind(cam);
-	glPopMatrix();
+	//glPushMatrix();
+	//AECameraBind(cam);
+	//glPopMatrix();
 	
 	glClearColor(0,0,0,1);
 	glEnable( GL_BLEND );
@@ -329,12 +466,11 @@ void AEContextOpen(AEContext* context,const char* title,int w,int h){
 	context->fixedUpdateFrameRateMin=15;
 }
 
-static void AEDefaultPerframeFunc(AEContext* context, double step){}
+//static void AEDefaultPerframeFunc(AEContext* context, double step){}
 
 void AEContextRun(AEContext* context){
-	if(not context) context=AEContextsGetActive();
 	//0 is a magical number, simply acts as the default
-	if(context->frameUpdate==NULL) context->frameUpdate=AEDefaultPerframeFunc;
+	//if(context->frameUpdate==NULL) context->frameUpdate=AEDefaultPerframeFunc;
 	
 	double lastFrameTime = context->seconds(context);
 	double cyclesLeftOver = 0.0;
@@ -365,20 +501,19 @@ void AEContextRun(AEContext* context){
 			cyclesLeftOver = updateIterations;
 			lastFrameTime = currentTime;
 		}
-		if(context->clearedBuffers) glClear(context->clearedBuffers);
-		AECameraBind(AECamerasGetActive());
-		
-		now=context->seconds(context);
-		context->frameUpdate(context, (now-then));
-		then=now;
+		//if(context->clearedBuffers) glClear(context->clearedBuffers);
+		//AECameraBind(context->camera);
+		if(context->frameUpdate){
+			now=context->seconds(context);
+			context->frameUpdate(context, (now-then));
+			then=now;
+		}
 		//Sounds....  Poetic
 		
 		context->swapBuffers(context);
 	}
-	AEContextClose(context);
 }
 
 void AEContextClose(AEContext* context){
-	if(not context) context=AEContextsGetActive();
 	if(context->close) context->close(context);
-}
+}*/

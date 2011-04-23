@@ -4,7 +4,7 @@
 
 //This has a lot of ugly things that need to be cleaned up sometime.
 
-size_t AEVABytesPerVertex(AEVA* self){
+/*size_t AEVABytesPerVertex(AEVA* self){
 	size_t stride=sizeof(AEVec3);
 	stride+=sizeof(AEVec2)*self->format.textureCoordsPerVertex;
 	if(self->format.hasNormals) stride+=sizeof(AEVec3);
@@ -12,6 +12,7 @@ size_t AEVABytesPerVertex(AEVA* self){
 	return stride;
 }
 #define AEVAVertexByteSize AEVABytesPerVertex
+*/
 
 void AEVAInit(AEVA* va){
 	memset(va,0,sizeof(AEVA));
@@ -49,8 +50,9 @@ void AEVAInitCopy(AEVA* self,AEVA* from){
 
 void* AEVAMap(AEVA* va, unsigned int length,unsigned int writereadmode){
 	unsigned int arrayType=va->format.isAnIndexArray?GL_ELEMENT_ARRAY_BUFFER:GL_ARRAY_BUFFER;
-	if(sizeof(GLfloat)!=sizeof(char[4]) and sizeof(GLuint)!=sizeof(char[4])) AEError("A GLfloat or GLuint is not equal to 4 bytes on your system!  This is very, very, bad.");
-	if(va->length && va->length!=length) AEError("You are trying to access a VA with a different length than the length it actually has.");
+	if(sizeof(GLfloat) not_eq sizeof(char[4]) and sizeof(GLuint)!=sizeof(char[4])) AEError("A GLfloat or GLuint is not equal to 4 bytes on your system!  This is very, very, bad.");
+	if(va->length and va->length not_eq length) AEError("You are trying to access a VA with a different length than the length it actually has.");
+	if(sizeof(AEVec3) not_eq 3*sizeof(float)) AEError("AEVec3 is padded, this is bad!");
 	if(va->length==0){
 		va->length=length;
 		if(va->format.storageType){
@@ -60,13 +62,13 @@ void* AEVAMap(AEVA* va, unsigned int length,unsigned int writereadmode){
 			unsigned int vbotype=0;
 			
 			switch(va->format.storageType){
-				case AEVAVBOTypeStream:
+				case AEVAFormatStorageTypeStream:
 					vbotype=GL_STREAM_DRAW;
 					break;
-				case AEVAVBOTypeDynamic:
+				case AEVAFormatStorageTypeDynamic:
 					vbotype=GL_DYNAMIC_DRAW;
 					break;
-				case AEVAVBOTypeStatic:
+				case AEVAFormatStorageTypeStatic:
 					vbotype=GL_STATIC_DRAW;
 					break;
 			}
@@ -94,7 +96,7 @@ void AEVAUnmap(AEVA* va){
 	}
 }
 
-//Some might be wondering why I am doing slow things here, the truth is, this is not really designed for speed, it is designed to be easier to use.  There was a time that this was designed for speed, it turned out to be fast, but very unforgiving in the event that it was used even the slightest bit incorrectly, the current design is to prevent it from being used improperly.
+//Some might be wondering why I am doing slow things here.  This is not really designed for speed, it is designed to be easy to use.  There was a time that this was designed for speed, it turned out to be fast, but very unforgiving in the event that it was used even the slightest bit incorrectly, the current design is to prevent it from being used improperly.
 
 void AEVADrawRange(AEVA* va, AEVA* ia, unsigned long start, unsigned long end){
 	GLuint* indexOffset=NULL;
@@ -108,7 +110,7 @@ void AEVADrawRange(AEVA* va, AEVA* ia, unsigned long start, unsigned long end){
 	int tcount=va->format.textureCoordsPerVertex;
 	bool hasNormals=va->format.hasNormals;
 	
-	void* offset=NULL;
+	char* offset=NULL;
 	if(va->format.storageType) glBindBuffer(GL_ARRAY_BUFFER, va->data.vbo);
 	else{
 		glBindBuffer(GL_ARRAY_BUFFER, 0);

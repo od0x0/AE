@@ -3,37 +3,17 @@
 
 //Somewhat based off of pursuade's idea since it pwn3d'd my own
 
-//Always interleaved as 4CUB 2TF* 3NF 3VF
+//Always interleaved as 2TF* 4CUB? 3NF? 3VF or an array of 32 bit unsigned int indices
 typedef struct{
 	uint32_t//since this is guarranteed to be 32 bits.
 		isAnIndexArray :1,//2 possible values
 		storageType :2,//4 possible values
-		textureCoordsPerVertex :4,//16 possible
+		textureCoordsPerVertex :4,//16 possible (0-15)
 		hasNormals :1,//2 possible values
 		hasColors :1,//2 possible
-		hasVertices :1,
+		hasVertices :1,//yes or no
 		unused :32-10;
 }AEVAFormat;
-
-static inline uint64_t AEVAFormatTo64Bits(AEVAFormat* self){
-	uint64_t bits=0;
-	bits |= self->isAnIndexArray << 0;
-	bits |= self->storageType << 1;
-	bits |= self->textureCoordsPerVertex << 1+2;
-	bits |= self->hasNormals << 1+2+4;
-	bits |= self->hasColors << 1+2+4+1;
-	bits |= self->hasVertices << 1+2+4+1+1;
-	return bits;
-}
-
-static inline void AEVAFormatFrom64Bits(AEVAFormat* self, uint64_t bits){
-	self->isAnIndexArray = (bits >> 0) & 1;
-	self->storageType = (bits >> 1) & 2;
-	self->textureCoordsPerVertex = (bits >> 1+2) & 4;
-	self->hasNormals = (bits >> 1+2+4) & 1;
-	self->hasColors = (bits >> 1+2+4+1) & 1;
-	self->hasVertices = (bits >> 1+2+4+1+1) & 1;
-}
 
 //Should be alright to read from, it's pretty much standard now
 typedef struct AEVA{
@@ -54,10 +34,10 @@ typedef struct AEVA{
 #define AEVADataFormat4CUB3VF 2
 #define AEVADataFormat4CUB3NF3VF 3
 */
-#define AEVAVBOTypeNone 0
-#define AEVAVBOTypeStream 1
-#define AEVAVBOTypeDynamic 2
-#define AEVAVBOTypeStatic 3
+#define AEVAFormatStorageTypeNone 0
+#define AEVAFormatStorageTypeStream 1
+#define AEVAFormatStorageTypeDynamic 2
+#define AEVAFormatStorageTypeStatic 3
 
 size_t AEVABytesPerVertex(AEVA* self);
 

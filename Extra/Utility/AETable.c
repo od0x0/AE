@@ -47,9 +47,9 @@ void* AETableRemove(void* table, char* name){
 	return value;
 }
 
-char* AETableGetName(AETable* table, void* value){
+const char* AETableGetName(AETable* table, void* value){
 	khash_t(Table)* h=table;
 	for (khiter_t k = kh_begin(h); k != kh_end(h); ++k)
-		if (kh_exist(h, k) && kh_value(h, k)==value) return (char*)kh_key(h, k);
+		if (kh_exist(h, k) && kh_value(h, k)==value) return kh_key(h, k);
 	return NULL;
 }

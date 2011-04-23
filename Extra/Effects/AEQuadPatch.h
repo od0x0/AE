@@ -12,7 +12,9 @@ typedef struct{
 	AEVec3 center;
 	AEVec3 size;
 	float distance;//Used for sorting
-	uint32_t usertag;
+	float timeLeft;
+	AERGBAub color;
+	//uint32_t usertag;
 }AEQuadPatchQuad;
 
 typedef struct{
@@ -36,14 +38,11 @@ typedef struct{
 void AEQuadPatchInit(AEQuadPatch* self, bool cylindrical, size_t quadCount, AEVec3* centers, AEVec3* sizes, AERGBAub* colors/*Perface color, which is translated to pervertex*/);
 
 void AEQuadPatchRender(AEQuadPatch* self);
-void AEQuadPatchUpdate(AEQuadPatch* self, const AEVec3 up, const AEVec3 right);
+void AEQuadPatchUpdate(AEQuadPatch* self, const AEVec3 cameraPosition, const AEVec3 up, const AEVec3 right);
 void AEQuadPatchDeinit(AEQuadPatch* self);
 
 void AEQuadPatchAlterImageToSetupForAlphaTest(AEImage* image);
-static inline void AEQuadPatchGetUpAndRightBasedOnOpenGLModelViewMatrix(AEVec3* up, AEVec3* right){
-	float modelview[16];
-	glGetFloatv(GL_MODELVIEW_MATRIX, modelview);
-
+static inline void AEQuadPatchGetUpAndRightFromMatrix(AEVec3* up, AEVec3* right, float* modelview){
 	*right = AEVec3From3(modelview[0], modelview[4], modelview[8]);
 	*up = AEVec3From3(modelview[1], modelview[5], modelview[9]);
 }

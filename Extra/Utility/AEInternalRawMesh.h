@@ -32,7 +32,7 @@ static AERawMesh* AERawMeshLoad(const char* filename){
 	unsigned int cv,cf,ct,cn,v[3],n[3],t[3];
 	char buffer[256];
 	float x,y,z;
-	
+	size_t lineCount=0;
 	cv=cf=ct=cn=fcount=vcount=ncount=tcount=0;
 	
 	FILE* file=fopen(filename,"r");
@@ -43,6 +43,7 @@ static AERawMesh* AERawMeshLoad(const char* filename){
 	}
 	while(!feof(file)){
 		fgets(buffer,255,file);
+		lineCount++;
 		if((buffer[0]=='v')&&(buffer[1]==' ')){
 			vcount++;
 			
@@ -171,6 +172,7 @@ static AERawMesh* AERawMeshLoad(const char* filename){
 			m->f[cf].v[2]=v[2]-1;
 			cf++;
 		}
+		//else fprintf(stderr, "Problematic Line #%lu: \"%s\"\n", (unsigned long)lineCount, buffer);
 	}
 	if(cf==fcount&&cv==vcount&&ct==tcount&&cn==ncount){
 		m->count.f=fcount;

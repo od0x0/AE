@@ -1,9 +1,4 @@
-/*
- *  AEMarchingCubes.h
- *  AE Editor attempt 5
- *
- *  Created by Oliver Daids on 2/12/11.
- *  Copyright 2011 __MyCompanyName__. All rights reserved.
- *
- */
+#pragma once
+#include "AE.h"
 
+int AEMarchCube(const double* voxels, double isovalue, AEVec3* outVertices, size_t outVertexCount);

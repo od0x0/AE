@@ -30,7 +30,8 @@ THE SOFTWARE.
 //#include "khash.h"
 
 #include "AECore.h"
-#include "AECamera.h"
+#include "AEWindow.h"
+//#include "AECamera.h"
 
 #include "AEVA.h"
 #include "AEImage.h"

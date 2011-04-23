@@ -2,7 +2,7 @@
 
 //////////////////////////////
 
-AEVO* Subdivide(AEVO* self){
+static AEVO* Subdivide(AEVO* self){
 	if(not self) return NULL;
 	if(self->children) return NULL;
 	
@@ -51,18 +51,20 @@ void AEVOApply(AEVO* self, AEVOApplyFunc func, void* userdata){
 	{
 		const float density = self->voxels[x+(y*w)+(z*w*h)]/255.0f;
 		const AEVec3 cellCenter = AEVec3Add(self->min, AEVec3Add(AEVec3Add(cellSize, AEVec3From3(x, y, z)), halfCellSize));
-		self->voxels[x+(y*w)+(z*w*h)]=(uint8_t)(AEClamp(func(density, cellCenter.x, cellCenter.y, cellCenter.z, userdata), 0, 1)*255.0f);
+		self->voxels[x+(y*w)+(z*w*h)]=(uint8_t)(AEClamp(func(density, cellCenter.x, cellCenter.y, cellCenter.z, userdata), 0, 1)*255);
 	}
 	if(self->children) for (int i=0; i<8; i++) AEVOApply(self->children + i, func, userdata);
 }
 
-/*//Subdivides the octree and gives it children if it doesn't have them.
+/*
+//Subdivides the octree and gives it children if it doesn't have them.
 AEVO* AEVOSubdivide(AEVO* self){
 	if(not self) return;
 	Subdivide(self);
 	AEVOResample(self, self->w, self->h, self->d);
 	return self->children;
-}*/
+}
+*/
 
 //Changes to a new resolution
 void AEVOResample(AEVO* self, uint64_t w, uint64_t h, uint64_t d, uint8_t splitThreshold){

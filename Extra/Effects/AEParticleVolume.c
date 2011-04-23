@@ -10,7 +10,7 @@ void AEParticleVolumeDeinit(AEParticleVolume* self){
 	memset(self, 0, sizeof(AEParticleVolume));
 }
 
-void AEParticleVolumeStep(AEParticleVolume* self, double seconds, const AEVec3 up, const AEVec3 right){
+void AEParticleVolumeStep(AEParticleVolume* self, double seconds, const AEVec3 cameraPosition, const AEVec3 up, const AEVec3 right){
 	const AEVec3 movement = AEVec3Mul(self->movement, AEVec3From1(seconds));
 	for (size_t i=0; i<self->quadPatch.quadCount; i++) {
 		const AEVec3 p=self->quadPatch.quads[i].center;
@@ -20,7 +20,7 @@ void AEParticleVolumeStep(AEParticleVolume* self, double seconds, const AEVec3 u
 		else
 			self->quadPatch.quads[i].center=AEVec3RandomBetween(self->min, self->max);
 	}
-	AEQuadPatchUpdate(& self->quadPatch, up, right);
+	AEQuadPatchUpdate(& self->quadPatch, cameraPosition, up, right);
 }
 
 void AEParticleVolumeRender(AEParticleVolume* self){

@@ -8,7 +8,7 @@ typedef struct{
 	unsigned char* pixels;
 }AEImage;
 
-static void AEImageInit(AEImage* self){memset(self, 0, sizeof(AEImage));}
+static inline void AEImageInit(AEImage* self){memset(self, 0, sizeof(AEImage));}
 void AEImageInitWithSize(AEImage* self, int w,int h);
 ///Loads a file using SOIL and returns it in an image
 void AEImageInitFromFile(AEImage* self, const char* filename);

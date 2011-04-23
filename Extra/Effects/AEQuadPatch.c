@@ -36,15 +36,13 @@ static int SortQuads(const void* vq, const void* vq2){
 	return q2->distance - q->distance;
 }
 
-void AEQuadPatchUpdate(AEQuadPatch* self, const AEVec3 up, const AEVec3 right){
+void AEQuadPatchUpdate(AEQuadPatch* self, const AEVec3 cameraPosition, const AEVec3 up, const AEVec3 right){
 	//Some of this code was made experimentally, so it's not the cleanest, nor the fastest, but it works.
 	if(not self) return;
 	
 	if(self->depthSort){
-		AEVec3 position;
-		AECameraGetPosition(AECamerasGetActive(), &position);
 		for (size_t i=0; i<self->quadCount; i++) {
-			AEVec3 difference=AEVec3Sub(self->quads[i].center, position);
+			AEVec3 difference=AEVec3Sub(self->quads[i].center, cameraPosition);
 			self->quads[i].distance=AEVec3Dot(difference,difference);
 		}
 		qsort(self->quads, self->quadCount, sizeof(AEQuadPatchQuad), SortQuads);
