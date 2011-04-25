@@ -5,21 +5,43 @@
 
 //Always interleaved as 2TF* 4CUB? 3NF? 3VF or an array of 32 bit unsigned int indices
 typedef struct{
-	uint32_t//since this is guarranteed to be 32 bits.
-		isAnIndexArray :1,//2 possible values
+	uint32_t
+		indexType :2,//4 possible values
 		storageType :2,//4 possible values
 		textureCoordsPerVertex :4,//16 possible (0-15)
 		hasNormals :1,//2 possible values
 		hasColors :1,//2 possible
 		hasVertices :1,//yes or no
-		unused :32-10;
+		isQuads :1,//yes or no
+		unused :32-12;
 }AEVAFormat;
+
+#define AEVAFormatIndexTypeNone 0
+#define AEVAFormatIndexType16Bit 2
+#define AEVAFormatIndexType32Bit 1
+
+static inline size_t AEVAFormatByteSize(const AEVAFormat* self){
+	size_t size=0;
+	size+=self->textureCoordsPerVertex*sizeof(GLfloat[2]);
+	if(self->hasNormals) size+=sizeof(GLfloat[3]);
+	if(self->hasColors) size+=sizeof(GLubyte[4]);
+	if(self->hasVertices) size+=sizeof(GLfloat[3]);
+	switch (self->indexType) {
+		case AEVAFormatIndexType16Bit:
+			size+=sizeof(GLushort);
+			break;
+		case AEVAFormatIndexType32Bit:
+			size+=sizeof(GLushort);
+			break;
+	}
+	return size;
+}
 
 //Should be alright to read from, it's pretty much standard now
 typedef struct AEVA{
-	GLuint length;
+	GLuint elementCount;
 	union{
-		void* data;
+		void* pointer;
 		GLuint vbo;
 	}data;
 	/*unsigned char isAnIndexArray;
@@ -39,14 +61,12 @@ typedef struct AEVA{
 #define AEVAFormatStorageTypeDynamic 2
 #define AEVAFormatStorageTypeStatic 3
 
-size_t AEVABytesPerVertex(AEVA* self);
-
 void AEVAInit(AEVA* self);
 void AEVADeinit(AEVA* self);
 void AEVAInitCopy(AEVA* self,AEVA* from);
 
-void* AEVAMap(AEVA* self, unsigned int length,unsigned int writereadmode);
+void* AEVAMap(AEVA* self, unsigned int elementCount,unsigned int writereadmode);
 void AEVAUnmap(AEVA* self);
 
-void AEVADraw(AEVA* va, AEVA* ia);
-void AEVADrawRange(AEVA* va, AEVA* ia, unsigned long start, unsigned long end);
+void AEVADraw(const AEVA* va, const AEVA* ia);
+void AEVADrawRange(const AEVA* va, const AEVA* ia, unsigned long start, unsigned long count);

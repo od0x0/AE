@@ -19,13 +19,12 @@ void AEVAInit(AEVA* va){
 }
 
 void AEVADeinit(AEVA* self){
-	if(self->length){
+	if(self->elementCount){
 		if(self->format.storageType)
 			glDeleteBuffers(1, &self->data.vbo);
 		else
-			free(self->data.data);
+			free(self->data.pointer);
 	}
-	self->length=0;
 	memset(self, 0, sizeof(AEVA));
 }
 
@@ -35,26 +34,29 @@ void AEVAInitCopy(AEVA* self,AEVA* from){
 	
 	//A workaround for me being uncertain on whether I can map multiple vbos at the same time
 	
-	void* memorytemp = malloc(sizeof(float) * from->length);
+	size_t memorySize=AEVAFormatByteSize(& from->format) * from->elementCount;
 	
-	void* memoryfrom = AEVAMap(from, from->length, GL_READ_ONLY);
-	memcpy(memorytemp, memoryfrom, sizeof(float) * from->length);
+	void* memorytemp = malloc(memorySize);
+	
+	void* memoryfrom = AEVAMap(from, from->elementCount, GL_READ_ONLY);
+	memcpy(memorytemp, memoryfrom, memorySize);
 	AEVAUnmap(from);
 	
-	void* memoryto = AEVAMap(self, from->length, GL_WRITE_ONLY);
-	memcpy(memoryto, memorytemp, sizeof(float) * from->length);
+	void* memoryto = AEVAMap(self, from->elementCount, GL_WRITE_ONLY);
+	memcpy(memoryto, memorytemp, memorySize);
 	AEVAUnmap(self);
 	
 	free(memorytemp);
 }
 
-void* AEVAMap(AEVA* va, unsigned int length,unsigned int writereadmode){
-	unsigned int arrayType=va->format.isAnIndexArray?GL_ELEMENT_ARRAY_BUFFER:GL_ARRAY_BUFFER;
-	if(sizeof(GLfloat) not_eq sizeof(char[4]) and sizeof(GLuint)!=sizeof(char[4])) AEError("A GLfloat or GLuint is not equal to 4 bytes on your system!  This is very, very, bad.");
-	if(va->length and va->length not_eq length) AEError("You are trying to access a VA with a different length than the length it actually has.");
-	if(sizeof(AEVec3) not_eq 3*sizeof(float)) AEError("AEVec3 is padded, this is bad!");
-	if(va->length==0){
-		va->length=length;
+void* AEVAMap(AEVA* va, unsigned int elementCount,unsigned int writereadmode){
+	unsigned int arrayType=va->format.indexType?GL_ELEMENT_ARRAY_BUFFER:GL_ARRAY_BUFFER;
+	//if(sizeof(GLfloat) not_eq sizeof(char[4]) and sizeof(GLuint)!=sizeof(char[4])) AEError("A GLfloat or GLuint is not equal to 4 bytes on your system!  This is very, very, bad.");
+	if(va->format.indexType == 1 or va->format.indexType == 3) AEError("I dunno if you haven't realized that I b0rk3d ur shiz, but I recently b0rk3d ur shiz.  indexType=AEVAFormatIndexType32Bit is the comparison of isAnIndexArray=true.  It's a whole lot more powerful considering that indexType=AEVAFormatIndexType16Bit saves a ton of space and is probably all you need.  Try the 16 bit version, it works, it's small, and it gives a home to children in Africa (not really).");
+	if(va->elementCount and va->elementCount not_eq elementCount) AEError("You are trying to access a VA with a different length than the length it actually has.");
+	//if(sizeof(AEVec3) not_eq 3*sizeof(float)) AEError("AEVec3 is padded, this is bad!");
+	if(va->elementCount==0){
+		va->elementCount=elementCount;
 		if(va->format.storageType){
 			glGenBuffers(1, &va->data.vbo);
 			//glBindBuffer(GL_ARRAY_BUFFER, va->data.vbo);
@@ -73,24 +75,24 @@ void* AEVAMap(AEVA* va, unsigned int length,unsigned int writereadmode){
 					break;
 			}
 			glBindBuffer(arrayType, va->data.vbo);
-			glBufferData(arrayType, length * sizeof(char[4]), NULL,vbotype);
+			glBufferData(arrayType, elementCount * AEVAFormatByteSize(& va->format), NULL,vbotype);
 			void* data= glMapBuffer(arrayType, writereadmode);
 			if(not data) AEError("glMapBuffer is returning a NULL o/");
 			return data;
 		}
-		else va->data.data=malloc(sizeof(char[4])*length);
+		else va->data.pointer=malloc(elementCount * AEVAFormatByteSize(& va->format));
 	}
 	if(va->format.storageType){
 		glBindBuffer(arrayType, va->data.vbo);
 		
 		return glMapBuffer(arrayType, writereadmode);
 	}
-	return va->data.data;
+	return va->data.pointer;
 }
 
 void AEVAUnmap(AEVA* va){
 	if(va->format.storageType){
-		unsigned int arrayType=va->format.isAnIndexArray?GL_ELEMENT_ARRAY_BUFFER:GL_ARRAY_BUFFER;
+		unsigned int arrayType=va->format.indexType?GL_ELEMENT_ARRAY_BUFFER:GL_ARRAY_BUFFER;
 		glBindBuffer(arrayType, va->data.vbo);
 		glUnmapBuffer(arrayType);
 	}
@@ -98,13 +100,15 @@ void AEVAUnmap(AEVA* va){
 
 //Some might be wondering why I am doing slow things here.  This is not really designed for speed, it is designed to be easy to use.  There was a time that this was designed for speed, it turned out to be fast, but very unforgiving in the event that it was used even the slightest bit incorrectly, the current design is to prevent it from being used improperly.
 
-void AEVADrawRange(AEVA* va, AEVA* ia, unsigned long start, unsigned long end){
-	GLuint* indexOffset=NULL;
+void AEVADrawRange(const AEVA* va, const AEVA* ia, unsigned long start, unsigned long count){
+	char* indexOffset=NULL;
+	size_t indexStride=0;
 	if(ia){
 		glEnableClientState(GL_INDEX_ARRAY);
 		indexOffset=NULL;
 		if(ia->format.storageType) glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ia->data.vbo);
-		else indexOffset=ia->data.data;
+		else indexOffset=ia->data.pointer;
+		indexStride=ia->format.indexType==AEVAFormatIndexType32Bit ? sizeof(GLuint) : sizeof(GLushort);
 	}
 	
 	int tcount=va->format.textureCoordsPerVertex;
@@ -114,11 +118,10 @@ void AEVADrawRange(AEVA* va, AEVA* ia, unsigned long start, unsigned long end){
 	if(va->format.storageType) glBindBuffer(GL_ARRAY_BUFFER, va->data.vbo);
 	else{
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		offset=va->data.data;
+		offset=va->data.pointer;
 	}
 	
-	size_t stride=tcount*sizeof(float[2]) + sizeof(float[3]);
-	stride += hasNormals ? sizeof(float[3]) : 0;
+	size_t stride=AEVAFormatByteSize(& va->format);
 	
 	for(int i=0;i<tcount;i++){
 		glClientActiveTexture(GL_TEXTURE0+i);
@@ -128,6 +131,12 @@ void AEVADrawRange(AEVA* va, AEVA* ia, unsigned long start, unsigned long end){
 	}
 	glClientActiveTexture(GL_TEXTURE0);
 	
+	if(va->format.hasColors) {
+		glEnableClientState(GL_COLOR_ARRAY);
+		glColorPointer(4, GL_UNSIGNED_BYTE, stride, offset);
+		offset+=sizeof(GLubyte[4]);
+	}
+	
 	if(hasNormals){
 		glEnableClientState(GL_NORMAL_ARRAY);
 		glNormalPointer(GL_FLOAT, stride, offset);
@@ -136,15 +145,30 @@ void AEVADrawRange(AEVA* va, AEVA* ia, unsigned long start, unsigned long end){
 	
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glVertexPointer(3, GL_FLOAT, stride, offset);
-
-	if(ia) glDrawElements(GL_TRIANGLES, end - start, GL_UNSIGNED_INT,indexOffset+start);
-	else glDrawArrays(GL_TRIANGLES,start,end);
+	
+	if(ia) {
+		glDrawElements( ia->format.isQuads ? GL_QUADS : GL_TRIANGLES, count, ia->format.indexType==AEVAFormatIndexType32Bit ? GL_UNSIGNED_INT : GL_UNSIGNED_SHORT, indexOffset+indexStride*start);
+		/*switch(ia->format.indexType) {
+		case AEVAFormatIndexType16Bit:
+		glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_SHORT,indexOffset+start);
+		break;
+		case AEVAFormatIndexType32Bit:
+		glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT,indexOffset+start);
+		break;
+		default:
+			AEError("It's cool and all to have an invalid index type and all, but it doesn't really make sense, really.");
+			break;
+	}*/
+	}
+	else glDrawArrays(va->format.isQuads ? GL_QUADS : GL_TRIANGLES, start, count);
 	
 	for(int i=0;i<tcount;i++){
 		glClientActiveTexture(GL_TEXTURE0+i);
 		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 	}
 	glClientActiveTexture(GL_TEXTURE0);
+	
+	if(va->format.hasColors) glDisableClientState(GL_COLOR_ARRAY);
 	
 	if(hasNormals) glDisableClientState(GL_NORMAL_ARRAY);
 	
@@ -156,6 +180,6 @@ void AEVADrawRange(AEVA* va, AEVA* ia, unsigned long start, unsigned long end){
 	}
 }
 
-void AEVADraw(AEVA* va, AEVA* ia){
-	AEVADrawRange(va, ia, 0, (ia ? ia: va)->length);
+void AEVADraw(const AEVA* va, const AEVA* ia){
+	AEVADrawRange(va, ia, 0, (ia ? ia: va)->elementCount);
 }

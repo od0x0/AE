@@ -1,24 +1,24 @@
 #include "AEVAUtility.h"
 #include "AEInternalRawMesh.h"
-
+/*
 void AEVASerializeToIO(AEVA* va,AEIO* io){
 	uint64_t version=2;
 	version=AENetU64FromHost(version);
 	AEIOWrite(io, &version, sizeof(uint64_t));
 	
-	uint64_t length=va->length;
-	length=AENetU64FromHost(length);
-	AEIOWrite(io, &length, sizeof(uint64_t));
+	uint64_t elementCount=va->elementCount;
+	elementCount=AENetU64FromHost(elementCount);
+	AEIOWrite(io, &elementCount, sizeof(uint64_t));
 	
 	uint64_t formatbits;
 	formatbits=AEVAFormatTo64Bits(& va->format);
 	AEIOWrite(io, & formatbits, sizeof(formatbits));
 	
-	uint32_t* memory=AEVAMap(va, va->length, GL_READ_ONLY);
+	uint32_t* memory=AEVAMap(va, va->elementCount, GL_READ_ONLY);
 	
-	if(not va->format.isAnIndexArray) {
+	if(not va->format.indexType) {
 		const size_t countsPerVertex=AEVAFormatVertex32Count(& va->format);
-		const size_t count=va->length/countsPerVertex;
+		const size_t count=va->elementCount;
 		uint32_t ints[countsPerVertex];
 		const size_t vertexByteSize=countsPerVertex*sizeof(uint32_t);
 		
@@ -31,7 +31,7 @@ void AEVASerializeToIO(AEVA* va,AEIO* io){
 	}
 	else{
 		uint32_t* ints=memory;
-		for (size_t i=0; i<va->length; i++) {
+		for (size_t i=0; i<va->elementCount; i++) {
 			uint32_t value=AENetU32FromHost(ints[i]);
 			AEIOWrite(io, &value, sizeof(uint32_t));
 		}
@@ -59,9 +59,9 @@ void AEVAUnserializeFromIO(AEVA* va,AEIO* io){
 	
 	uint32_t* memory=AEVAMap(va, length, GL_WRITE_ONLY);
 	
-	if(not va->format.isAnIndexArray) {
+	if(not va->format.indexType) {
 		const size_t countsPerVertex=AEVAFormatVertex32Count(& va->format);
-		const size_t count=va->length/countsPerVertex;
+		const size_t count=va->elementCount;
 		uint32_t ints[countsPerVertex];
 		const size_t vertexByteSize=countsPerVertex*sizeof(uint32_t);
 		
@@ -74,7 +74,7 @@ void AEVAUnserializeFromIO(AEVA* va,AEIO* io){
 	}
 	else{
 		uint32_t* ints=memory;
-		for (size_t i=0; i<va->length; i++) {
+		for (size_t i=0; i<va->elementCount; i++) {
 			uint32_t value=0;
 			AEIORead(io, &value, sizeof(uint32_t));
 			ints[i]=AEHostU32FromNet(value);
@@ -139,3 +139,4 @@ void AEVALoadFromObj(AEVA* va, AEVA* ia, const char* objfilename){
 	AEArrayDeinit(&indexList);
 	AEArrayDeinit(&vertexList);
 }
+*/

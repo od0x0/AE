@@ -2,7 +2,7 @@
 
 //There are a couple optimizations we could make here, if I cared enough.  We could have made optimizations such as Streamed Vertex Buffer Objects, separating calculation of billboarding from rendering, using point sprites, using shaders, and so on... ...but, I didn't, so suck it.
 
-void AEQuadPatchInit(AEQuadPatch* self, bool cylindrical, size_t quadCount, AEVec3* centers, AEVec3* sizes, AERGBAub* colors/*Perface color, which is translated to pervertex*/){
+void AEQuadPatchInit(AEQuadPatch* restrict self, bool cylindrical, size_t quadCount, AEVec3* centers, AEVec3* sizes, AERGBAub* colors/*Perface color, which is translated to pervertex*/, bool hasDynamics){
 	memset(self, 0, sizeof(AEQuadPatch));
 	self->cylindrical=cylindrical;
 	self->quadCount=quadCount;
@@ -23,6 +23,7 @@ void AEQuadPatchInit(AEQuadPatch* self, bool cylindrical, size_t quadCount, AEVe
 			self->vertices[i*4+j].color.a= 255;
 		}
 	}
+	if(hasDynamics) self->quadDynamics=calloc(quadCount, sizeof(AEQuadPatchQuadDynamics));
 }
 
 //This may potentially be unsafe
@@ -33,10 +34,13 @@ void AEQuadPatchInit(AEQuadPatch* self, bool cylindrical, size_t quadCount, AEVe
 static int SortQuads(const void* vq, const void* vq2){
 	const AEQuadPatchQuad* q=vq;
 	const AEQuadPatchQuad* q2=vq2;
-	return q2->distance - q->distance;
+	float difference=q2->distance-q->distance;
+	if(AEAbs(difference) > AEEpsilon) 
+		return difference;
+	return q-q2;
 }
 
-void AEQuadPatchUpdate(AEQuadPatch* self, const AEVec3 cameraPosition, const AEVec3 up, const AEVec3 right){
+void AEQuadPatchStep(AEQuadPatch* restrict self, float seconds, const AEVec3 cameraPosition, const AEVec3 up, const AEVec3 right){
 	//Some of this code was made experimentally, so it's not the cleanest, nor the fastest, but it works.
 	if(not self) return;
 	
@@ -52,8 +56,16 @@ void AEQuadPatchUpdate(AEQuadPatch* self, const AEVec3 cameraPosition, const AEV
 	const AEVec3 modifiedUp=self->cylindrical ? AEVec3From3(0, 1, 0) : up;
 	
 	for(size_t i=0; i < self->quadCount; i++){
-		const AEVec3 center=self->quads[i].center;
-		const AEVec3 size=self->quads[i].size;
+		AEQuadPatchQuad* quad=self->quads+i;
+		if(self->quadDynamics){
+			AEQuadPatchQuadDynamics* dynamics=self->quadDynamics+i;
+			quad->center.x+=dynamics->velocity.x*seconds;
+			quad->center.y+=dynamics->velocity.y*seconds;
+			quad->center.z+=dynamics->velocity.z*seconds;
+			dynamics->timeLeft-=seconds;
+		}
+		const AEVec3 center=quad->center;
+		const AEVec3 size=quad->size;
 		const AEVec3 scaledRight = AEVec3Mul(right, AEVec3From1(size.x));
 		const AEVec3 scaledUp = AEVec3Mul(modifiedUp, AEVec3From1(size.y));
 		const AEVec3 rightPlusUp=AEVec3Add(scaledRight, scaledUp);
@@ -65,30 +77,15 @@ void AEQuadPatchUpdate(AEQuadPatch* self, const AEVec3 cameraPosition, const AEV
 	}
 }
 
-void AEQuadPatchRender(AEQuadPatch* self){
-	glDisable(GL_CULL_FACE);
-	if(self->alphaCutoff){
-		glEnable(GL_ALPHA_TEST);
-		glAlphaFunc(GL_GEQUAL, self->alphaCutoff);
-	}
-	
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glInterleavedArrays(GL_T2F_C4UB_V3F, 0, self->vertices);
-	
-	glDrawArrays(GL_QUADS,0,self->quadCount*4);
-	
-	glEnable(GL_CULL_FACE);
-	if(self->alphaCutoff) glDisable(GL_ALPHA_TEST);
-}
-
-void AEQuadPatchDeinit(AEQuadPatch* self){
+void AEQuadPatchDeinit(AEQuadPatch* restrict self){
 	if(not self) return;
 	free(self->quads);
 	free(self->vertices);
+	free(self->quadDynamics);
 	memset(self, 0, sizeof(AEQuadPatch));
 }
 
-void AEQuadPatchAlterImageToSetupForAlphaTest(AEImage* image){
+void AEQuadPatchAlterImageToSetupForAlphaTest(AEImage* restrict image){
 	size_t pixelCount=image->w*image->h;
 	if(image->channels==4){
 		unsigned char max=0,min=0;

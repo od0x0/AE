@@ -600,7 +600,7 @@ int AEMarchCube(const double* voxels, double isovalue, AEVec3* outVertices, size
 		corners[i].x=x;
 		corners[i].y=y;
 		corners[i].z=z;
-		densities[i]=voxels[i];
+		densities[i]=voxels[i]*255;
 	}
 	return Polygonise(densities, corners, isovalue, outVertices);
 }

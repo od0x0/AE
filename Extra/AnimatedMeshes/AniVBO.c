@@ -9,7 +9,7 @@ AEAniModelVBOClass* AEAniModelVBOClassNew(char* filename){
 	AEVAInit(& self->texCoordArray);
 	self->texCoordArray.format.textureCoordsPerVertex=1;
 	AEVAInit(& self->indexArray);
-	self->indexArray.format.isAnIndexArray=true;
+	self->indexArray.format.indexType=true;
 	
 	AEVec2* ts=AEVAMap(&self->texCoordArray,self->model->meshes[0].vertexCount*2,GL_READ_WRITE);
 	for(size_t i=0;i < self->model->meshes[0].vertexCount;i++){

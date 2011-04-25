@@ -19,6 +19,8 @@ static inline void AEFontStyleInit(AEFontStyle* self){
 	self->textColor.a=1;
 }
 
+static inline void AEFontStyleDeinit(AEFontStyle* self){}
+
 typedef struct AEFont AEFont;
 
 float AEFontGetLineHeight(AEFont* self);

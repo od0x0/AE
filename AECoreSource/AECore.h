@@ -10,6 +10,9 @@ Ambition Engine Core.
 #ifdef __APPLE_CC__
 #include <OpenGL/gl.h>
 #include <OpenGL/glu.h>
+#elif defined(__WIN32__)
+#include "GL/gl.h"
+#include "GL/glu.h"
 #else
 //Most portable option, just add a header search path
 #include "gl.h"

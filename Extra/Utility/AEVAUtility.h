@@ -1,24 +1,24 @@
 #pragma once
 #include "AE.h"
-
+/*
 static inline uint64_t AEVAFormatTo64Bits(AEVAFormat* self){
 	uint64_t bits=0;
-	bits |= self->isAnIndexArray << 0;
-	bits |= self->storageType << 1;
-	bits |= self->textureCoordsPerVertex << (1+2);
-	bits |= self->hasNormals << (1+2+4);
-	bits |= self->hasColors << (1+2+4+1);
-	bits |= self->hasVertices << (1+2+4+1+1);
+	bits |= self->indexType << 0;
+	bits |= self->storageType << 2;
+	bits |= self->textureCoordsPerVertex << (2+2);
+	bits |= self->hasNormals << (2+2+4);
+	bits |= self->hasColors << (2+2+4+1);
+	bits |= self->hasVertices << (2+2+4+1+1);
 	return bits;
 }
 
 static inline void AEVAFormatFrom64Bits(AEVAFormat* self, uint64_t bits){
-	self->isAnIndexArray = (bits >> 0) & 1;
-	self->storageType = (bits >> 1) & 2;
-	self->textureCoordsPerVertex = (bits >> (1+2)) & 4;
-	self->hasNormals = (bits >> (1+2+4)) & 1;
-	self->hasColors = (bits >> (1+2+4+1)) & 1;
-	self->hasVertices = (bits >> (1+2+4+1+1)) & 1;
+	self->indexType = (bits >> 0) & 2;
+	self->storageType = (bits >> 2) & 2;
+	self->textureCoordsPerVertex = (bits >> (2+2)) & 4;
+	self->hasNormals = (bits >> (2+2+4)) & 1;
+	self->hasColors = (bits >> (2+2+4+1)) & 1;
+	self->hasVertices = (bits >> (2+2+4+1+1)) & 1;
 }
 
 static inline size_t AEVAFormatVertex32Count(AEVAFormat* self){
@@ -116,3 +116,4 @@ void AEVAUnserializeFromIO(AEVA* self,AEIO* io);
 void AEVALoadFromObj(AEVA* va, AEVA* ia, const char* objfilename);
 
 //A few notes about loading from .obj's, 1) It will only pickup triangulated meshes, there are just too many variants to deal with for it to bother with triangulating your stuff, you should be manually triangulating anyway.  2) Leaving the "ia" argument as NULL will generate va as ready for glDrawArrays() 3) This loader will only pickup normals, positions, and texture coordinates, if you want more, write your own loader.
+*/
