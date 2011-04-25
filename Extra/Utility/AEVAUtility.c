@@ -83,7 +83,7 @@ void AEVAUnserializeFromIO(AEVA* va,AEIO* io){
 	
 	AEVAUnmap(va);
 }
-
+*/
 void AEVALoadFromObj(AEVA* va, AEVA* ia, const char* objfilename){
 	bool hasColors=va->format.hasColors;
 	bool hasNormals=va->format.hasNormals;
@@ -139,4 +139,3 @@ void AEVALoadFromObj(AEVA* va, AEVA* ia, const char* objfilename){
 	AEArrayDeinit(&indexList);
 	AEArrayDeinit(&vertexList);
 }
-*/
