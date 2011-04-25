@@ -18,7 +18,7 @@ typedef struct{
 
 #define AEVAFormatIndexTypeNone 0
 #define AEVAFormatIndexType16Bit 2
-#define AEVAFormatIndexType32Bit 1
+#define AEVAFormatIndexType32Bit 3
 
 static inline size_t AEVAFormatByteSize(const AEVAFormat* self){
 	size_t size=0;
