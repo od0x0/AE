@@ -52,7 +52,6 @@ void AEVAInitCopy(AEVA* self,AEVA* from){
 void* AEVAMap(AEVA* va, unsigned int elementCount,unsigned int writereadmode){
 	unsigned int arrayType=va->format.indexType?GL_ELEMENT_ARRAY_BUFFER:GL_ARRAY_BUFFER;
 	//if(sizeof(GLfloat) not_eq sizeof(char[4]) and sizeof(GLuint)!=sizeof(char[4])) AEError("A GLfloat or GLuint is not equal to 4 bytes on your system!  This is very, very, bad.");
-	if(va->format.indexType == 1 or va->format.indexType == 3) AEError("I dunno if you haven't realized that I b0rk3d ur shiz, but I recently b0rk3d ur shiz.  indexType=AEVAFormatIndexType32Bit is the comparison of isAnIndexArray=true.  It's a whole lot more powerful considering that indexType=AEVAFormatIndexType16Bit saves a ton of space and is probably all you need.  Try the 16 bit version, it works, it's small, and it gives a home to children in Africa (not really).");
 	if(va->elementCount and va->elementCount not_eq elementCount) AEError("You are trying to access a VA with a different length than the length it actually has.");
 	//if(sizeof(AEVec3) not_eq 3*sizeof(float)) AEError("AEVec3 is padded, this is bad!");
 	if(va->elementCount==0){
@@ -100,20 +99,12 @@ void AEVAUnmap(AEVA* va){
 
 //Some might be wondering why I am doing slow things here.  This is not really designed for speed, it is designed to be easy to use.  There was a time that this was designed for speed, it turned out to be fast, but very unforgiving in the event that it was used even the slightest bit incorrectly, the current design is to prevent it from being used improperly.
 
-void AEVADrawRange(const AEVA* va, const AEVA* ia, unsigned long start, unsigned long count){
-	char* indexOffset=NULL;
-	size_t indexStride=0;
-	if(ia){
-		glEnableClientState(GL_INDEX_ARRAY);
-		indexOffset=NULL;
-		if(ia->format.storageType) glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ia->data.vbo);
-		else indexOffset=ia->data.pointer;
-		indexStride=ia->format.indexType==AEVAFormatIndexType32Bit ? sizeof(GLuint) : sizeof(GLushort);
-	}
+//#define AEVADrawRangeUnoptimized
+#ifdef AEVADrawRangeUnoptimized
+void AEVADrawRange(const AEVA* va, const AEVA* ia, GLuint start, GLuint count){
 	
-	int tcount=va->format.textureCoordsPerVertex;
-	bool hasNormals=va->format.hasNormals;
-	
+	if(not va) return;
+	if(count==0) count = (ia ? ia : va)->elementCount;
 	char* offset=NULL;
 	if(va->format.storageType) glBindBuffer(GL_ARRAY_BUFFER, va->data.vbo);
 	else{
@@ -123,7 +114,7 @@ void AEVADrawRange(const AEVA* va, const AEVA* ia, unsigned long start, unsigned
 	
 	size_t stride=AEVAFormatByteSize(& va->format);
 	
-	for(int i=0;i<tcount;i++){
+	for(int i=0;i<va->format.textureCoordsPerVertex;i++){
 		glClientActiveTexture(GL_TEXTURE0+i);
 		glTexCoordPointer(2, GL_FLOAT, stride, offset);
 		glEnableClientState(GL_TEXTURE_COORD_ARRAY);
@@ -137,7 +128,7 @@ void AEVADrawRange(const AEVA* va, const AEVA* ia, unsigned long start, unsigned
 		offset+=sizeof(GLubyte[4]);
 	}
 	
-	if(hasNormals){
+	if(va->format.hasNormals){
 		glEnableClientState(GL_NORMAL_ARRAY);
 		glNormalPointer(GL_FLOAT, stride, offset);
 		offset+=sizeof(float[3]);
@@ -146,23 +137,23 @@ void AEVADrawRange(const AEVA* va, const AEVA* ia, unsigned long start, unsigned
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glVertexPointer(3, GL_FLOAT, stride, offset);
 	
+	
 	if(ia) {
-		glDrawElements( ia->format.isQuads ? GL_QUADS : GL_TRIANGLES, count, ia->format.indexType==AEVAFormatIndexType32Bit ? GL_UNSIGNED_INT : GL_UNSIGNED_SHORT, indexOffset+indexStride*start);
-		/*switch(ia->format.indexType) {
-		case AEVAFormatIndexType16Bit:
-		glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_SHORT,indexOffset+start);
-		break;
-		case AEVAFormatIndexType32Bit:
-		glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT,indexOffset+start);
-		break;
-		default:
-			AEError("It's cool and all to have an invalid index type and all, but it doesn't really make sense, really.");
-			break;
-	}*/
+		char* indexOffset=NULL;
+		size_t indexStride=0;
+		glEnableClientState(GL_INDEX_ARRAY);
+		if(ia->format.storageType) glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ia->data.vbo);
+		else indexOffset=ia->data.pointer;
+		indexStride=ia->format.indexType==AEVAFormatIndexType32Bit ? sizeof(GLuint) : sizeof(GLushort);
+		GLuint indexType=GL_UNSIGNED_SHORT;
+		if(ia->format.indexType==AEVAFormatIndexType32Bit) indexType=GL_UNSIGNED_INT;
+		glDrawElements(ia->format.isQuads ? GL_QUADS : GL_TRIANGLES, count, indexType, indexOffset+indexStride*start);
+		glDisableClientState(GL_INDEX_ARRAY);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	}
 	else glDrawArrays(va->format.isQuads ? GL_QUADS : GL_TRIANGLES, start, count);
 	
-	for(int i=0;i<tcount;i++){
+	for(int i=0;i<va->format.textureCoordsPerVertex;i++){
 		glClientActiveTexture(GL_TEXTURE0+i);
 		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 	}
@@ -170,16 +161,114 @@ void AEVADrawRange(const AEVA* va, const AEVA* ia, unsigned long start, unsigned
 	
 	if(va->format.hasColors) glDisableClientState(GL_COLOR_ARRAY);
 	
-	if(hasNormals) glDisableClientState(GL_NORMAL_ARRAY);
+	if(va->format.hasNormals) glDisableClientState(GL_NORMAL_ARRAY);
 	
 	glDisableClientState(GL_VERTEX_ARRAY);
+}
+
+#else
+static inline bool AEVAsAreEqual(const AEVA* va, const AEVA* va2) {
+	return 0==memcmp(va, va2, sizeof(AEVA));
+}
+
+static GLuint IndexType=0, IndexStride=0;
+static char* IndexOffset=NULL;
+
+
+static inline void AEVABind(const AEVA* va, const AEVA* ia){
+	static AEVA lastVA, lastIA, blank;
 	
-	if(ia){
+	if(not ia){
+		lastIA = blank;
 		glDisableClientState(GL_INDEX_ARRAY);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	}
+	else if(not AEVAsAreEqual(ia, & lastIA)){
+		glEnableClientState(GL_INDEX_ARRAY);
+		
+		if(ia->format.storageType) {
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ia->data.vbo);
+			IndexOffset=NULL;
+		}
+		else {
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+			IndexOffset=ia->data.pointer;
+		}
+		
+		IndexStride=ia->format.indexType==AEVAFormatIndexType32Bit ? sizeof(GLuint) : sizeof(GLushort);
+		
+		IndexType=GL_UNSIGNED_SHORT;
+		if(ia->format.indexType==AEVAFormatIndexType32Bit) IndexType=GL_UNSIGNED_INT;
+		
+		lastIA = *ia;
+		
+		//puts("Binding Indices.");
+	}
+	
+	if(not va or not AEVAsAreEqual(& lastIA, va)){
+		for(int i=0;i<lastVA.format.textureCoordsPerVertex;i++){
+			glClientActiveTexture(GL_TEXTURE0+i);
+			glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+		}
+		glClientActiveTexture(GL_TEXTURE0);
+	
+		if(lastVA.format.hasColors) glDisableClientState(GL_COLOR_ARRAY);
+	
+		if(lastVA.format.hasNormals) glDisableClientState(GL_NORMAL_ARRAY);
+	
+		glDisableClientState(GL_VERTEX_ARRAY);
+		
+		lastVA=blank;
+		if(not va) return;
+		
+		lastVA =  *va;
+		
+		char* offset=NULL;
+		if(va->format.storageType) glBindBuffer(GL_ARRAY_BUFFER, va->data.vbo);
+		else{
+			glBindBuffer(GL_ARRAY_BUFFER, 0);
+			offset=va->data.pointer;
+		}
+		size_t stride=AEVAFormatByteSize(& va->format);
+		for(int i=0;i<va->format.textureCoordsPerVertex;i++){
+			glClientActiveTexture(GL_TEXTURE0+i);
+			glTexCoordPointer(2, GL_FLOAT, stride, offset);
+			glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+			offset+=sizeof(float[2]); 
+		}
+		glClientActiveTexture(GL_TEXTURE0);
+		if(va->format.hasColors) {
+			glEnableClientState(GL_COLOR_ARRAY);
+			glColorPointer(4, GL_UNSIGNED_BYTE, stride, offset);
+			offset+=sizeof(GLubyte[4]);
+		}
+		if(va->format.hasNormals){
+			glEnableClientState(GL_NORMAL_ARRAY);
+			glNormalPointer(GL_FLOAT, stride, offset);
+			offset+=sizeof(float[3]);
+		}
+		glEnableClientState(GL_VERTEX_ARRAY);
+		glVertexPointer(3, GL_FLOAT, stride, offset);
+		
+		//puts("Binding Vertices.");
+	}
 }
 
-void AEVADraw(const AEVA* va, const AEVA* ia){
-	AEVADrawRange(va, ia, 0, (ia ? ia: va)->elementCount);
+void AEVADrawRange(const AEVA* va, const AEVA* ia, GLuint start, GLuint count){
+	AEVABind(va, ia);
+	if(not va) return;
+	if(count==0) count = (ia ? ia : va)->elementCount;
+	if(ia) {
+		glDrawElements(ia->format.isQuads ? GL_QUADS : GL_TRIANGLES, count, IndexType, IndexOffset+IndexStride*start);
+		//abort();
+	}
+	else glDrawArrays(va->format.isQuads ? GL_QUADS : GL_TRIANGLES, start, count);
 }
+#endif
+/*
+void AEVADraw(const AEVA* va, const AEVA* ia){
+	GLuint count=0;
+	if(ia) count=ia->elementCount;
+	else if(va) count=va->elementCount;
+	AEVADrawRange(va, ia, 0, count);
+}*/

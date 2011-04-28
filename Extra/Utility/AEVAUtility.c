@@ -82,8 +82,8 @@ void AEVAUnserializeFromIO(AEVA* va,AEIO* io){
 	}
 	
 	AEVAUnmap(va);
-}
-*/
+}*/
+/*
 void AEVALoadFromObj(AEVA* va, AEVA* ia, const char* objfilename){
 	bool hasColors=va->format.hasColors;
 	bool hasNormals=va->format.hasNormals;
@@ -133,6 +133,55 @@ void AEVALoadFromObj(AEVA* va, AEVA* ia, const char* objfilename){
 	}
 	
 	data=AEVAMap(va,AEArrayLengthInSizeofType(&vertexList,float),GL_WRITE_ONLY);
+	memcpy(data,AEArrayAsCArray(&vertexList),AEArrayLengthInBytes(&vertexList));
+	AEVAUnmap(va);
+	
+	AEArrayDeinit(&indexList);
+	AEArrayDeinit(&vertexList);
+}
+*/
+
+void AEVALoadFromObj(AEVA* va, AEVA* ia, const char* objfilename){
+	size_t vertexTypeSize=AEVAFormatByteSize(& va->format);
+	size_t indexTypeSize=ia ? AEVAFormatByteSize(& ia->format) : 0;
+	AEArray(void) vertexList;
+	AEArrayInitWithTypeOfSize(&vertexList, vertexTypeSize);
+	AEArray(GLuint) indexList;
+	AEArrayInit(& indexList);
+	
+	AERawMesh* m=AERawMeshLoad(objfilename);
+	for(uint64_t i=0;i < m->count.f;i++){
+		AERawMeshFace* face=m->f+i;
+		for(int j=0;j<3;j++){
+			uint8_t buffer[vertexTypeSize];
+			uint8_t* data=buffer;
+			AERGBA color={255,255,255,255};
+			AEVec2 ts[va->format.textureCoordsPerVertex];
+			for(int k=0; k<va->format.textureCoordsPerVertex; k++) ts[k]=m->t[face->t[j]];
+			AEVAFormatSetVertex(& va->format, buffer, ts, &color, m->n+face->n[j], m->v+face->v[j]);
+			if(ia){
+				uint64_t index=AEArrayAddBytesUnique(&vertexList, data);
+				AEArrayAdd(&indexList, index);
+			}
+			else AEArrayAddBytes(&vertexList, data);
+		}
+	}
+	
+	AERawMeshDelete(m);
+	
+	void* data=NULL;
+	
+	if(ia){
+		data=AEVAMap(ia,AEArrayLength(&indexList),GL_WRITE_ONLY);
+		uint8_t indexData[indexTypeSize];
+		for (uint64_t i=0; i<AEArrayLength(& indexList); i++) {
+			AEVAFormatSetIndex(& ia->format, ((uint8_t*)data)+i*indexTypeSize, AEArrayAsCArray(&indexList)[i]);
+		}
+	//	memcpy(data, AEArrayAsCArray(&indexList), AEArrayLengthInBytes(&indexList));
+		AEVAUnmap(ia);
+	}
+	
+	data=AEVAMap(va,AEArrayLength(&vertexList),GL_WRITE_ONLY);
 	memcpy(data,AEArrayAsCArray(&vertexList),AEArrayLengthInBytes(&vertexList));
 	AEVAUnmap(va);
 	

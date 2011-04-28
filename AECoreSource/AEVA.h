@@ -31,7 +31,7 @@ static inline size_t AEVAFormatByteSize(const AEVAFormat* self){
 			size+=sizeof(GLushort);
 			break;
 		case AEVAFormatIndexType32Bit:
-			size+=sizeof(GLushort);
+			size+=sizeof(GLuint);
 			break;
 	}
 	return size;
@@ -68,5 +68,6 @@ void AEVAInitCopy(AEVA* self,AEVA* from);
 void* AEVAMap(AEVA* self, unsigned int elementCount,unsigned int writereadmode);
 void AEVAUnmap(AEVA* self);
 
-void AEVADraw(const AEVA* va, const AEVA* ia);
-void AEVADrawRange(const AEVA* va, const AEVA* ia, unsigned long start, unsigned long count);
+//
+//void AEVADraw(const AEVA* va, const AEVA* ia);
+void AEVADrawRange(const AEVA* va, const AEVA* ia, GLuint start, GLuint count);

@@ -68,12 +68,12 @@ static inline void AEQuadPatchUtilityRenderVA(const AEVA* va, float alphaCutoff)
 	
 	glDrawArrays(GL_QUADS,0,self->quadCount*4);*/
 	
-	AEVADraw(va, NULL);
+	AEVADrawRange(va, NULL, 0, 0);
 	
 	glEnable(GL_CULL_FACE);
 	if(alphaCutoff) glDisable(GL_ALPHA_TEST);
 }
-
+/*
 static inline void AEQuadPatchRender(const AEQuadPatch* self, float alphaCutoff){
 	glDisable(GL_CULL_FACE);
 	if(alphaCutoff){
@@ -89,7 +89,7 @@ static inline void AEQuadPatchRender(const AEQuadPatch* self, float alphaCutoff)
 	glEnable(GL_CULL_FACE);
 	if(alphaCutoff) glDisable(GL_ALPHA_TEST);
 }
-
+*/
 void AEQuadPatchAlterImageToSetupForAlphaTest(AEImage* image);
 static inline void AEQuadPatchGetUpAndRightFromMatrix(AEVec3* up, AEVec3* right, float* modelview){
 	*right = AEVec3From3(modelview[0], modelview[4], modelview[8]);
